@@ -2,13 +2,27 @@
  * Named data loaders — each maps to an exact pipeline output filename.
  * All CSV loaders return Promise<Array<Object>>.
  * JSON loaders return Promise<Object|null>.
+ *
+ * CSV tables: Supabase-first with automatic fallback to local CSV files.
+ * JSON files: local fetch only (phiwe_insights.json, root_cause_analysis.json, validation_report.json).
  */
 
 import Papa from 'papaparse'
+import { supabase } from '../lib/supabaseClient.js'
 
 const BASE = '/data'
 
-function loadCSV(filename) {
+// ─── Supabase table fetch ─────────────────────────────────────────────────────
+async function loadFromSupabase(tableName) {
+  if (!supabase) throw new Error('Supabase client not initialised')
+  const { data, error } = await supabase.from(tableName).select('*')
+  if (error) throw new Error(error.message)
+  if (!data || data.length === 0) throw new Error('empty result')
+  return data
+}
+
+// ─── Local CSV fallback ───────────────────────────────────────────────────────
+function loadCSVLocal(filename) {
   return new Promise((resolve) => {
     Papa.parse(`${BASE}/${filename}`, {
       download: true,
@@ -21,6 +35,15 @@ function loadCSV(filename) {
         resolve([])
       },
     })
+  })
+}
+
+// ─── Primary loader: Supabase → CSV fallback ──────────────────────────────────
+function loadCSV(filename) {
+  const tableName = filename.replace('.csv', '')
+  return loadFromSupabase(tableName).catch((err) => {
+    console.info(`[dataLoader] Supabase unavailable for ${tableName} (${err.message}) — using local CSV`)
+    return loadCSVLocal(filename)
   })
 }
 

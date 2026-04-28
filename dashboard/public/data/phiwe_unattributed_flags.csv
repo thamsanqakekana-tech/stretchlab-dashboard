@@ -1,12 +1,22 @@
 user_id,first_name,last_name,location,first_visit_date,cellphone,flag_reason,confidence
 121663572,Nolen,Thomas,StretchLab Pearland,2026-04-25,8326923064,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 123057772,Isabel,Lopez,StretchLab River Oaks ,2026-04-22,(281) 932-2726,Phiwe called this number; lead completed first visit under different booking attribution,Medium
+128439663,Douglas,Sandvig,StretchLab Bunker Hill,2026-03-11,7138588093,Phiwe called this number; lead completed first visit under different booking attribution,Medium
+128408134,Somer,Garza,StretchLab Bunker Hill,2026-03-15,(832) 573-8534,Phiwe called this number; lead completed first visit under different booking attribution,Medium
+128388169,Leila,Rangel,StretchLab Bunker Hill,2026-03-20,8324237356,Phiwe called this number; lead completed first visit under different booking attribution,Medium
+128585133,Teresa,Sancho,StretchLab Bunker Hill,2026-03-21,(612) 508-2857,Phiwe called this number; lead completed first visit under different booking attribution,Medium
+128830064,Elijah,Sanders,StretchLab Bunker Hill,2026-03-28,+1 (979) 472-9470,Phiwe called this number; lead completed first visit under different booking attribution,Medium
+128830034,Eliza,Sanders,StretchLab Bunker Hill,2026-03-28,+1 (979) 472-9470,Phiwe called this number; lead completed first visit under different booking attribution,Medium
+128868564,Ernest,Alexander,StretchLab Bunker Hill,2026-03-28,7137026911,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 111503279,Quincy,Bogany,StretchLab Bunker Hill,2026-03-30,8322729477,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 119144082,Joseph,Minotti,StretchLab Bunker Hill,2026-04-08,2816879991,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 120048240,Timothy,Cooper,StretchLab Shreveport,2026-03-21,(318) 465-3609,Phiwe called this number; lead completed first visit under different booking attribution,High - also in manual tracker (Paid=Yes)
 118381181,Anna beth,Crowson,StretchLab Shreveport,2026-04-16,(318) 518-5329,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 111943835,Stephanie,Ostrowski,StretchLab Brighton,2026-03-17,7274159353,Phiwe called this number; lead completed first visit under different booking attribution,Medium
+128391509,Tamar,Doulette,StretchLab Brighton,2026-03-19,7346930377,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 128761440,Brendan,Cherwalk,StretchLab Brighton,2026-03-26,(810) 295-8925,Phiwe called this number; lead completed first visit under different booking attribution,Medium
+128680235,Joe,Combs,StretchLab Brighton,2026-03-28,(734) 217-6039,Phiwe called this number; lead completed first visit under different booking attribution,Medium
+128902042,Michele,Lafleur,StretchLab Brighton,2026-03-30,(612) 297-8761,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 116997713,Lisa,Liles,StretchLab Bellaire,2026-03-25,(713) 417-5301,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 124136097,Chip,Cherry,StretchLab Heights,2026-02-25,(832) 729-7879,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 106028799,Khadija,Washington,StretchLab Heights,2026-02-27,12819129468,Phiwe called this number; lead completed first visit under different booking attribution,Medium
@@ -16,13 +26,26 @@ user_id,first_name,last_name,location,first_visit_date,cellphone,flag_reason,con
 128414950,Arthur,Sanchez,StretchLab Heights,2026-03-10,(281) 684-4832,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 128360113,Dareka,Haley,StretchLab Heights,2026-03-11,(281) 915-8355,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 128368197,Dillon,Kent,StretchLab Heights,2026-03-11,2816874959,Phiwe called this number; lead completed first visit under different booking attribution,Medium
+128469286,Aidan,Crimmins,StretchLab Heights,2026-03-12,(210) 508-5214,Phiwe called this number; lead completed first visit under different booking attribution,Medium
+128471147,Alex,Rios,StretchLab Heights,2026-03-12,(713) 476-2444,Phiwe called this number; lead completed first visit under different booking attribution,Medium
+128471206,Rheanna,Velasquez,StretchLab Heights,2026-03-12,(832) 434-8592,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 128380478,Edward,Motley,StretchLab Heights,2026-03-13,(281) 865-5984,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 128380528,Iyanna,Motley,StretchLab Heights,2026-03-13,(281) 914-5515,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 128362472,Tammica,Motley,StretchLab Heights,2026-03-13,2818657283,Phiwe called this number; lead completed first visit under different booking attribution,Medium
+128502253,Caroline,Robinson,StretchLab Heights,2026-03-14,(571) 337-2447,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 128594649,Jen,Riser,StretchLab Heights,2026-03-17,(516) 993-9333,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 128625401,Aaron,Mercier,StretchLab Heights,2026-03-18,8326714480,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 128616435,Reynol,Rodriguez,StretchLab Heights,2026-03-19,8325371602,Phiwe called this number; lead completed first visit under different booking attribution,Medium
-128535252,Melvinia,McClain,StretchLab Heights,2026-03-20,7869426637,Phiwe called this number; lead completed first visit under different booking attribution,Medium
+128664622,Alex,Hightaian,StretchLab Heights,2026-03-20,(334) 318-9812,Phiwe called this number; lead completed first visit under different booking attribution,Medium
+128680591,Chad,Cossey,StretchLab Heights,2026-03-20,(713) 429-2639,Phiwe called this number; lead completed first visit under different booking attribution,Medium
+128703830,Leon,Fantroy,StretchLab Heights,2026-03-21,19142555076,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 128442233,Kiarah (Kyra),Palmer,StretchLab Heights,2026-03-21,4099959772,Phiwe called this number; lead completed first visit under different booking attribution,Medium
+128655610,Angelique,Montoya,StretchLab Heights,2026-03-22,(832) 477-4127,Phiwe called this number; lead completed first visit under different booking attribution,Medium
+128709842,Bernadette,Benjamin,StretchLab Heights,2026-03-22,(832) 533-5777,Phiwe called this number; lead completed first visit under different booking attribution,Medium
+76661916,Dorna,Philogene,StretchLab Heights,2026-03-22,18325335777,Phiwe called this number; lead completed first visit under different booking attribution,Medium
+128511125,Dustin,Fuller,StretchLab Heights,2026-03-24,3464079264,Phiwe called this number; lead completed first visit under different booking attribution,Medium
+128846769,Kait,Reel,StretchLab Heights,2026-03-26,(315) 224-2217,Phiwe called this number; lead completed first visit under different booking attribution,Medium
+128848425,Hailey,Moore,StretchLab Heights,2026-03-31,2812027973,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 129240285,Kathy,Crumpler,StretchLab Heights,2026-04-07,8322677138,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 129527549,Gina,Gray,StretchLab Heights,2026-04-15,(713) 829-3998,Phiwe called this number; lead completed first visit under different booking attribution,Medium
+123057772,Isabel,Lopez,StretchLab Heights,2026-04-25,(281) 932-2726,Phiwe called this number; lead completed first visit under different booking attribution,Medium

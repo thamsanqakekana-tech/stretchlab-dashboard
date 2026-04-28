@@ -1,4 +1,4 @@
 window_category,total_bookings,cancelled,shows,cancel_rate_pct,show_rate_pct
 30+ days,1,1,0,100.0,0.0
-<7 days,43,33,13,76.74418604651163,30.23255813953488
-Unknown,10,0,0,0.0,0.0
+<7 days,46,36,14,78.26086956521739,30.434782608695656
+Unknown,11,0,1,0.0,9.090909090909092
