@@ -34,7 +34,7 @@ const DAYS_OF_WEEK = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturd
 // ─── Studio stats builder ─────────────────────────────────────────────────────
 function buildStudioStats(bookings, cancellations = []) {
   const getStatus = b => String(b.current_status || b['Current Status'] || '').trim()
-  const isHasShow = b => String(b['has_show'] ?? b.has_show ?? '').trim() === '1'
+  const isHasShow = b => { const v = b['has_show'] ?? b.has_show; return v === true || v === 1 || String(v).trim() === '1' }
 
   const grouped = {}
   bookings.forEach(b => {
@@ -434,7 +434,7 @@ function StudioSignalCard({ s, isManagerView, pipeline = [] }) {
                 </thead>
                 <tbody>
                   {sortedBks.map((bk, i) => {
-                    const hasShow       = String(bk['has_show'] ?? bk.has_show ?? '').trim() === '1'
+                    const hasShow       = (() => { const v = bk['has_show'] ?? bk.has_show; return v === true || v === 1 || String(v).trim() === '1' })()
                     const status        = String(bk.current_status || '').trim()
                     const isFuture      = status.includes('Open Booking')
                     const isCancCust    = status.includes('Cancelled Within Policy') || status.includes('Cancelled Outside Policy')

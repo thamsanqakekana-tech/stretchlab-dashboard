@@ -66,7 +66,7 @@ function buildBookingBuckets(bookings) {
   const getStatus = r => String(r['Current Status'] ?? r.current_status ?? r['current_status'] ?? '')
   const getId     = r => String(r['Booking ID']    ?? r.booking_id     ?? r['booking_id']     ?? '')
   const getIsPast = r => { const v = r['is_past'] ?? r.is_past ?? ''; return v === '1' || v === 1 || v === true }
-  const getHasShow = r => String(r['has_show']     ?? r.has_show       ?? '').trim() === '1'
+  const getHasShow = r => { const v = r['has_show'] ?? r.has_show; return v === true || v === 1 || String(v).trim() === '1' }
 
   const attended      = bookings.filter(getHasShow)
   const attendedIds   = new Set(attended.map(getId))
@@ -527,7 +527,7 @@ function StudioStrip({ studios = [], bookings = [], isClientView = false }) {
       const st = map[loc]
       const cs = String(r['Current Status'] || r.current_status || '')
       st.bookings++
-      const hasShow = String(r.has_show ?? '') === '1'
+      const hasShow = r.has_show === true || r.has_show === 1 || String(r.has_show ?? '').trim() === '1'
       const isPast  = String(r.is_past  ?? '') === '1'
       if (hasShow)                                st.shows++
       if (cs.includes('Cancelled') && !hasShow) {

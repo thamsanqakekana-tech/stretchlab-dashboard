@@ -15,7 +15,8 @@ const BASE = '/data'
 // ─── Supabase table fetch ─────────────────────────────────────────────────────
 async function loadFromSupabase(tableName) {
   if (!supabase) throw new Error('Supabase client not initialised')
-  const { data, error } = await supabase.from(tableName).select('*')
+  // PostgREST default cap is 1,000 rows — override to 50,000 to cover all tables
+  const { data, error } = await supabase.from(tableName).select('*').limit(50000)
   if (error) throw new Error(error.message)
   if (!data || data.length === 0) throw new Error('empty result')
   return data

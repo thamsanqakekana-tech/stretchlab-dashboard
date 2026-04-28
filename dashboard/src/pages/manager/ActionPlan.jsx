@@ -51,7 +51,7 @@ function generateActions({ pipeline, bookings, cancellations, validationLeads, c
     ? upcoming.slice().sort((a,b) => +a.days_until - +b.days_until)[0]
     : null
 
-  const shows         = bookings.filter(b => String(b.has_show).trim() === '1')
+  const shows         = bookings.filter(b => b.has_show === true || b.has_show === 1 || String(b.has_show ?? '').trim() === '1')
   const isPast        = bookings.filter(b => String(b.is_past).trim() === '1')
   const rescheduled   = isPast.filter(b => String(b.current_status || '').includes('Rescheduled'))
   const resolved      = isPast.length - rescheduled.length
