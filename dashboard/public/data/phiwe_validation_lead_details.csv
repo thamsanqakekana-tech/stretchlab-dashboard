@@ -1,0 +1,58 @@
+name,date_of_appointment,location,paid,in_system,month,notes,lead_age,prior_visits,held
+Becky Rogers,2026-03-02 12:00:00,Shreveport,No,True,1,Cancelled,12 Month,0.0,No
+Tamara Bryant,2026-03-10 17:00:00,Shreveport,Yes,True,1,Held,Not sure,,Yes
+Lawanda Wilson,2026-03-14 13:00:00,Shreveport,Yes,True,1,Taken over by internal team,6 Month,0.0,Yes
+Juan Bryant,2026-03-10 17:00:00,Shreveport,Yes,True,1,Held,Not sure,,Yes
+Caltoniavanta Tippins,2026-03-10 10:00:00,Shreveport,No,True,1,Insurance issue,12 Month,0.0,No
+Cynthia Williams,2026-02-27 13:00:00,Shreveport,No,False,1,Cancelled - forgot about appointment ,12 Month,0.0,No
+Anthony Hilliard,2026-03-13 01:00:00,Shreveport,No,True,1,"Cancelled - no pre-payment, no show",10 Month,0.0,No
+Chasity Allen,2026-03-17 16:00:00,Shreveport,No,True,1,Client lost this sale,10 Month,2.0,No
+Samantha Bennett,2026-03-02 11:00:00,Shreveport,Yes,True,1,Appointment held,10 Month,0.0,Yes
+Askel Matre,2026-03-06 13:00:00,Bellaire ,No,True,1,"Cancelled - no pre-payment, no show",12 Month,0.0,No
+Felicia Jewitt,2026-03-14 10:00:00,Shreveport,No,True,1,Flexologist changed times. The client was re-booked for April 4. Cancelled ,8 Month ,0.0,No
+Timothy Cooper,2026-03-21 09:00:00,Shreveport,Yes,False,1,Appointment held,10 Month,0.0,Yes
+Euronda Jefferson,2026-03-10 13:00:00,Shreveport,No,True,1,"Cancelled - no pre-payment, no show",10 Month,0.0,No
+Angela Washington,2026-03-14 13:00:00,Shreveport,No,True,1,Internal team mishap,12 Month,0.0,No
+Rochelle Hargrove,2026-03-14 11:00:00,Shreveport,No,True,1,Internal team mishap,12 Month,0.0,No
+Ali Waqar,2026-03-23 13:00:00,Bunker Hill,No,True,1,"Cancelled - no pre-payment, no show",8 Month,0.0,No
+Rich Thayer,2026-04-18 00:00:00,Bunker Hill,No,True,1,Cancelled - needed to reschedule,8 Month,0.0,No
+Edgar Monray ,2026-03-14 13:00:00,Bunker Hill,Yes,False,1,The client has credits that did not get used. He cancelled the session and will re-book,8 Month,0.0,No
+Donald Johnson,2026-03-23 09:00:00,Shreveport,Yes,True,1,Appointment held,6 Month,0.0,Yes
+Marlene mira Washington bey,2026-03-27 15:00:00,Shreveport,No,False,1,Insurance issue,8 Month,0.0,No
+Abijauh Parker,2026-03-26 13:00:00,Shreveport,No,False,1,Cancelled - had a personal issue,8 Month,1.0,No
+Lamont Johnson,2026-03-21 10:00:00,Clarkston,No,True,1,"Cancelled - no pre-payment, no show",6 Month,0.0,No
+Gini Fox ,"March 30, 2026 at 12:00 PM",Cherry Street ,No,True,1,Cancelled - had family in town and could no longer make it,10 Month,0.0,No
+Ross Williams ,2026-05-01 15:00:00,Shreveport,No,True,1,Future dated,6 Month,0.0,
+Laura Adeniseun,2026-03-20 11:00:00,Bunker Hill,No,True,1,"Cancelled - no pre-payment, no show",6 Month,0.0,No
+Altaf Lalani,2025-03-08 10:00:00,Bunker Hill,No,True,1,"Cancelled - no pre-payment, no show",12 Month,2.0,No
+Daniel Little,2026-03-23 13:00:00,Clarkston,No,True,1,Cancelled,12 Month,1.0,No
+Chase Fondren,2026-04-10 00:00:00,Bellaire ,No,True,1,Cancelled,Not sure,,No
+Rafael Smith,9:00 AM Tuesday 31 March,Heights,No,True,1,"Cancelled - no pre-payment, no show",6 Month,5.0,No
+Rochelle Ashe,2026-04-27 10:00:00,Bunker Hill,No,True,1,Future dated,12 Month,0.0,
+Steve Bynum,2026-04-06 00:00:00,Pearland,Yes,True,2,Booked on Tamryn's account/ laptop. Second stretch booked,,,Yes
+Cathy Barazi,2026-04-11 00:00:00,Bellaire ,Yes,False,2,Booked by an internal team member. ,,,Yes
+Ronald Maxwell ,2026-03-26 00:00:00,Cherry Street ,Yes,True,2,"Paid, no show",,,No
+JD. Davis,2026-03-30 00:00:00,Pearland,Yes,False,2,Second stretch booked already ,,,Yes
+Maryam Taghadosi,"Friday, April 17,",River Oaks ,Yes,True,2,Held ,,,Yes
+David Kocsis Jr,"Sunday, May 3,",Pearland,No,True,2,Future dated,,,
+Candy Smith,2026-04-20 13:00:00,Bunker Hill,No,True,2,"No payment, no show",,,No
+Gina Gray,"Wednesday, April 15, 2026 2:00 PM with Kenisha Likely",Bunker Hill,Yes,True,2,Held,,,Yes
+Samuel Amos,2026-05-04 10:00:00,Bellaire ,No,True,2,Future dated,,,
+Terry Davis,2026-04-10 02:00:00,Pearland,No,True,2,"No payment, no show",,,No
+Crystal Chukwu,2026-04-09 17:00:00,Shreveport,Yes,True,2,Held,,,Yes
+Lamonica Martin,"Friday, April 10, 2026 10:00 AM with Della Perkins",Shreveport,No,True,2,The client says the link does not work when making payment. Advised to make the payment in studio. Cancelled. ,,,No
+Richard Webb,"Wednesday, April 22, 2026 11:00 AM with Mahlik Hanna",Cherry Street ,No,True,2,"No payment, no show",,,No
+Stephen Weeks,2026-04-22 00:00:00,Cherry Street ,No,True,2,"No payment, no show",,,No
+Tynisha Alexander,2026-05-22 08:00:00,Cherry Street ,No,True,2,This booking was cancelled because the Flexologist will be on maternity leave. I will call lead to find out if they can reschedule for another day. ,,,No
+Charlene Johnson,2026-04-17 04:00:00,Cherry Street ,Yes,True,2,Held,,,Yes
+Jacorian Oes,2026-04-27 11:00:00,Shreveport,No,True,2,Future dated,,,
+Fame gilliam,2026-05-11 10:00:00,Shreveport,No,True,2,Future dated,,,
+Christopher Ejike-Ukah,2026-05-05 10:00:00,Bellaire ,No,False,2,Future dated,,,
+Albert Cantu,2026-04-24 11:00:00,Bellaire ,Yes,True,2,Second 4x membership booked ,,,Yes
+Debbie Webb,2026-05-11 10:00:00,Bunker Hill,No,True,2,Future dated ,,,
+Lyndsey Brantley,2026-05-07 14:00:00,River Oaks ,Yes,False,2,Future dated ,,,
+Justin Cassell,2026-05-03 01:00:00,Heights,No,False,2,"Future dated, will make payment using a voucher ",,,
+Jorge Miranda,2026-04-29 12:00:00,Heights,No,False,2,Future dated ,,,
+Melvinia McClain,2026-05-01 03:00:00,Heights,No,False,2,Future dated ,,,
+David Dole,2026-05-09 01:00:00,Brighton,No,True,2,Future dated ,,,
+Kelly Dole,2026-05-09 13:00:00,Brighton,No,True,2,Future dated ,,,

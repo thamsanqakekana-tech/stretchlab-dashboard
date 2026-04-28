@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Premium dark palette (Zinc-based, à la Linear / Vercel / Resend) ─── */
+:root {
+  --bg:        #09090b;   /* Zinc-950 — near black                        */
+  --surface:   #111115;   /* Elevated card surface                        */
+  --surface-2: #18181b;   /* Zinc-900 — second elevation (tables, inputs) */
+  --border:    #27272a;   /* Zinc-800 — crisp neutral separator           */
+  --accent:    #6366f1;   /* Indigo-500 — primary brand / UI              */
+  --positive:  #22c55e;   /* Green-500  — positive metric / chart bar     */
+  --muted:     #71717a;   /* Zinc-500  — secondary text                   */
+  --text:      #fafafa;   /* Zinc-50   — primary text                     */
+  --text-2:    #a1a1aa;   /* Zinc-400  — tertiary text                    */
+  --warn:      #f59e0b;   /* Amber-500                                    */
+  --danger:    #ef4444;   /* Red-500                                      */
+  --info:      #38bdf8;   /* Sky-400                                      */
+  --admin:     #a855f7;   /* Purple-500                                   */
+
+  /* Aliases kept for backward compat with existing components */
+  --accent-old: #22c55e;
+}
+
+/* Role-tint overrides */
+[data-role="admin"]   { --accent: #a855f7; }
+[data-role="manager"] { --accent: #f59e0b; }
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code, pre, .mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ─── Scrollbar ─────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* ─── Chart containers ───────────────────────────────────────────────────── */
+.plot-container svg { background: transparent !important; }
+.plot-container text {
+  fill: var(--muted) !important;
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: 11px !important;
+}
+
+/* ─── Animations ─────────────────────────────────────────────────────────── */
+.fade-in {
+  animation: fadeIn 0.25s ease-out both;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Warning border for below-benchmark metrics (manager/admin) ─────────── */
+.below-benchmark {
+  border-left: 3px solid var(--warn) !important;
+}
+
+/* ─── Thin inset glow used by KpiCard accent line ─────────────────────────── */
+.kpi-accent-line {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  border-radius: 10px 10px 0 0;
+}

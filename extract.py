@@ -1,0 +1,112 @@
+"""
+StretchLab B2C Pipeline - Extract Module (V4.0 FINAL)
+Extracts data from Excel workbook (all sheets)
+"""
+
+import pandas as pd
+import logging
+from pathlib import Path
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+
+class DataExtractor:
+    """
+    V4.0: Extract data from StretchLab workbook
+    NO PHONE MATCHING - Direct + Tamryn only
+    """
+    
+    def __init__(self, workbook_path):
+        self.workbook_path = Path(workbook_path)
+        
+    def extract(self):
+        """Extract all data from workbook"""
+        logger.info(f"Extracting data from: {self.workbook_path}")
+        
+        if not self.workbook_path.exists():
+            raise FileNotFoundError(f"Workbook not found: {self.workbook_path}")
+        
+        # Load all sheets
+        xl = pd.ExcelFile(self.workbook_path)
+        logger.info(f"Found {len(xl.sheet_names)} sheets: {xl.sheet_names}")
+        
+        # Extract each sheet
+        data = {
+            'calls': self._extract_calls(xl),
+            'bookings': self._extract_bookings(xl),
+            'first_visits': self._extract_first_visits(xl),
+            'loyalsnap': self._extract_loyalsnap(xl)
+        }
+        
+        logger.info("✅ Extraction complete")
+        return data
+    
+    def _extract_calls(self, xl):
+        """Extract RingCentral call log"""
+        logger.info("Extracting calls...")
+        
+        calls = pd.read_excel(xl, sheet_name='ringcentral_call_log')
+        
+        # Rename columns for consistency
+        calls = calls.rename(columns={
+            'From Name': 'from_name',
+            'From Number': 'from_number',
+            'To Name': 'to_name',
+            'To Number': 'to_number',
+            'Date-Time': 'call_start_time',
+            'Length': 'call_length',
+            'Direction': 'call_direction',
+            'Call Type': 'call_type',
+            'Call Response': 'call_response',
+            'Result': 'result',
+            'Ringing': 'ringing_time',
+            'Live Talk': 'live_talk_time'
+        })
+        
+        logger.info(f"  Extracted {len(calls):,} call records")
+        return calls
+    
+    def _extract_bookings(self, xl):
+        """Extract booking events log"""
+        logger.info("Extracting bookings...")
+        
+        bookings = pd.read_excel(xl, sheet_name='booking_events_log')
+        
+        logger.info(f"  Extracted {len(bookings):,} booking events")
+        return bookings
+    
+    def _extract_first_visits(self, xl):
+        """Extract first visits"""
+        logger.info("Extracting first visits...")
+        
+        first_visits = pd.read_excel(xl, sheet_name='first_visits')
+        
+        logger.info(f"  Extracted {len(first_visits):,} first visit records")
+        return first_visits
+    
+    def _extract_loyalsnap(self, xl):
+        """Extract LoyalSnap activity"""
+        logger.info("Extracting LoyalSnap...")
+        
+        loyalsnap = pd.read_excel(xl, sheet_name='loyalsnap')
+        
+        logger.info(f"  Extracted {len(loyalsnap):,} LoyalSnap records")
+        return loyalsnap
+
+
+if __name__ == '__main__':
+    import sys
+    
+    if len(sys.argv) < 2:
+        print("Usage: python extract.py <workbook_path>")
+        sys.exit(1)
+    
+    extractor = DataExtractor(sys.argv[1])
+    data = extractor.extract()
+    
+    print("\n" + "="*70)
+    print("EXTRACTION SUMMARY")
+    print("="*70)
+    for key, df in data.items():
+        print(f"{key}: {len(df):,} rows")

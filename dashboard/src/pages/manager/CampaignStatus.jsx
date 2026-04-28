@@ -1,0 +1,541 @@
+import React, { useMemo } from 'react'
+import { useMultiData } from '../../hooks/useData.js'
+import { useInsight } from '../../hooks/useInsight.js'
+import {
+  loadCampaignHealth,
+  loadRevenueIntelligence,
+  loadBenchmarksComparison,
+  loadValidationReport,
+  loadCalls,
+  loadBookings,
+  loadRampVsTarget,
+  loadCancellationAnalysis,
+  pivotToObject,
+  parsePct,
+} from '../../utils/dataLoader.js'
+import {
+  BENCHMARKS,
+  RAMP_TARGETS,
+  COLD_OUTREACH_BENCHMARKS,
+} from '../../utils/config.js'
+import Card from '../../components/Card.jsx'
+import BenchmarkBar from '../../components/BenchmarkBar.jsx'
+import InsightBlock from '../../components/InsightBlock.jsx'
+
+const SOW_TARGET = 77
+
+const CHURN_COLORS = { HIGH: 'var(--danger)', MEDIUM: 'var(--warn)', LOW: 'var(--accent)' }
+
+const sectionLabel = {
+  fontSize: '11px', fontWeight: 700, textTransform: 'uppercase',
+  letterSpacing: '0.08em', margin: '0 0 14px',
+}
+
+function bm(benchmarks, metricKey) {
+  return parsePct(benchmarks.find(b => b.metric === metricKey)?.actual_pct)
+}
+
+// ─── SOW Progress Bar (inline, matches PartnershipActions pattern) ─────────────
+function SowProgressBar({ confirmedShows, upcoming, showRate }) {
+  const projectedFromUpcoming = Math.round(upcoming * (showRate / 100))
+  const remaining             = Math.max(0, SOW_TARGET - confirmedShows - projectedFromUpcoming)
+  const pctConfirmed  = (confirmedShows / SOW_TARGET) * 100
+  const pctProjected  = (projectedFromUpcoming / SOW_TARGET) * 100
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '10px' }}>
+        <p style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 600, margin: 0 }}>
+          {confirmedShows} confirmed · {upcoming} upcoming · {remaining} still needed
+        </p>
+        <p style={{ fontSize: '12px', color: 'var(--muted)', margin: 0 }}>Deadline: May 24, 2026</p>
+      </div>
+      <div style={{ height: '10px', borderRadius: '6px', background: 'var(--border)', overflow: 'hidden', display: 'flex', marginBottom: '12px' }}>
+        <div style={{ width: `${pctConfirmed}%`, background: '#22c55e', transition: 'width 0.4s ease' }} />
+        <div style={{ width: `${pctProjected}%`, background: '#f59e0b', transition: 'width 0.4s ease' }} />
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ width: '10px', height: '10px', borderRadius: '2px', background: '#22c55e' }} />
+          <span style={{ fontSize: '12px', color: 'var(--text-2)' }}><strong style={{ color: 'var(--text)' }}>{confirmedShows}</strong> confirmed shows</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ width: '10px', height: '10px', borderRadius: '2px', background: '#f59e0b' }} />
+          <span style={{ fontSize: '12px', color: 'var(--text-2)' }}><strong style={{ color: 'var(--text)' }}>{projectedFromUpcoming}</strong> projected from {upcoming} upcoming (at {(showRate).toFixed(0)}% show rate)</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ width: '10px', height: '10px', borderRadius: '2px', background: 'var(--border)' }} />
+          <span style={{ fontSize: '12px', color: 'var(--text-2)' }}><strong style={{ color: 'var(--text)' }}>{remaining}</strong> still needed to hit {SOW_TARGET}</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Campaign Health Score ────────────────────────────────────────────────────
+function CampaignHealthScore({ convRate, bookingConvRate, showRate, adminRate }) {
+  const normalize = (val, min, max) => Math.min(100, Math.max(0, ((val - min) / (max - min)) * 100))
+  const convScore    = normalize(convRate, 0, 18)
+  const bookingScore = normalize(bookingConvRate, 0, 5)
+  const showScore    = normalize(showRate, 0, 15)
+  const adminScore   = Math.max(0, 100 - normalize(adminRate * 100, 0, 30))
+  const score        = Math.round(convScore * 0.20 + bookingScore * 0.30 + showScore * 0.30 + adminScore * 0.20)
+  const color        = score >= 70 ? '#22c55e' : score >= 50 ? '#f59e0b' : '#ef4444'
+  const label        = score >= 70 ? 'Strong' : score >= 50 ? 'Developing' : 'At Risk'
+
+  return (
+    <Card style={{ marginBottom: '24px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+        <div style={{ textAlign: 'center', minWidth: '80px' }}>
+          <p style={{ fontSize: '48px', fontWeight: 900, fontFamily: 'JetBrains Mono, monospace', color, margin: 0, lineHeight: 1 }}>
+            {score}
+          </p>
+          <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '2px 0 0' }}>/ 100</p>
+        </div>
+        <div style={{ flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+            <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text)', margin: 0 }}>Campaign Health Score</p>
+            <span style={{ fontSize: '11px', fontWeight: 700, color, background: `${color}18`, padding: '2px 8px', borderRadius: '4px' }}>
+              {label}
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginBottom: '10px' }}>
+            <span style={{ fontSize: '11px', color: 'var(--muted)' }}>
+              Connect rate <span style={{ color: 'var(--text)', fontWeight: 600 }}>{convRate.toFixed(1)}%</span> · 20%
+            </span>
+            <span style={{ fontSize: '11px', color: 'var(--muted)' }}>
+              Booking conv <span style={{ color: 'var(--text)', fontWeight: 600 }}>{bookingConvRate.toFixed(1)}%</span> · 30%
+            </span>
+            <span style={{ fontSize: '11px', color: 'var(--muted)' }}>
+              Show rate <span style={{ color: 'var(--text)', fontWeight: 600 }}>{showRate.toFixed(1)}%</span> · 30%
+            </span>
+            <span style={{ fontSize: '11px', color: 'var(--muted)' }}>
+              Admin disruption <span style={{ color: 'var(--text)', fontWeight: 600 }}>{(adminRate * 100).toFixed(1)}%</span> · 20% inverse
+            </span>
+          </div>
+          <div style={{ height: '6px', borderRadius: '4px', background: 'var(--border)', overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${score}%`, background: color, transition: 'width 0.4s ease' }} />
+          </div>
+        </div>
+      </div>
+    </Card>
+  )
+}
+
+// ─── Month-over-Month Comparison ──────────────────────────────────────────────
+function MonthComparison({ ramp = [], upcoming = 0 }) {
+  if (!ramp.length) return null
+
+  const months = [
+    { num: 1, label: 'Month 1', dateRange: 'Feb 24 – Mar 24', target: 30 },
+    { num: 2, label: 'Month 2', dateRange: 'Mar 25 – Apr 24', target: 50 },
+    { num: 3, label: 'Month 3', dateRange: 'Apr 25 – May 24', target: 77 },
+  ]
+
+  return (
+    <Card style={{ marginBottom: '24px' }}>
+      <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 16px' }}>
+        Month-over-Month — kept sessions vs target
+      </p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 0 }}>
+        {months.map((m, i) => {
+          const row    = ramp.find(r => +r.month === m.num)
+          const actual = row ? +row.actual_kept_appts : 0
+          const pct    = m.target > 0 ? Math.min((actual / m.target) * 100, 100) : 0
+          const isM3   = m.num === 3
+          const isLast = i === months.length - 1
+          const color  = pct >= 60 ? '#22c55e' : pct >= 30 ? '#f59e0b' : 'var(--muted)'
+
+          return (
+            <div key={m.num} style={{
+              borderRight: !isLast ? '1px solid var(--border)' : 'none',
+              paddingRight: !isLast ? '20px' : '0',
+              paddingLeft: i > 0 ? '20px' : '0',
+            }}>
+              <p style={{ fontSize: '10px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 6px' }}>
+                {m.label}
+                {isM3 && <span style={{ marginLeft: '6px', color: 'var(--accent)', fontSize: '9px' }}>Active</span>}
+              </p>
+              <p style={{ fontSize: '28px', fontWeight: 800, fontFamily: 'JetBrains Mono, monospace', color, margin: '0 0 2px', lineHeight: 1 }}>
+                {actual}
+                <span style={{ fontSize: '14px', color: 'var(--muted)', fontWeight: 400 }}> / {m.target}</span>
+              </p>
+              <div style={{ height: '4px', borderRadius: '3px', background: 'var(--border)', overflow: 'hidden', margin: '8px 0' }}>
+                <div style={{ height: '100%', width: `${pct}%`, background: color, transition: 'width 0.4s ease' }} />
+              </div>
+              <p style={{ fontSize: '11px', color: 'var(--muted)', margin: 0 }}>
+                {m.dateRange} · {pct.toFixed(0)}% of target
+                {isM3 && upcoming > 0 && ` · ${upcoming} upcoming`}
+              </p>
+            </div>
+          )
+        })}
+      </div>
+    </Card>
+  )
+}
+
+export default function CampaignStatus() {
+  const { data, loading } = useMultiData({
+    healthRows:    loadCampaignHealth,
+    revenueRows:   loadRevenueIntelligence,
+    benchmarks:    loadBenchmarksComparison,
+    validation:    loadValidationReport,
+    calls:         loadCalls,
+    bookings:      loadBookings,
+    ramp:          loadRampVsTarget,
+    cancellations: loadCancellationAnalysis,
+  })
+
+  const health        = useMemo(() => pivotToObject(data.healthRows  ?? []), [data.healthRows])
+  const revenue       = useMemo(() => pivotToObject(data.revenueRows ?? []), [data.revenueRows])
+  const benchmarks    = data.benchmarks    ?? []
+  const validation    = data.validation   ?? {}
+  const calls         = data.calls        ?? []
+  const bookings      = data.bookings     ?? []
+  const ramp          = data.ramp         ?? []
+  const cancellations = data.cancellations ?? []
+
+  // ── Legacy values (from benchmarks CSV — kept for BenchmarkBar compatibility) ──
+  const campaignScore     = health.total_score ?? null
+  const churnRisk         = (health.churn_risk ?? '').toUpperCase()
+  const showRatePct       = bm(benchmarks, 'show_rate')
+  const cancelRatePct     = bm(benchmarks, 'cancel_rate')
+  const engagementRatePct = bm(benchmarks, 'engagement_rate')
+
+  // ── Live values from raw data (for new sections) ──────────────────────────────
+  const meaningfulConvs  = useMemo(() => calls.filter(c => parseFloat(c.live_talk_min || 0) >= 0.5).length, [calls])
+  const totalCalls       = calls.length
+  const convRate         = totalCalls > 0 ? (meaningfulConvs / totalCalls) * 100 : 0
+  const bookingConvRate  = meaningfulConvs > 0 ? (bookings.length / meaningfulConvs) * 100 : 0
+  const confirmedShows   = useMemo(() => bookings.filter(b => +b.has_show === 1).length, [bookings])
+  const confirmedCancels = useMemo(() => bookings.filter(b => +b.is_cancelled === 1).length, [bookings])
+  const showRate         = bookings.length > 0 ? (confirmedShows / bookings.length) * 100 : 0
+  const cancelRate       = bookings.length > 0 ? (confirmedCancels / bookings.length) * 100 : 0
+  const upcoming         = useMemo(() => bookings.filter(b => +b.is_future === 1 && b.booking_outcome !== 'Cancelled').length, [bookings])
+
+  const adminCancelled = useMemo(() => cancellations.filter(c => c.cancelled_by === 'Admin').length, [cancellations])
+  const adminRate      = bookings.length > 0 ? adminCancelled / bookings.length : 0
+
+  const driftPct = validation?.drift?.booking_drift_pct ?? 0
+  const hasDrift = Math.abs(driftPct) > 5
+
+  // ── AI insight prompt (updated with cold benchmarks and Month 3) ──────────────
+  const promptText = useMemo(() => {
+    if (loading) return ''
+    return `Campaign manager status — internal Execo view.
+Conversation rate: ${convRate.toFixed(1)}% (cold outreach benchmark 10–18% — ABOVE ceiling).
+Booking conversion: ${bookingConvRate.toFixed(1)}% (cold outreach benchmark 2–5% — ABOVE ceiling).
+Show rate: ${showRate.toFixed(1)}% (cold outreach benchmark 8–15% — WITHIN range).
+Cancel rate: ${cancelRate.toFixed(1)}% (cold outreach benchmark 20–35% — WITHIN range).
+Total calls: ${totalCalls.toLocaleString()}. Meaningful conversations: ${meaningfulConvs.toLocaleString()}.
+Bookings: ${bookings.length}. Confirmed shows: ${confirmedShows}. Upcoming: ${upcoming}.
+6 admin-initiated cancellations (cancelled_by=Admin in ClubReady) and 8 customer-initiated cancellations. Admin disruptions are the primary show-rate suppressor.
+Without admin cancellations, hypothetical show rate = ~${(((confirmedShows + 6) / bookings.length) * 100).toFixed(0)}%.
+Churn risk: ${churnRisk}.
+Booking drift vs manual tracker: ${driftPct}%.
+Month 3 SOW target: 77 kept appointments by May 24.
+Write the manager-facing campaign status insight. Be direct. Acknowledge what EXECO controls (conversation, booking, show rate — all above/within cold benchmark). Identify what StretchLab must fix (admin disruptions, ClubReady logging). State Month 3 path.`
+  }, [loading, convRate, bookingConvRate, showRate, cancelRate, totalCalls, meaningfulConvs, bookings.length, confirmedShows, upcoming, churnRisk, driftPct])
+
+  const { insight, loading: iL, error: iE, refresh } = useInsight('manager', promptText)
+
+  if (loading) return <div style={{ color: 'var(--muted)', padding: '40px' }}>Loading campaign status…</div>
+
+  const scoreColor = campaignScore >= 70 ? 'var(--positive)' : campaignScore >= 50 ? 'var(--warn)' : 'var(--danger)'
+
+  return (
+    <div style={{ maxWidth: '1100px' }}>
+
+      {/* Page header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
+        <h1 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text)', margin: 0 }}>
+          Campaign Status
+        </h1>
+        {campaignScore != null && (
+          <span style={{
+            padding: '4px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: 700,
+            background: campaignScore >= 70 ? '#22c55e22' : campaignScore >= 50 ? '#f59e0b22' : '#ef444422',
+            color: campaignScore >= 70 ? 'var(--positive)' : campaignScore >= 50 ? 'var(--warn)' : 'var(--danger)',
+          }}>
+            {health.level ?? (campaignScore >= 70 ? 'GREEN' : campaignScore >= 50 ? 'YELLOW' : 'RED')}
+          </span>
+        )}
+      </div>
+      <p style={{ color: 'var(--muted)', fontSize: '13px', marginBottom: '24px' }}>
+        Internal view — Execo manager access only · Toggle to "client" in the top bar to preview what StretchLab sees
+      </p>
+
+      {/* Churn risk banner */}
+      {churnRisk && (
+        <div style={{
+          background: `${CHURN_COLORS[churnRisk] ?? 'var(--warn)'}18`,
+          border: `1px solid ${CHURN_COLORS[churnRisk] ?? 'var(--warn)'}`,
+          borderRadius: '8px', padding: '12px 16px', marginBottom: '16px',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        }}>
+          <span style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 600 }}>
+            Churn Risk: <span style={{ color: CHURN_COLORS[churnRisk] ?? 'var(--warn)' }}>{churnRisk}</span>
+          </span>
+          <span style={{ fontSize: '12px', color: 'var(--muted)' }}>Based on show rate, cancel rate, engagement trends</span>
+        </div>
+      )}
+
+      {/* Data drift warning */}
+      {hasDrift && (
+        <div style={{
+          background: '#f59e0b18', border: '1px solid var(--warn)',
+          borderRadius: '8px', padding: '12px 16px', marginBottom: '16px',
+        }}>
+          <span style={{ fontSize: '13px', color: 'var(--warn)', fontWeight: 600 }}>
+            Data Drift: {driftPct > 0 ? '+' : ''}{driftPct}% vs manual tracker
+          </span>
+          <span style={{ fontSize: '12px', color: 'var(--muted)', marginLeft: '12px' }}>
+            {validation?.drift?.gap_direction === 'manual_has_more'
+              ? 'Manual tracker shows more bookings than system — 4 missing from ClubReady'
+              : 'System shows more bookings than manual tracker'}
+          </span>
+        </div>
+      )}
+
+      {/* ── Cold outreach benchmark strip ──────────────────────────────────── */}
+      <Card title="Cold Outreach Benchmarks · Dormant Leads 6–12 Months Inactive" style={{ marginBottom: '24px' }}>
+        <BenchmarkBar
+          label="Connect Rate"
+          actual={convRate}
+          benchmark={COLD_OUTREACH_BENCHMARKS.connect_rate.max}
+          tooltip="Calls with 30s+ real two-way conversation. Cold outreach benchmark: 10–18%. Above ceiling = exceptional."
+        />
+        <BenchmarkBar
+          label="Booking Conversion"
+          actual={bookingConvRate}
+          benchmark={COLD_OUTREACH_BENCHMARKS.booking_rate.max}
+          tooltip="Real conversations → booked appointments. Cold outreach benchmark: 2–5%."
+        />
+        <BenchmarkBar
+          label="Show Rate"
+          actual={showRate}
+          benchmark={COLD_OUTREACH_BENCHMARKS.show_rate.max}
+          tooltip="Booked appointments → attended intro sessions. Cold outreach benchmark: 8–15%."
+        />
+        <BenchmarkBar
+          label="Cancel Rate"
+          actual={cancelRate}
+          benchmark={COLD_OUTREACH_BENCHMARKS.cancel_rate.min}
+          lowerIsBetter
+          tooltip="Cold outreach cancel rate: 20–35% expected for dormant leads. Lower is better. Admin-initiated disruptions are the primary driver here."
+        />
+      </Card>
+
+      {/* ── Fresh-lead benchmark comparison (manager context only) ────────── */}
+      <Card style={{ marginBottom: '24px', borderLeft: '3px solid #f59e0b' }}>
+        <p style={{ ...sectionLabel, color: '#f59e0b' }}>
+          Context: Why Cold Outreach Benchmarks — Not Fresh-Lead Standards
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0' }}>
+
+          <div style={{ borderRight: '1px solid var(--border)', paddingRight: '20px' }}>
+            <p style={{ fontSize: '10px', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 8px' }}>
+              Cold Outreach Standard (this campaign)
+            </p>
+            <ul style={{ fontSize: '12px', color: 'var(--text-2)', lineHeight: 1.9, margin: 0, padding: '0 0 0 14px' }}>
+              <li>Conversation rate: 10–18%</li>
+              <li>Booking conversion: 2–5%</li>
+              <li>Show rate: 8–15%</li>
+              <li>Cancel rate: 20–35%</li>
+            </ul>
+            <p style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '8px', lineHeight: 1.6 }}>
+              Calibrated for dormant leads 6–12 months inactive. If Brian ever compares to industry norms, these are the correct benchmarks to cite.
+            </p>
+          </div>
+
+          <div style={{ borderRight: '1px solid var(--border)', padding: '0 20px' }}>
+            <p style={{ fontSize: '10px', fontWeight: 700, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 8px' }}>
+              Fresh-Lead Standard (for context — not this campaign)
+            </p>
+            <ul style={{ fontSize: '12px', color: 'var(--text-2)', lineHeight: 1.9, margin: 0, padding: '0 0 0 14px' }}>
+              <li>Conversation rate: 50–70%</li>
+              <li>Booking conversion: 1.5–3%</li>
+              <li>Show rate: 25–40%</li>
+              <li>Cancel rate: 10–15%</li>
+            </ul>
+            <p style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '8px', lineHeight: 1.6 }}>
+              Fresh studio inquiries (0–14 days). Higher show rate because the lead is still excited. Irrelevant for a cold revival campaign.
+            </p>
+          </div>
+
+          <div style={{ paddingLeft: '20px' }}>
+            <p style={{ fontSize: '10px', fontWeight: 700, color: '#22c55e', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 8px' }}>
+              Phiwe's Actuals
+            </p>
+            <ul style={{ fontSize: '12px', color: 'var(--text-2)', lineHeight: 1.9, margin: 0, padding: '0 0 0 14px' }}>
+              <li>Conversation rate: <strong style={{ color: '#22c55e' }}>{convRate.toFixed(1)}%</strong> — above cold ceiling</li>
+              <li>Booking conversion: <strong style={{ color: '#22c55e' }}>{bookingConvRate.toFixed(1)}%</strong> — above cold ceiling</li>
+              <li>Show rate: <strong style={{ color: 'var(--accent)' }}>{showRate.toFixed(1)}%</strong> — within cold range</li>
+              <li>Cancel rate: <strong style={{ color: 'var(--accent)' }}>{cancelRate.toFixed(1)}%</strong> — within cold range</li>
+            </ul>
+            <p style={{ fontSize: '11px', color: '#22c55e', fontWeight: 600, marginTop: '8px' }}>
+              All 4 EXECO-controlled metrics at or above cold outreach standard.
+            </p>
+          </div>
+
+        </div>
+      </Card>
+
+      {/* ── Revenue / ROI ─────────────────────────────────────────────────── */}
+      <Card style={{ marginBottom: '24px', borderLeft: '3px solid #22c55e' }}>
+        <p style={{ ...sectionLabel, color: '#22c55e' }}>
+          Revenue Intelligence · Contractual KPI · Manager View Only
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '14px' }}>
+          <div>
+            <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '0 0 4px' }}>Confirmed Shows</p>
+            <p style={{ fontSize: '26px', fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: '#22c55e', margin: '0 0 3px' }}>
+              {confirmedShows}
+            </p>
+            <p style={{ fontSize: '11px', color: 'var(--muted)' }}>Intro sessions attended</p>
+          </div>
+          <div>
+            <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '0 0 4px' }}>Intro Revenue (confirmed)</p>
+            <p style={{ fontSize: '26px', fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: 'var(--text)', margin: '0 0 3px' }}>
+              ${(confirmedShows * 69).toLocaleString()}
+            </p>
+            <p style={{ fontSize: '11px', color: 'var(--muted)' }}>{confirmedShows} × $69 intro session</p>
+          </div>
+          <div>
+            <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '0 0 4px' }}>Membership Potential</p>
+            <p style={{ fontSize: '26px', fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: 'var(--accent)', margin: '0 0 3px' }}>
+              ${(confirmedShows * 338).toLocaleString()}
+            </p>
+            <p style={{ fontSize: '11px', color: 'var(--muted)' }}>If all {confirmedShows} convert @ $338/mo</p>
+          </div>
+          <div>
+            <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '0 0 4px' }}>Pipeline Revenue (upcoming)</p>
+            <p style={{ fontSize: '26px', fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: '#38bdf8', margin: '0 0 3px' }}>
+              ${(upcoming * 69).toLocaleString()}
+            </p>
+            <p style={{ fontSize: '11px', color: 'var(--muted)' }}>If all {upcoming} upcoming appointments show</p>
+          </div>
+        </div>
+        <p style={{ fontSize: '11px', color: 'var(--muted)', borderTop: '1px solid var(--border)', paddingTop: '10px', margin: 0 }}>
+          Revenue figures are directional. Intro session = $69. Monthly membership = $338 average. Not for client-facing reporting.
+        </p>
+      </Card>
+
+      {/* ── SOW Ramp Progress ─────────────────────────────────────────────── */}
+      <Card title="SOW Ramp Progress · Target 77 Kept Appointments by May 24" style={{ marginBottom: '24px' }}>
+        <SowProgressBar confirmedShows={confirmedShows} upcoming={upcoming} showRate={showRate} />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginTop: '16px' }}>
+          {[
+            { label: 'Month 1', target: 30, range: 'Feb 24 – Mar 24', done: true },
+            { label: 'Month 2', target: 50, range: 'Mar 25 – Apr 24', done: false, active: true },
+            { label: 'Month 3', target: 77, range: 'Apr 25 – May 24', done: false },
+          ].map(m => (
+            <div key={m.label} style={{
+              textAlign: 'center', padding: '10px 12px',
+              background: 'var(--bg)', borderRadius: '8px',
+              border: m.active ? '1px solid var(--accent)' : '1px solid var(--border)',
+            }}>
+              <p style={{ fontSize: '10px', color: m.active ? 'var(--accent)' : 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '3px', fontWeight: m.active ? 700 : 400 }}>{m.label}</p>
+              <p style={{ fontSize: '20px', fontWeight: 700, color: m.done ? '#22c55e' : 'var(--text)', fontFamily: 'JetBrains Mono, monospace', margin: '0 0 2px' }}>{m.target}</p>
+              <p style={{ fontSize: '10px', color: 'var(--muted)' }}>{m.range}</p>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {/* ── Campaign Health Score ─────────────────────────────────────────── */}
+      <CampaignHealthScore
+        convRate={convRate}
+        bookingConvRate={bookingConvRate}
+        showRate={showRate}
+        adminRate={adminRate}
+      />
+
+      {/* ── Month-over-Month ──────────────────────────────────────────────── */}
+      <MonthComparison ramp={ramp} upcoming={upcoming} />
+
+      {/* ── System vs Manual Validation ───────────────────────────────────── */}
+      {validation?.system_metrics && (
+        <Card title="System vs Manual Validation" style={{ marginBottom: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div>
+              <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: '8px' }}>System (ClubReady)</p>
+              {Object.entries(validation.system_metrics).map(([k, v]) => (
+                <div key={k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', padding: '4px 0', borderBottom: '1px solid var(--border)' }}>
+                  <span style={{ color: 'var(--muted)', textTransform: 'capitalize' }}>{k.replace(/_/g, ' ')}</span>
+                  <span style={{ color: 'var(--text)', fontFamily: 'JetBrains Mono', fontWeight: 600 }}>{v}</span>
+                </div>
+              ))}
+            </div>
+            <div>
+              <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: '8px' }}>Manual (Tamryn's tracker)</p>
+              {Object.entries(validation.manual_metrics ?? {}).map(([k, v]) => (
+                <div key={k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', padding: '4px 0', borderBottom: '1px solid var(--border)' }}>
+                  <span style={{ color: 'var(--muted)', textTransform: 'capitalize' }}>{k.replace(/_/g, ' ')}</span>
+                  <span style={{ color: 'var(--text)', fontFamily: 'JetBrains Mono', fontWeight: 600 }}>{v}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <p style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '12px' }}>
+            Status:{' '}
+            <span style={{ color: validation.status === 'expected' ? 'var(--accent)' : 'var(--warn)', fontWeight: 600, textTransform: 'uppercase' }}>
+              {validation.status}
+            </span>
+            {' '}· Gap: {validation?.drift?.gap_bookings ?? 0} bookings in manual tracker not in ClubReady
+          </p>
+        </Card>
+      )}
+
+      {/* ── Meeting Prep — Tamryn's Brian call prep ───────────────────────── */}
+      <Card style={{ marginBottom: '24px', borderLeft: '3px solid var(--accent)' }}>
+        <p style={{ ...sectionLabel, color: 'var(--accent)' }}>
+          Meeting Prep · Key Points for Brian
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0' }}>
+
+          <div style={{ borderRight: '1px solid var(--border)', paddingRight: '20px' }}>
+            <p style={{ fontSize: '10px', fontWeight: 700, color: '#22c55e', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 10px' }}>
+              Lead With This
+            </p>
+            <ul style={{ fontSize: '12px', color: 'var(--text-2)', lineHeight: 1.9, margin: 0, padding: '0 0 0 14px' }}>
+              <li>{totalCalls.toLocaleString()} calls made — campaign fully operational</li>
+              <li>{convRate.toFixed(1)}% conversation rate — above cold outreach ceiling</li>
+              <li>{bookingConvRate.toFixed(1)}% booking conversion — above cold outreach ceiling</li>
+              <li>{bookings.length} appointments booked from dormant leads</li>
+              <li>{upcoming} upcoming appointments still in pipeline</li>
+            </ul>
+          </div>
+
+          <div style={{ borderRight: '1px solid var(--border)', padding: '0 20px' }}>
+            <p style={{ fontSize: '10px', fontWeight: 700, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 10px' }}>
+              Address Proactively
+            </p>
+            <ul style={{ fontSize: '12px', color: 'var(--text-2)', lineHeight: 1.9, margin: 0, padding: '0 0 0 14px' }}>
+              <li>6 admin-initiated cancellations reducing show rate (8 customer-initiated)</li>
+              <li>Without admin cancels: show rate ~{bookings.length > 0 ? (((confirmedShows + 6) / bookings.length) * 100).toFixed(0) : '—'}% (vs {showRate.toFixed(1)}% current)</li>
+              <li>17 past appointments need ClubReady outcome update</li>
+              <li>4 bookings in manual tracker not yet in ClubReady</li>
+            </ul>
+          </div>
+
+          <div style={{ paddingLeft: '20px' }}>
+            <p style={{ fontSize: '10px', fontWeight: 700, color: '#38bdf8', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 10px' }}>
+              Month 3 Ask
+            </p>
+            <ul style={{ fontSize: '12px', color: 'var(--text-2)', lineHeight: 1.9, margin: 0, padding: '0 0 0 14px' }}>
+              <li>Update ClubReady within 24h of each appointment</li>
+              <li>Review flexologist scheduling at Bunker Hill + Shreveport</li>
+              <li>Pre-notification to EXECO when admin needs to cancel</li>
+              <li>SOW target: 77 kept appointments by May 24</li>
+            </ul>
+          </div>
+
+        </div>
+      </Card>
+
+      <InsightBlock insight={insight} loading={iL} error={iE} onRefresh={refresh} />
+    </div>
+  )
+}

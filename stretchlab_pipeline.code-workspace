@@ -1,0 +1,96 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "python.defaultInterpreterPath": "${workspaceFolder}/venv/bin/python",
+    "python.terminal.activateEnvironment": true,
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": false,
+    "python.linting.flake8Enabled": true,
+    "python.formatting.provider": "black",
+    "files.exclude": {
+      "**/__pycache__": true,
+      "**/*.pyc": true,
+      "venv": true
+    },
+    "editor.formatOnSave": true,
+    "editor.rulers": [88],
+    "[python]": {
+      "editor.tabSize": 4,
+      "editor.insertSpaces": true
+    }
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Run Pipeline",
+        "type": "python",
+        "request": "launch",
+        "program": "${workspaceFolder}/run_pipeline.py",
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}",
+        "env": {},
+        "justMyCode": true
+      },
+      {
+        "name": "Run Pipeline (Debug)",
+        "type": "python",
+        "request": "launch",
+        "program": "${workspaceFolder}/run_pipeline.py",
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}",
+        "env": {},
+        "justMyCode": false,
+        "logToFile": true
+      }
+    ]
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Run Pipeline",
+        "type": "shell",
+        "command": "${workspaceFolder}/venv/bin/python",
+        "args": ["run_pipeline.py"],
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "presentation": {
+          "reveal": "always",
+          "panel": "new"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Setup Environment",
+        "type": "shell",
+        "command": "bash",
+        "args": ["setup.sh"],
+        "group": "none",
+        "presentation": {
+          "reveal": "always",
+          "panel": "new"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "View Latest Log",
+        "type": "shell",
+        "command": "tail",
+        "args": ["-f", "logs/$(ls -t logs/ | head -1)"],
+        "group": "none",
+        "presentation": {
+          "reveal": "always",
+          "panel": "new"
+        },
+        "problemMatcher": []
+      }
+    ]
+  }
+}

@@ -1,0 +1,12 @@
+metric,value
+total_score,38
+max_score,100
+level,RED
+churn_risk,HIGH
+churn_risk_pct,0.5
+performance_score,35
+performance_max,50
+engagement_score,3
+engagement_max,25
+goal_alignment_score,0
+goal_alignment_max,25
