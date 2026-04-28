@@ -19,7 +19,6 @@ import ActionPlan from './pages/manager/ActionPlan.jsx'
 // Admin pages
 import DataDrift from './pages/admin/DataDrift.jsx'
 import PipelineReconciliation from './pages/admin/PipelineReconciliation.jsx'
-import LoyalsnapEngagement from './pages/admin/LoyalsnapEngagement.jsx'
 import FlexologistPerformance from './pages/admin/FlexologistPerformance.jsx'
 import RawDataExplorer from './pages/admin/RawDataExplorer.jsx'
 import SystemHealth from './pages/admin/SystemHealth.jsx'
@@ -96,14 +95,6 @@ export default function App() {
               element={
                 <RequireRole allowed={['manager', 'admin']}>
                   <ActionPlan />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="/manager/loyalsnap"
-              element={
-                <RequireRole allowed={['manager', 'admin']}>
-                  <LoyalsnapEngagement />
                 </RequireRole>
               }
             />

@@ -208,9 +208,11 @@ export default function CampaignStatus() {
   const totalCalls       = calls.length
   const convRate         = totalCalls > 0 ? (meaningfulConvs / totalCalls) * 100 : 0
   const bookingConvRate  = meaningfulConvs > 0 ? (bookings.length / meaningfulConvs) * 100 : 0
-  const confirmedShows   = useMemo(() => bookings.filter(b => +b.has_show === 1).length, [bookings])
+  const confirmedShows   = useMemo(() => bookings.filter(b => { const v = b.has_show; return v === true || v === 1 || String(v ?? '').trim() === '1' }).length, [bookings])
   const confirmedCancels = useMemo(() => bookings.filter(b => +b.is_cancelled === 1).length, [bookings])
-  const showRate         = bookings.length > 0 ? (confirmedShows / bookings.length) * 100 : 0
+  const noShowCount      = bookings.filter(b => String(b.current_status ?? '').includes('No Show')).length
+  const resolved         = confirmedShows + noShowCount + confirmedCancels
+  const showRate         = resolved > 0 ? (confirmedShows / resolved) * 100 : 0
   const cancelRate       = bookings.length > 0 ? (confirmedCancels / bookings.length) * 100 : 0
   const upcoming         = useMemo(() => bookings.filter(b => +b.is_future === 1 && b.booking_outcome !== 'Cancelled').length, [bookings])
 

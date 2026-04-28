@@ -727,12 +727,11 @@ function NarrativeCard({ totalCalls, meaningfulConvs, convRate, bookingCount, up
               ? <>
                   Of {bookingCount} appointments booked, {cancelledCustomer} were cancelled by the lead —
                   {lastMinuteCancelPct !== null
-                    ? ` ${lastMinuteCancelPct}% of them on the day of the appointment.`
+                    ? ` ${lastMinuteCancelPct}% of them on the day of the session.`
                     : '.'
                   }
-                  {' '}These leads already know StretchLab — they signed up, showed real interest, then went quiet.
-                  {' '}The window between booking and showing up is where re-engagement campaigns are won or lost.
-                  {' '}Closing that final-hour gap is the primary lever for Month 3.
+                  {' '}These leads already know StretchLab — they signed up, showed genuine interest, then went quiet.
+                  {' '}Phiwe&apos;s confirmation follow-up in the 24–48 hours before each session is the most effective point to convert a booked appointment into an attended one.
                 </>
               : <>
                   These leads already know StretchLab. They signed up, showed genuine interest, and went quiet for months.
@@ -741,8 +740,8 @@ function NarrativeCard({ totalCalls, meaningfulConvs, convRate, bookingCount, up
             }
             {!isClientView && bookingCount > 0 && cancels > 0 && (
               <>
-                {' '}The expected range for dormant lead reactivation is {COLD_OUTREACH_BENCHMARKS.cancel_rate.min}–{COLD_OUTREACH_BENCHMARKS.cancel_rate.max}%.
-                {cancelAboveRange ? ' Reducing that rate is the primary lever for Month 3.' : ' Maintaining it as the pipeline builds into Month 3 is the target.'}
+                {' '}The expected cancel range for dormant lead reactivation is {COLD_OUTREACH_BENCHMARKS.cancel_rate.min}–{COLD_OUTREACH_BENCHMARKS.cancel_rate.max}%.
+                {cancelAboveRange ? ' Bringing the rate into range through pre-session confirmation is the next priority.' : ' Maintaining it as the Month 3 pipeline builds is the target.'}
               </>
             )}
           </p>
@@ -1303,10 +1302,6 @@ export default function CampaignPulse() {
         }
       </p>
 
-      {/* Manager insight — cancellation root causes */}
-      {isManagerView && (
-        <ManagerCancellationInsight rootCauses={rootCause} />
-      )}
 
       {/* ── Drill: Connect Rate — By Day & Hour ── */}
       {activeKpi === 'connect' && (

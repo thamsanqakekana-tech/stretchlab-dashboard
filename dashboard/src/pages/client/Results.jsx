@@ -629,7 +629,7 @@ function ResponsibilityModel({ studioOpsStudios, isManagerView }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {[
               { title: 'Studio scheduling',          desc: 'Availability at the booked time is a studio decision. Unavailability = admin cancel.' },
-              { title: 'Session recording',         desc: 'Accurate session logging in the studio system drives every number you see here.' },
+              { title: 'Session recording',         desc: 'Accurate session logging in the studio system drives every number Execo reports to StretchLab.' },
               { title: 'Intro session experience',  desc: 'What the lead walks into determines whether they become a member.' },
               { title: 'Membership conversion',     desc: 'Turning attended sessions into paying members happens inside the studio.' },
             ].map(item => (
@@ -743,7 +743,7 @@ export default function Results() {
           Studio Performance
         </h1>
         <p style={{ fontSize: '13px', color: 'var(--muted)', margin: 0 }}>
-          How each market is converting Phiwe&apos;s booked appointments into attended sessions.
+          How each studio is converting Phiwe&apos;s booked appointments into attended sessions.
         </p>
       </div>
 

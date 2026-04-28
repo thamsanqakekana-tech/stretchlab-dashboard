@@ -360,7 +360,7 @@ function PartnershipMatrix({ bookings, calls }) {
       <Card>
         <p style={{ ...sectionLabel, color: 'var(--accent)' }}>EXECO Is Delivering</p>
         <ul style={{ margin: 0, padding: '0 0 0 16px', fontSize: '13px', color: 'var(--text-2)', lineHeight: 1.9 }}>
-          <li><strong style={{ color: 'var(--text)' }}>{totalCalls.toLocaleString()} calls</strong> made across all active markets</li>
+          <li><strong style={{ color: 'var(--text)' }}>{totalCalls.toLocaleString()} calls</strong> made across all active studios</li>
           <li>Connect rate <strong style={{ color: '#22c55e' }}>{connectRate}%</strong> — within the expected range for dormant lead re-engagement</li>
           <li><strong style={{ color: '#22c55e' }}>{bookingConvRate}%</strong> of real conversations became a booked session</li>
           <li>Phiwe follows up with every upcoming appointment to confirm attendance before the session date</li>

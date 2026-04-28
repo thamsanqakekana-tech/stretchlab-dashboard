@@ -582,8 +582,6 @@ export default function ActionPlan() {
             <option value="all">All owners</option>
             <option value="phiwe">Phiwe</option>
             <option value="tamryn">Tamryn</option>
-            <option value="brian">Brian</option>
-            <option value="thamsanqa">Thamsanqa</option>
             <option value="multi">Multi</option>
           </select>
         </div>

@@ -14,7 +14,6 @@ const NAV = {
     { path: '/manager/calltiming',   label: 'Call Timing',       icon: '⊡' },
     { path: '/manager/pipeline',     label: 'At-Risk Pipeline',  icon: '◈' },
     { path: '/manager/actionplan',   label: 'Action Plan',       icon: '✦' },
-    { path: '/manager/loyalsnap',    label: 'LoyalSnap SMS',     icon: '◷' },
   ],
   admin: [
     { path: '/admin/drift',          label: 'Data Drift',     icon: '◎' },
