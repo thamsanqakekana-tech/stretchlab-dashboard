@@ -51,7 +51,7 @@ function buildStudioStats(bookings, cancellations = []) {
 
     const rest              = bks.filter(b => !attendedSet.has(b.booking_id))
     // Only is_past=1 rows count toward resolved buckets
-    const isPastRest        = rest.filter(b => String(b.is_past ?? '').trim() === '1')
+    const isPastRest        = rest.filter(b => { const v = b.is_past; return v === true || v === 1 || String(v ?? '').trim() === '1' })
     const noShowBks         = isPastRest.filter(b => getStatus(b).includes('No Show'))
     const cancelledCustBks  = isPastRest.filter(b =>
       getStatus(b).includes('Cancelled Within Policy') ||

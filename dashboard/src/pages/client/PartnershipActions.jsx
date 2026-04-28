@@ -18,45 +18,54 @@ const sectionLabel = {
   letterSpacing: '0.08em', margin: '0 0 12px',
 }
 
-// ─── Month 3 Progress Bar ─────────────────────────────────────────────────────
+// ─── SOW Progress Bar ─────────────────────────────────────────────────────────
 function ProgressBar({ bookings }) {
   const confirmedShows = bookings.filter(b => +b.has_show === 1).length
-  const upcoming       = bookings.filter(b => +b.is_future === 1 && b.booking_outcome !== 'Cancelled').length
-  const resolved       = bookings.filter(b => +b.is_past === 1 && !String(b.current_status || '').includes('Rescheduled')).length
-  const showRate       = resolved > 0 ? confirmedShows / resolved : 0
-  const projected      = Math.round(upcoming * showRate)
-  const total          = confirmedShows + projected
-  const still          = Math.max(0, SOW_TARGET - total)
+  const upcoming       = bookings.filter(b => {
+    const v = b.is_future; const isFut = v === true || v === 1 || String(v ?? '').trim() === '1'
+    return isFut && !String(b.current_status || '').includes('Cancelled')
+  }).length
+  const resolved       = bookings.filter(b => {
+    const v = b.is_past; const isPast = v === true || v === 1 || String(v ?? '').trim() === '1'
+    return isPast && !String(b.current_status || '').includes('Rescheduled')
+  }).length
+  const showRate            = resolved > 0 ? confirmedShows / resolved : 0
+  const projectedFromUpcoming = Math.round(upcoming * showRate)
+  const stillToBook         = Math.max(0, SOW_TARGET - confirmedShows - upcoming)
 
-  const pctConfirmed = (confirmedShows / SOW_TARGET) * 100
-  const pctProjected = (projected / SOW_TARGET) * 100
+  const pctConfirmed = Math.min(100, (confirmedShows / SOW_TARGET) * 100)
+  const pctUpcoming  = Math.min(100 - pctConfirmed, (upcoming / SOW_TARGET) * 100)
 
   return (
     <Card style={{ marginBottom: '24px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '12px' }}>
-        <p style={{ ...sectionLabel, color: 'var(--muted)', margin: 0 }}>Month 3 SOW Progress — Target: {SOW_TARGET} kept appointments</p>
+        <p style={{ ...sectionLabel, color: 'var(--muted)', margin: 0 }}>SOW Progress — Target: {SOW_TARGET} kept appointments</p>
         <p style={{ fontSize: '11px', color: 'var(--muted)', margin: 0 }}>Deadline: May 24, 2026</p>
       </div>
       <div style={{ height: '10px', borderRadius: '6px', background: 'var(--border)', overflow: 'hidden', display: 'flex', marginBottom: '12px' }}>
         <div style={{ width: `${pctConfirmed}%`, background: '#22c55e', transition: 'width 0.4s ease' }} />
-        <div style={{ width: `${pctProjected}%`, background: '#f59e0b', transition: 'width 0.4s ease' }} />
+        <div style={{ width: `${pctUpcoming}%`, background: '#6366f1', opacity: 0.55, transition: 'width 0.4s ease' }} />
       </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', marginBottom: still > 0 ? '12px' : 0 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', marginBottom: '10px' }}>
         <span style={{ fontSize: '12px', color: 'var(--text-2)' }}>
-          <strong style={{ color: '#22c55e' }}>{confirmedShows}</strong> sessions confirmed
+          <strong style={{ color: '#22c55e' }}>{confirmedShows}</strong> sessions held
         </span>
         <span style={{ fontSize: '12px', color: 'var(--text-2)' }}>
-          <strong style={{ color: '#f59e0b' }}>{projected}</strong> projected from {upcoming} upcoming (at current {(showRate * 100).toFixed(0)}% show rate)
+          <strong style={{ color: '#6366f1' }}>{upcoming}</strong> scheduled, pending
         </span>
         <span style={{ fontSize: '12px', color: 'var(--text-2)' }}>
-          <strong style={{ color: 'var(--text)' }}>{still}</strong> still needed to reach {SOW_TARGET}
+          <strong style={{ color: 'var(--muted)' }}>{stillToBook}</strong> still to be booked
         </span>
       </div>
-      {still > 0 && (
-        <div style={{ background: 'rgba(245,158,11,0.08)', borderRadius: '8px', padding: '10px 14px', border: '1px solid rgba(245,158,11,0.2)' }}>
-          <p style={{ fontSize: '12px', color: '#f59e0b', margin: 0, lineHeight: 1.6 }}>
-            <strong>{still} more kept appointments</strong> are needed to reach the SOW target.
-            Month 3 outreach starts April 25 — maintaining the current pipeline and confirming all upcoming appointments are the two primary levers.
+      {upcoming > 0 && projectedFromUpcoming > 0 && (
+        <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '0 0 10px', lineHeight: 1.5 }}>
+          At the current {(showRate * 100).toFixed(0)}% show rate, approximately <strong>{projectedFromUpcoming}</strong> of the {upcoming} scheduled appointments are expected to hold — confirming each one before the session date is the most reliable lever for improving that outcome.
+        </p>
+      )}
+      {stillToBook > 0 && (
+        <div style={{ background: 'rgba(99,102,241,0.07)', borderRadius: '8px', padding: '10px 14px', border: '1px solid rgba(99,102,241,0.2)' }}>
+          <p style={{ fontSize: '12px', color: '#6366f1', margin: 0, lineHeight: 1.6 }}>
+            <strong>{confirmedShows} held · {upcoming} scheduled · {stillToBook} still to book</strong> — Month 3 outreach runs through May 24. Phiwe is actively calling and converting leads every day — each confirmed session and membership conversion builds toward the partnership goal.
           </p>
         </div>
       )}
@@ -75,9 +84,16 @@ function AdminDisruptionsCard({ cancellations, bookings }) {
 
   const ratioText = leadCancels.length > 0 ? `${(adminCancelled / leadCancels.length).toFixed(1)}×` : null
 
-  const hypotheticalShows   = confirmedShows + adminCancelled
-  const hypotheticalShowRate = bookings.length > 0
-    ? ((hypotheticalShows / bookings.length) * 100).toFixed(0)
+  const resolvedCount = useMemo(() => {
+    const past = bookings.filter(b => { const v = b.is_past; return v === true || v === 1 || String(v ?? '').trim() === '1' })
+    const resch = past.filter(b => String(b.current_status || '').includes('Rescheduled'))
+    return past.length - resch.length
+  }, [bookings])
+
+  const hypotheticalShows    = confirmedShows + adminCancelled
+  const hypotheticalDenom    = resolvedCount + adminCancelled
+  const hypotheticalShowRate = hypotheticalDenom > 0
+    ? ((hypotheticalShows / hypotheticalDenom) * 100).toFixed(0)
     : '0'
 
   const byStudio = useMemo(() => {
@@ -114,9 +130,9 @@ function AdminDisruptionsCard({ cancellations, bookings }) {
         <div style={{ borderRight: '1px solid var(--border)', padding: '0 20px' }}>
           <p style={{ fontSize: '10px', fontWeight: 700, color: 'var(--warn)', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 8px' }}>Impact on show rate</p>
           <p style={{ fontSize: '13px', color: 'var(--text)', lineHeight: 1.7, margin: 0 }}>
-            Without admin disruptions, show rate would be approximately{' '}
-            <strong style={{ color: '#22c55e' }}>{hypotheticalShowRate}%</strong> — above the 15% benchmark for this lead type.
-            These cancellations are the primary gap between current performance and the target show rate.
+            Without these studio-side reschedules, the show rate on lead-committed bookings would be approximately{' '}
+            <strong style={{ color: '#22c55e' }}>{hypotheticalShowRate}%</strong> — well above the benchmark for this lead type.
+            Coordinating schedule changes proactively with Execo before a session is moved is the most direct way to protect those outcomes.
           </p>
         </div>
 

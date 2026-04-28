@@ -52,7 +52,7 @@ function generateActions({ pipeline, bookings, cancellations, validationLeads, c
     : null
 
   const shows         = bookings.filter(b => b.has_show === true || b.has_show === 1 || String(b.has_show ?? '').trim() === '1')
-  const isPast        = bookings.filter(b => String(b.is_past).trim() === '1')
+  const isPast        = bookings.filter(b => { const v = b.is_past; return v === true || v === 1 || String(v ?? '').trim() === '1' })
   const rescheduled   = isPast.filter(b => String(b.current_status || '').includes('Rescheduled'))
   const resolved      = isPast.length - rescheduled.length
   const showRate      = resolved > 0 ? (shows.length / resolved) * 100 : 0

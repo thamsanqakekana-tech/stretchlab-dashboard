@@ -48,13 +48,15 @@ SYSTEM_PROMPTS = {
         "You are writing for the Execo operations manager reviewing this campaign weekly. "
         "All performance comparisons are against cold re-engagement outreach standards.\n\n"
         "Write exactly 3 paragraphs:\n"
-        "1. One-sentence verdict: the most important performance gap vs benchmark, with the exact number. Do not soften.\n"
-        "2. Root cause: break down cancellations by who (admin vs customer), when (last-minute vs advance), "
-        "and what the ramp shortfall means in sessions remaining. Name the highest-risk studio. "
-        "Include booking velocity (days first-call-to-booking) if available — slower velocity signals pipeline risk.\n"
+        "1. One-sentence ramp verdict: where the campaign sits vs SOW target, days remaining, and what pace is needed. "
+        "Lead with ramp progress (actual kept appts / 77 target), not cancel rate — the show rate is above benchmark.\n"
+        "2. What is working and what needs attention: the show rate on resolved bookings, the connect rate, "
+        "admin-initiated disruptions and their impact, and what the pipeline risk means for Month 3. "
+        "Name the highest-risk upcoming leads if available.\n"
         "3. Numbered action plan, max 3 items. Format: [Owner] — [specific action] — [expected outcome]. "
-        "Reference pipeline risk levels where relevant.\n\n"
-        "Be direct. Name gaps. No filler phrases. Max 140 words."
+        "Focus on outreach volume, pipeline confirmation, and studio coordination.\n\n"
+        "Use the CANCEL RATE (total bookings) figure from the data — not the resolved-bookings rate. "
+        "Be direct and specific. No filler phrases. Max 140 words."
     ),
 
     'admin': (
@@ -87,10 +89,12 @@ SYSTEM_PROMPTS = {
         "Hard rules:\n"
         "- Never mention: \"flexologist\", \"ClubReady\", \"confirmation follow-up\", \"pre-booking contact\", \"booking window\", \"cold outreach\"\n"
         "- Never say: \"studio-canceled\", \"studio-cancelled\", \"priority follow-up\", \"requiring priority\", \"risk\", \"pipeline risk\"\n"
+        "- Never say: \"it's on us\", \"we need to figure out\", \"we need to look into\" or any phrase that puts accountability ambiguously on 'us'\n"
+        "- Attribute accountability clearly: 'admin-scheduled cancellations' for studio side, 'Phiwe's outreach' for SDR side\n"
         "- Never use passive voice\n"
         "- Do not use management jargon: \"actionable\", \"leverage\", \"optimize\", \"streamline\"\n"
         "- Name studios by their city name only: Shreveport, Pearland, Bunker Hill — not \"StretchLab Shreveport\"\n"
-        "- Write like a partner who looked at the studio data this morning\n"
+        "- Write like a strategic business partner who reviewed the studio data this morning and has a clear view on what's working and what needs attention\n"
     ),
 }
 
@@ -175,10 +179,11 @@ def build_summary(output_dir):
     cancels_customer = int(resolved['is_cancelled_customer'].sum()) if 'is_cancelled_customer' in resolved.columns else 0
     no_shows         = int(resolved['is_no_show'].sum())            if 'is_no_show'             in resolved.columns else 0
 
-    show_rate_resolved      = round(shows            / resolved_count * 100, 1) if resolved_count else 0
-    cancel_rate_resolved    = round(cancels          / resolved_count * 100, 1) if resolved_count else 0
-    cancel_rate_customer    = round(cancels_customer / resolved_count * 100, 1) if resolved_count else 0
-    show_rate_naive         = round(shows            / total_bookings * 100, 1) if total_bookings else 0
+    show_rate_resolved      = round(shows            / resolved_count  * 100, 1) if resolved_count  else 0
+    # Cancel rate uses total bookings as denominator per CLAUDE.md — resolved denominator gives inflated misleading rate
+    cancel_rate_total       = round(cancels          / total_bookings  * 100, 1) if total_bookings  else 0
+    cancel_rate_customer    = round(cancels_customer / total_bookings  * 100, 1) if total_bookings  else 0
+    show_rate_naive         = round(shows            / total_bookings  * 100, 1) if total_bookings  else 0
 
     # Benchmark from CSV — used in summary so LLM comparisons use the correct standard
     bm_row       = benchmarks[benchmarks['metric'] == 'cancel_rate']
@@ -296,7 +301,7 @@ def build_summary(output_dir):
         f"SHOW RATE: {show_rate_resolved}% (resolved bookings only, n={resolved_count}) "
         f"| Uncorrected (total bookings): {show_rate_naive}% "
         f"| Cold re-engagement standard: 15–20%\n"
-        f"CANCEL RATE (all): {cancel_rate_resolved}% of resolved bookings "
+        f"CANCEL RATE (total bookings): {cancel_rate_total}% "
         f"| Customer-initiated only: {cancel_rate_customer}% "
         f"| Cold re-engagement benchmark: {cancel_bm}%\n"
         f"NO-SHOW RATE: {round(no_shows/resolved_count*100,1) if resolved_count else 0}%\n"

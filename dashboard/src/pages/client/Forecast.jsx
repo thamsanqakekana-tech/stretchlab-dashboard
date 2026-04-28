@@ -31,18 +31,22 @@ export default function Forecast() {
   const forecasts = data.forecast ?? []
   const ramp      = data.ramp     ?? []
 
-  // Ramp chart: merge targets + actuals
+  // Ramp chart: cumulative actuals vs cumulative targets
   const rampChart = useMemo(() => {
     const rows = []
-    ;[1,2,3].forEach(m => {
+    let runningActual = 0
+    ;[1, 2, 3].forEach(m => {
       rows.push({ month: m, type: 'Target', value: RAMP_TARGETS[m] })
-      const actual = ramp.find(r => r.month === m)?.actual_kept_appts
-      if (actual != null) rows.push({ month: m, type: 'Actual', value: actual })
+      const row = ramp.find(r => +r.month === m)
+      if (row != null) {
+        runningActual += +row.actual_kept_appts || 0
+        rows.push({ month: m, type: 'Actual', value: runningActual })
+      }
     })
     return rows
   }, [ramp])
 
-  const currentActual = ramp.find(r => r.month === 2)?.actual_kept_appts ?? 0
+  const currentActual = ramp.reduce((s, r) => s + (+r.actual_kept_appts || 0), 0)
   const m3Target      = RAMP_TARGETS[3]
   const progressPct   = Math.min(100, (currentActual / m3Target) * 100)
 

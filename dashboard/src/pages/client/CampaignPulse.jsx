@@ -528,7 +528,7 @@ function StudioStrip({ studios = [], bookings = [], isClientView = false }) {
       const cs = String(r['Current Status'] || r.current_status || '')
       st.bookings++
       const hasShow = r.has_show === true || r.has_show === 1 || String(r.has_show ?? '').trim() === '1'
-      const isPast  = String(r.is_past  ?? '') === '1'
+      const isPast  = (() => { const v = r.is_past; return v === true || v === 1 || String(v ?? '').trim() === '1' })()
       if (hasShow)                                st.shows++
       if (cs.includes('Cancelled') && !hasShow) {
         st.cancelledAll++
