@@ -1,9 +1,8 @@
 import { useState, useMemo } from 'react'
 import { useMultiData } from '../../hooks/useData.js'
 import {
-  loadBookings,
+  loadLeadFunnel,
   loadInsights,
-  loadByStudio,
   loadCancellationAnalysis,
   loadPipeline,
 } from '../../utils/dataLoader.js'
@@ -54,15 +53,19 @@ function buildStudioStats(bookings, cancellations = []) {
     attended.forEach(b => attendedSet.add(b.booking_id))
 
     const rest              = bks.filter(b => !attendedSet.has(b.booking_id))
-    // Only is_past=1 rows count toward resolved buckets
-    const isPastRest        = rest.filter(b => { const v = b.is_past; return v === true || v === 1 || String(v ?? '').trim() === '1' })
-    const noShowBks         = isPastRest.filter(b => getStatus(b).includes('No Show'))
-    const cancelledCustBks  = isPastRest.filter(b =>
+    // Cancelled status is authoritative regardless of is_past/is_future (a future-dated cancellation is still resolved)
+    const cancelledCustBks  = rest.filter(b =>
       getStatus(b).includes('Cancelled Within Policy') ||
       getStatus(b).includes('Cancelled Outside Policy')
     )
-    const cancelledAdminBks = isPastRest.filter(b => getStatus(b).includes('Cancelled By Admin'))
-    const rescheduledBks    = rest.filter(b => getStatus(b).includes('Rescheduled'))
+    const cancelledAdminBks = rest.filter(b => getStatus(b).includes('Cancelled By Admin'))
+    // No-shows still require is_past — can't no-show a future session
+    const pastNonCancelledRest = rest.filter(b => {
+      const v = b.is_past; const s = getStatus(b)
+      return (v === true || v === 1 || String(v ?? '').trim() === '1') && !s.includes('Cancelled')
+    })
+    const noShowBks         = pastNonCancelledRest.filter(b => getStatus(b).includes('No Show'))
+    const rescheduledBks    = rest.filter(b => getStatus(b).includes('Rescheduled') && !getStatus(b).includes('Cancelled'))
     const upcomingBks       = rest.filter(b => getStatus(b).includes('Open Booking'))
 
     const shows         = attended.length
@@ -163,7 +166,7 @@ function assessmentLine(s) {
   if (s.segment === 'inactive')         return 'Studio activation needed — outreach and studio coordination required'
   if (s.segment === 'activating')       return `${s.upcoming} upcoming · no resolved sessions yet`
   if (s.segment === 'small-sample')     return `${s.shows} attended · ${s.upcoming > 0 ? `${s.upcoming} upcoming` : 'resolving outcomes'}`
-  if (s.segment === 'studio-ops')       return `${s.adminCancels} studio-initiated cancels · show rate suppressed`
+  if (s.segment === 'studio-ops')       return `${s.adminCancels} studio-initiated cancels · show rate pending resolution`
   if (s.segment === 'working')          return `${s.shows} attended · ${(s.showRate * 100).toFixed(0)}% show rate`
   return `${s.shows} attended · ${s.upcoming > 0 ? `${s.upcoming} upcoming` : 'monitor conversion'}`
 }
@@ -340,6 +343,7 @@ function StudioSignalCard({ s, isManagerView, pipeline = [] }) {
         <div style={{ minWidth: '48px', textAlign: 'center' }}>
           <p style={{ fontSize: '20px', fontWeight: 800, fontFamily: 'JetBrains Mono, monospace', color: srCol, margin: 0, lineHeight: 1 }}>{srLabel}</p>
           <p style={{ fontSize: '9px', color: 'var(--muted)', margin: '2px 0 0', textTransform: 'uppercase', letterSpacing: '0.06em' }}>show rate</p>
+          <p style={{ fontSize: '8px', color: 'var(--muted)', margin: '1px 0 0', opacity: 0.7 }}>resolved only</p>
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -691,39 +695,21 @@ export default function Results() {
   const isManagerView = role === 'manager' || role === 'admin'
 
   const { data, loading } = useMultiData({
-    bookings:      loadBookings,
+    bookings:      loadLeadFunnel,
     insights:      loadInsights,
-    byStudio:      loadByStudio,
     cancellations: loadCancellationAnalysis,
     pipeline:      loadPipeline,
   })
 
   const bookings      = data.bookings      ?? []
   const insightsJson  = data.insights      ?? {}
-  const byStudio      = data.byStudio      ?? []
   const cancellations = data.cancellations ?? []
   const pipeline      = data.pipeline      ?? []
 
   const studioStats = useMemo(() => {
     if (!bookings.length) return []
-    const stats = buildStudioStats(bookings, cancellations)
-    // Add any studios from phiwe_by_studio.csv with 0 bookings (e.g. South Tulsa)
-    // These don't appear in phiwe_bookings.csv at all so buildStudioStats misses them
-    const known = new Set(stats.map(s => s.studio.toLowerCase().trim()))
-    byStudio.forEach(row => {
-      const name = String(row.studio ?? '').trim()
-      if (name && !known.has(name.toLowerCase())) {
-        stats.push({
-          studio: name, total: 0, shows: 0, noShows: 0, custCancels: 0,
-          adminCancels: 0, totalCancels: 0, rescheduled: 0, upcoming: 0,
-          resolved: 0, showRate: 0, adminCancelPct: 0, segment: 'inactive', bookings: [],
-          cancelByDay: {}, cancelByTiming: { lastMinute: 0, shortNotice: 0, advance: 0 },
-          fastBookings: 0, fastBookingCancels: 0,
-        })
-      }
-    })
-    return stats
-  }, [bookings, byStudio, cancellations])
+    return buildStudioStats(bookings, cancellations)
+  }, [bookings, cancellations])
 
   const studioOpsStudios = useMemo(
     () => studioStats.filter(s => s.segment === 'studio-ops'),

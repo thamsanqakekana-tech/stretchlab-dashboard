@@ -113,22 +113,31 @@ function generateActions({ pipeline, bookings, cancellations, validationLeads, c
     })
   }
 
-  // ── CRITICAL: Unlogged appointments ─────────────────────────────────────────
-  if (notInSystem.length > 10) {
-    const heldUnlogged = notInSystem.filter(r => String(r.held).toLowerCase() === 'yes')
-    const revenueImpact = heldUnlogged.length * INTRO_PRICE
+  // ── CRITICAL: Manual tracker ↔ ClubReady drift — always surface when any drift exists ──
+  if (notInSystem.length > 0) {
+    const heldUnlogged   = notInSystem.filter(r => String(r.held ?? '').toLowerCase() === 'yes')
+    const revenueImpact  = heldUnlogged.length * INTRO_PRICE
+    const driftLines     = notInSystem.slice(0, 8).map(r => {
+      const loc    = String(r.location ?? '').trim()
+      const note   = String(r.notes ?? '').trim()
+      const status = String(r.held ?? '').toLowerCase() === 'yes' ? 'held' : 'not held'
+      return `${r.name} (${loc}) — ${note || status}`
+    })
+    const overflowNote   = notInSystem.length > 8 ? `\n…and ${notInSystem.length - 8} more.` : ''
     actions.push({
-      id:        'update-crm',
-      priority:  'critical',
-      title:     `Update ${notInSystem.length} past appointments in ClubReady`,
-      owner:     'tamryn',
-      why:       `${notInSystem.length} appointments from the manual tracker are not logged in ClubReady. ${heldUnlogged.length} of these were held sessions — missing from the official show count. Data gaps here suppress the measured show rate and mis-signal campaign performance to StretchLab.`,
-      impact: {
+      id:       'update-crm',
+      priority: notInSystem.length >= 5 ? 'critical' : 'important',
+      title:    `Sync ${notInSystem.length} manual tracker record${notInSystem.length !== 1 ? 's' : ''} into ClubReady`,
+      owner:    'tamryn',
+      why:      `The manual tracker (updated live on the floor) has ${notInSystem.length} record${notInSystem.length !== 1 ? 's' : ''} not yet in ClubReady. ${heldUnlogged.length > 0 ? `${heldUnlogged.length} were held sessions — missing from the official show count. ` : ''}ClubReady is the source of truth for reporting; any gap suppresses the measured show rate and mis-signals campaign performance to StretchLab. Tamryn to review each drift on every pipeline run.\n\nDrift detail:\n${driftLines.join('\n')}${overflowNote}`,
+      impact:   {
         revenue:     revenueImpact,
-        description: `${heldUnlogged.length} held sessions unrecorded × $${INTRO_PRICE} = $${revenueImpact} in unaccounted session revenue`,
+        description: heldUnlogged.length > 0
+          ? `${heldUnlogged.length} held session${heldUnlogged.length !== 1 ? 's' : ''} unrecorded × $${INTRO_PRICE} = $${revenueImpact} in unaccounted session revenue`
+          : `${notInSystem.length} record${notInSystem.length !== 1 ? 's' : ''} need ClubReady status update`,
       },
-      deadline:  addDays(3),
-      status:    'not_started',
+      deadline: addDays(2),
+      status:   'not_started',
     })
   }
 
