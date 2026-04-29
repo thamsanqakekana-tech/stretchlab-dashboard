@@ -392,29 +392,60 @@ function SowProgressMini({ confirmedShows, upcoming, sowTarget = 77 }) {
   )
 }
 
-// ─── Conversion Funnel — 6-stage sequential with pipeline drill-down ──────────
-function ConversionFunnel({ totalCalls, meaningfulConvs, bookingCount, paidCount, heldCount, upcomingCount, pipeline = [], isClientView = false }) {
-  const [pipelineOpen, setPipelineOpen] = useState(false)
+// ─── Conversion Funnel — 6-stage sequential with per-stage drill-downs ────────
+function ConversionFunnel({ totalCalls, meaningfulConvs, bookingCount, paidCount, heldCount, upcomingCount, pipeline = [], bookings = [], validationLeads = [], isClientView = false }) {
+  const [openStage, setOpenStage] = useState(null)
 
   const stages = [
     { key: 'calls',    label: 'Calls Made',  count: totalCalls,      color: 'var(--text-2)' },
     { key: 'convs',    label: 'Connections', count: meaningfulConvs, color: 'var(--accent)' },
-    { key: 'bookings', label: 'Bookings',    count: bookingCount,    color: 'var(--text)' },
-    { key: 'paid',     label: 'Paid',        count: paidCount,       color: 'var(--status-above)' },
-    { key: 'kept',     label: 'Kept',        count: heldCount,       color: 'var(--status-above)' },
+    { key: 'bookings', label: 'Bookings',    count: bookingCount,    color: 'var(--text)',          drillable: true },
+    { key: 'paid',     label: 'Paid',        count: paidCount,       color: 'var(--status-above)',  drillable: true },
+    { key: 'kept',     label: 'Kept',        count: heldCount,       color: 'var(--status-above)',  drillable: true },
     { key: 'upcoming', label: 'Upcoming',    count: upcomingCount,   color: 'var(--status-within)', drillable: true },
   ]
 
-  const riskOrder  = { High: 0, Medium: 1, Low: 2 }
-  const sortedPipe = [...pipeline].sort((a, b) => {
-    const dA = new Date(a.booking_date), dB = new Date(b.booking_date)
-    if (dA - dB !== 0) return dA - dB
-    return (riskOrder[a.risk_level] ?? 3) - (riskOrder[b.risk_level] ?? 3)
-  })
-  const highRiskCount  = pipeline.filter(r => r.risk_level === 'High').length
-  const riskBadgeColor = (level) =>
-    level === 'High'   ? 'var(--accent)' :
-    level === 'Medium' ? 'var(--status-below)' : 'var(--status-above)'
+  const fmtDate = d => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'
+
+  const paidLeads     = validationLeads.filter(l => isYesVal(l.paid))
+  const keptLeads     = validationLeads.filter(l => isYesVal(l.held))
+  const highRiskCount = pipeline.filter(r => r.risk_level === 'High').length
+  const sortedPipe    = [...pipeline].sort((a, b) => new Date(a.booking_date) - new Date(b.booking_date))
+
+  const drillRows = {
+    bookings: [...bookings]
+      .sort((a, b) => new Date(a.booking_date) - new Date(b.booking_date))
+      .map(b => ({
+        name:   [b.first_name, b.last_name].filter(Boolean).join(' ') || '—',
+        studio: String(b.booking_location || '').replace('StretchLab ', ''),
+        date:   fmtDate(b.booking_date),
+      })),
+    paid: paidLeads.map(l => ({
+      name:   l.name || '—',
+      studio: l.location || '—',
+      date:   fmtDate(l.date_of_appointment),
+    })),
+    kept: keptLeads.map(l => ({
+      name:   l.name || '—',
+      studio: l.location || '—',
+      date:   fmtDate(l.date_of_appointment),
+    })),
+    upcoming: sortedPipe.map(r => ({
+      name:   [r.first_name, r.last_name].filter(Boolean).join(' ') || '—',
+      studio: String(r.booking_location || '').replace('StretchLab ', ''),
+      date:   fmtDate(r.booking_date),
+    })),
+  }
+
+  const emptyMessages = {
+    bookings: 'No bookings on record.',
+    paid:     'No paid sessions recorded.',
+    kept:     'No kept sessions recorded.',
+    upcoming: 'No upcoming sessions in the pipeline.',
+  }
+
+  const handleClick = key => setOpenStage(o => o === key ? null : key)
+  const rows = openStage ? drillRows[openStage] : []
 
   return (
     <Card style={{ marginBottom: '24px', padding: '20px 24px' }}>
@@ -425,7 +456,7 @@ function ConversionFunnel({ totalCalls, meaningfulConvs, bookingCount, paidCount
         {stages.map((stage, i) => {
           const prev = stages[i - 1]
           const rate = prev && prev.count > 0 ? (stage.count / prev.count) * 100 : null
-          const isExpanded = stage.drillable && pipelineOpen
+          const isExpanded = stage.drillable && openStage === stage.key
           return (
             <React.Fragment key={stage.key}>
               {i > 0 && (
@@ -439,7 +470,7 @@ function ConversionFunnel({ totalCalls, meaningfulConvs, bookingCount, paidCount
                 </div>
               )}
               <div
-                onClick={stage.drillable ? () => setPipelineOpen(o => !o) : undefined}
+                onClick={stage.drillable ? () => handleClick(stage.key) : undefined}
                 style={{
                   flex: '0 0 auto', minWidth: '96px', textAlign: 'center',
                   background: isExpanded ? `${stage.color}10` : 'var(--bg)',
@@ -455,7 +486,7 @@ function ConversionFunnel({ totalCalls, meaningfulConvs, bookingCount, paidCount
                 <p style={{ fontSize: '11px', color: 'var(--muted)', margin: 0, fontWeight: 500 }}>{stage.label}</p>
                 {stage.drillable && (
                   <p style={{ fontSize: '9px', color: 'var(--muted)', margin: '5px 0 0', opacity: 0.7 }}>
-                    {isExpanded ? 'collapse ▲' : 'see pipeline ▼'}
+                    {isExpanded ? 'collapse ▲' : 'see list ▼'}
                   </p>
                 )}
               </div>
@@ -464,50 +495,35 @@ function ConversionFunnel({ totalCalls, meaningfulConvs, bookingCount, paidCount
         })}
       </div>
 
-      {/* Pipeline drill-down under Upcoming */}
-      {pipelineOpen && (
+      {/* Drill-down panel — shared across all drillable stages */}
+      {openStage && (
         <div style={{ marginTop: '20px', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
-          {highRiskCount > 0 && (
+          {openStage === 'upcoming' && highRiskCount > 0 && (
             <p style={{ fontSize: '12px', color: 'var(--text-2)', margin: '0 0 14px', lineHeight: 1.6 }}>
               <strong>{highRiskCount}</strong> of {pipeline.length} upcoming appointment{pipeline.length !== 1 ? 's' : ''} {highRiskCount === 1 ? 'is' : 'are'} due for confirmation contact this week.
             </p>
           )}
-          {sortedPipe.length === 0 ? (
-            <p style={{ fontSize: '13px', color: 'var(--muted)', fontStyle: 'italic' }}>No upcoming sessions in the pipeline.</p>
+          {rows.length === 0 ? (
+            <p style={{ fontSize: '13px', color: 'var(--muted)', fontStyle: 'italic' }}>{emptyMessages[openStage]}</p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              {sortedPipe.map((r, i) => {
-                const name   = [r.first_name, r.last_name].filter(Boolean).join(' ') || '—'
-                const studio = String(r.booking_location || '').replace('StretchLab ', '')
-                const date   = r.booking_date
-                  ? new Date(r.booking_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-                  : '—'
-                const rColor = riskBadgeColor(r.risk_level)
-                return (
-                  <div key={i} style={{
-                    display: 'flex', alignItems: 'center', gap: '20px',
-                    padding: '9px 0',
-                    borderBottom: i < sortedPipe.length - 1 ? '1px solid var(--border)' : 'none',
-                  }}>
-                    <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text)', minWidth: '160px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {name}
-                    </span>
-                    <span style={{ fontSize: '12px', color: 'var(--muted)', minWidth: '100px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {studio}
-                    </span>
-                    <span style={{ fontSize: '12px', color: 'var(--text-2)', fontFamily: 'JetBrains Mono, monospace', minWidth: '64px', whiteSpace: 'nowrap' }}>
-                      {date}
-                    </span>
-                    <span style={{
-                      fontSize: '9px', fontWeight: 700, padding: '2px 7px',
-                      borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '0.06em',
-                      background: `${rColor}14`, color: rColor, whiteSpace: 'nowrap',
-                    }}>
-                      {r.risk_level}
-                    </span>
-                  </div>
-                )
-              })}
+              {rows.map((row, i) => (
+                <div key={i} style={{
+                  display: 'flex', alignItems: 'center', gap: '20px',
+                  padding: '9px 0',
+                  borderBottom: i < rows.length - 1 ? '1px solid var(--border)' : 'none',
+                }}>
+                  <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text)', minWidth: '160px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {row.name}
+                  </span>
+                  <span style={{ fontSize: '12px', color: 'var(--muted)', minWidth: '100px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {row.studio}
+                  </span>
+                  <span style={{ fontSize: '12px', color: 'var(--text-2)', fontFamily: 'JetBrains Mono, monospace', whiteSpace: 'nowrap' }}>
+                    {row.date}
+                  </span>
+                </div>
+              ))}
             </div>
           )}
         </div>
@@ -1720,7 +1736,7 @@ export default function CampaignPulse() {
         <SowProgressMini confirmedShows={confirmedShows} upcoming={upcoming} sowTarget={sowTarget} />
       </Card>
 
-      {/* Conversion funnel — Upcoming node expands to pipeline drill-down */}
+      {/* Conversion funnel — Bookings/Paid/Kept/Upcoming stages are drillable */}
       <ConversionFunnel
         totalCalls={totalCalls}
         meaningfulConvs={meaningfulConvs}
@@ -1729,11 +1745,13 @@ export default function CampaignPulse() {
         heldCount={valHeldCount}
         upcomingCount={upcoming}
         pipeline={pipeline}
+        bookings={bookings}
+        validationLeads={validationLeads}
         isClientView={isClientView}
       />
 
-      {/* Narrative card */}
-      <NarrativeCard
+      {/* Narrative card — manager/admin only */}
+      {!isClientView && <NarrativeCard
         totalCalls={totalCalls}
         meaningfulConvs={meaningfulConvs}
         convRate={convRate}
@@ -1749,7 +1767,7 @@ export default function CampaignPulse() {
         pipeline={pipeline}
         benchmarksData={benchmarks}
         lastMinuteCancelPct={lastMinuteCancelPct}
-      />
+      />}
 
       {/* Show gaps — manager/admin only */}
       {!isClientView && (() => {
