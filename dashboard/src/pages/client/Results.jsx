@@ -19,10 +19,10 @@ const SEGMENT_LABEL = {
   'needs-attention': 'Needs attention',
   'studio-ops':      'Studio ops',
   activating:        'Activating',
-  inactive:          'Inactive',
+  inactive:          'Needs attention',
 }
 const SEGMENT_ACCENT = {
-  inactive:          '#475569',
+  inactive:          '#94a3b8',
   activating:        '#6366f1',
   'small-sample':    '#38bdf8',
   'studio-ops':      '#f59e0b',
@@ -156,13 +156,12 @@ function OwnershipBanner() {
 
 // ─── Assessment line ──────────────────────────────────────────────────────────
 function assessmentLine(s) {
-  if (s.segment === 'inactive')         return 'Pipeline inactive'
+  if (s.segment === 'inactive')         return 'Studio activation needed — outreach and studio coordination required'
   if (s.segment === 'activating')       return `${s.upcoming} upcoming · no resolved sessions yet`
-  if (s.segment === 'small-sample')     return `${s.shows} attended · small sample`
+  if (s.segment === 'small-sample')     return `${s.shows} attended · ${s.upcoming > 0 ? `${s.upcoming} upcoming` : 'resolving outcomes'}`
   if (s.segment === 'studio-ops')       return `${s.adminCancels} studio-initiated cancels · show rate suppressed`
-  const sampleTag = s.smallSample ? ' · small sample' : ''
-  if (s.segment === 'working')          return `${s.shows} attended · ${(s.showRate * 100).toFixed(0)}% show rate${sampleTag}`
-  return `${s.shows} attended · ${s.upcoming > 0 ? `${s.upcoming} upcoming` : 'monitor conversion'}${sampleTag}`
+  if (s.segment === 'working')          return `${s.shows} attended · ${(s.showRate * 100).toFixed(0)}% show rate`
+  return `${s.shows} attended · ${s.upcoming > 0 ? `${s.upcoming} upcoming` : 'monitor conversion'}`
 }
 
 // ─── Show rate colour ─────────────────────────────────────────────────────────
@@ -173,7 +172,7 @@ function srColor(showRate, resolved) {
   return '#ef4444'
 }
 
-// ─── Studio narrative ─────────────────────────────────────────────────────────
+// ─── Studio narrative (manager view only) ────────────────────────────────────
 function studioNarrative(s) {
   const name = s.studio.replace(/^StretchLab\s+/i, '')
   const rate = s.showRate != null ? Math.round(s.showRate * 100) : 0
@@ -181,10 +180,10 @@ function studioNarrative(s) {
   let opening = ''
   if (s.segment === 'activating')
     opening = `${s.total} session${s.total !== 1 ? 's are' : ' is'} booked at ${name} — outcomes will start coming in as those appointments are held.`
-  else if (s.shows > 0 && s.resolved >= 3)
-    opening = `${name} has held ${s.shows} of ${s.resolved} booked sessions — a ${rate}% success rate.`
+  else if (s.shows > 0 && s.total >= 3)
+    opening = `${name} has held ${s.shows} of ${s.total} bookings — a ${rate}% show rate on resolved sessions.`
   else if (s.shows > 0)
-    opening = `${name} has held ${s.shows} session${s.shows !== 1 ? 's' : ''} from ${s.resolved} completed appointment${s.resolved !== 1 ? 's' : ''}.`
+    opening = `${name} has held ${s.shows} session${s.shows !== 1 ? 's' : ''} from ${s.total} booking${s.total !== 1 ? 's' : ''}.`
   else if (s.resolved >= 2)
     opening = `${s.resolved} sessions at ${name} have passed their date — none were held.`
   else
@@ -196,7 +195,7 @@ function studioNarrative(s) {
   else if (s.adminCancels > 0 && s.adminCancels >= s.custCancels)
     pattern = `The cancellations are split between leads and the studio — there is room to improve on both sides.`
   else if (s.shows > 0 && s.custCancels > 0)
-    pattern = `${s.custCancels} lead${s.custCancels !== 1 ? 's' : ''} cancelled after booking. These are re-engaged contacts who committed and then changed their mind — each one is worth a follow-up.`
+    pattern = `${s.custCancels} lead${s.custCancels !== 1 ? 's' : ''} cancelled after booking.`
   else if (s.shows > 0 && s.adminCancels === 0)
     pattern = `Every session that held here did so cleanly — dormant leads who came back and showed up.`
   else if (s.upcoming > 0)
@@ -259,17 +258,23 @@ function SnapshotStrip({ stats }) {
     }),
     { total: 0, shows: 0, upcoming: 0, cancels: 0 }
   )
-  const activeStudios = stats.filter(s => s.total > 0).length
+  const studiosWithBookings = stats.filter(s => s.total > 0).length
+  const tiles = [
+    {
+      label: 'Booking locations',
+      value: `${studiosWithBookings}/${stats.length}`,
+      color: 'var(--accent)',
+      tooltip: 'Studios that have at least one booked appointment. Does not reflect current SDR outreach scope.',
+    },
+    { label: 'Total bookings',    value: totals.total,    color: 'var(--text)',           tooltip: 'All appointments booked by Phiwe across every studio.' },
+    { label: 'Sessions attended', value: totals.shows,    color: 'var(--status-above)',   tooltip: 'Appointments confirmed attended via session records.' },
+    { label: 'Upcoming',          value: totals.upcoming, color: 'var(--status-within)',  tooltip: 'Booked appointments still to come — outcomes pending.' },
+    { label: 'Total cancelled',   value: totals.cancels,  color: 'var(--status-below)',   tooltip: 'Lead-initiated and studio-initiated cancellations combined.' },
+  ]
   return (
     <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
-      {[
-        { label: 'Studios active',    value: `${activeStudios}/${stats.length}`, color: 'var(--accent)' },
-        { label: 'Total bookings',    value: totals.total,                        color: 'var(--text)'   },
-        { label: 'Sessions attended', value: totals.shows,                        color: '#22c55e'       },
-        { label: 'Upcoming',          value: totals.upcoming,                     color: '#6366f1'       },
-        { label: 'Total cancelled',   value: totals.cancels,                      color: '#ef4444'       },
-      ].map(({ label, value, color }) => (
-        <Card key={label} style={{ flex: 1, padding: '14px 18px' }}>
+      {tiles.map(({ label, value, color, tooltip }) => (
+        <Card key={label} style={{ flex: 1, padding: '14px 18px' }} title={tooltip}>
           <p style={{ fontSize: '10px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 6px' }}>{label}</p>
           <p style={{ fontSize: '24px', fontWeight: 800, fontFamily: 'JetBrains Mono, monospace', color, margin: 0 }}>{value}</p>
         </Card>
@@ -288,6 +293,8 @@ function StudioSignalCard({ s, isManagerView, pipeline = [] }) {
   const accent   = SEGMENT_ACCENT[s.segment] ?? 'var(--accent)'
   const srCol    = srColor(s.showRate, s.resolved)
   const srLabel  = s.resolved === 0 ? '—' : `${(s.showRate * 100).toFixed(0)}%`
+  // Badge label: rename 'inactive' → 'needs attention', hide 'small-sample' badge
+  const badgeText = s.segment === 'inactive' ? 'needs attention' : s.segment.replace('-', ' ')
 
   const studioPipeline = useMemo(() => {
     const sloc = s.studio.toLowerCase().replace(/^stretchlab\s+/i, '').trim()
@@ -334,12 +341,12 @@ function StudioSignalCard({ s, isManagerView, pipeline = [] }) {
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
             <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text)', margin: 0 }}>{name}</p>
-            {!(s.segment === 'studio-ops' && !isManagerView) && (
+            {s.segment !== 'small-sample' && !(s.segment === 'studio-ops' && !isManagerView) && (
               <span style={{
                 fontSize: '9px', fontWeight: 700, color: accent,
                 background: `${accent}18`, padding: '1px 6px', borderRadius: '3px',
                 textTransform: 'uppercase', letterSpacing: '0.06em', flexShrink: 0,
-              }}>{s.segment.replace('-', ' ')}</span>
+              }}>{badgeText}</span>
             )}
           </div>
           <p style={{
@@ -364,10 +371,12 @@ function StudioSignalCard({ s, isManagerView, pipeline = [] }) {
       {open && (
         <div style={{ borderTop: '1px solid var(--border)', padding: '14px 18px 18px' }}>
 
-          {/* Narrative paragraph */}
-          <p style={{ fontSize: '13px', color: 'var(--muted)', lineHeight: 1.6, margin: '0 0 14px' }}>
-            {studioNarrative(s)}
-          </p>
+          {/* Narrative paragraph — manager/admin only */}
+          {isManagerView && (
+            <p style={{ fontSize: '13px', color: 'var(--muted)', lineHeight: 1.6, margin: '0 0 14px' }}>
+              {studioNarrative(s)}
+            </p>
+          )}
 
           {/* Tab bar */}
           <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
@@ -385,26 +394,37 @@ function StudioSignalCard({ s, isManagerView, pipeline = [] }) {
             ))}
           </div>
 
-          {tab === 'breakdown' && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '10px' }}>
-              {[
-                { label: 'Attended',         value: s.shows,        color: '#22c55e' },
-                { label: 'Upcoming',          value: s.upcoming,     color: '#6366f1' },
-                { label: 'Lead-cancelled',    value: s.custCancels,  color: '#ef4444' },
-                { label: 'Studio-cancelled',  value: s.adminCancels, color: '#f59e0b' },
-                { label: 'No-show',           value: s.noShows,      color: '#64748b' },
-                { label: 'Rescheduled',       value: s.rescheduled,  color: '#38bdf8' },
-              ].map(item => (
-                <div key={item.label} style={{
-                  background: 'var(--bg)', borderRadius: '8px', padding: '10px 12px',
-                  border: `1px solid ${item.color}22`,
-                }}>
-                  <p style={{ fontSize: '20px', fontWeight: 800, fontFamily: 'JetBrains Mono, monospace', color: item.value > 0 ? item.color : 'var(--muted)', margin: '0 0 2px' }}>{item.value}</p>
-                  <p style={{ fontSize: '10px', color: 'var(--muted)', margin: 0, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{item.label}</p>
-                </div>
-              ))}
-            </div>
-          )}
+          {tab === 'breakdown' && (() => {
+            const breakdownItems = isManagerView
+              ? [
+                  { label: 'Attended',        value: s.shows,                        color: 'var(--status-above)' },
+                  { label: 'Upcoming',         value: s.upcoming,                     color: 'var(--status-within)' },
+                  { label: 'Lead-cancelled',   value: s.custCancels,                  color: '#ef4444' },
+                  { label: 'Studio-cancelled', value: s.adminCancels,                 color: '#f59e0b' },
+                  { label: 'No-show',          value: s.noShows,                      color: '#64748b' },
+                  { label: 'Rescheduled',      value: s.rescheduled,                  color: '#38bdf8' },
+                ]
+              : [
+                  { label: 'Attended',         value: s.shows,                        color: 'var(--status-above)' },
+                  { label: 'Upcoming',          value: s.upcoming,                    color: 'var(--status-within)' },
+                  { label: 'Cancelled',         value: s.custCancels + s.adminCancels, color: 'var(--status-below)' },
+                  { label: 'No-show',           value: s.noShows,                     color: '#64748b' },
+                  { label: 'Rescheduled',       value: s.rescheduled,                 color: '#38bdf8' },
+                ]
+            return (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '10px' }}>
+                {breakdownItems.map(item => (
+                  <div key={item.label} style={{
+                    background: 'var(--bg)', borderRadius: '8px', padding: '10px 12px',
+                    border: `1px solid ${item.color}22`,
+                  }}>
+                    <p style={{ fontSize: '20px', fontWeight: 800, fontFamily: 'JetBrains Mono, monospace', color: item.value > 0 ? item.color : 'var(--muted)', margin: '0 0 2px' }}>{item.value}</p>
+                    <p style={{ fontSize: '10px', color: 'var(--muted)', margin: 0, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{item.label}</p>
+                  </div>
+                ))}
+              </div>
+            )
+          })()}
 
           {tab === 'appointments' && (
             <>
@@ -569,7 +589,7 @@ function StudioSignalCard({ s, isManagerView, pipeline = [] }) {
                   const days    = +r.days_until
                   const isToday = days === 0
                   const risk    = String(r.risk_level ?? '').toLowerCase()
-                  const urgencyColor = isToday ? '#ef4444' : risk === 'high' ? '#f59e0b' : 'var(--border)'
+                  const urgencyColor = isToday ? '#ef4444' : risk === 'high' ? '#f59e0b' : 'var(--info)'
                   return (
                     <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', background: 'var(--bg)', borderRadius: '6px', border: `1px solid ${urgencyColor}` }}>
                       {isToday && (
@@ -747,8 +767,8 @@ export default function Results() {
         </p>
       </div>
 
-      <OwnershipBanner />
-      <InsightBlock insight={studioInsight} loading={false} error={null} />
+      {isManagerView && <OwnershipBanner />}
+      {isManagerView && <InsightBlock insight={studioInsight} loading={false} error={null} />}
 
       <SnapshotStrip stats={studioStats} />
 
@@ -772,7 +792,7 @@ export default function Results() {
         )
       })}
 
-      <ResponsibilityModel studioOpsStudios={studioOpsStudios} isManagerView={isManagerView} />
+      {isManagerView && <ResponsibilityModel studioOpsStudios={studioOpsStudios} isManagerView={isManagerView} />}
 
     </div>
   )
