@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-04-28T17:03:22.121962",
+  "generated_at": "2026-04-29T12:14:53.472656",
   "system_metrics": {
-    "total_bookings": 58,
-    "shows": 15,
-    "cancellations": 37,
+    "total_bookings": 61,
+    "shows": 16,
+    "cancellations": 38,
     "no_shows": 0
   },
   "manual_metrics": {
@@ -12,14 +12,14 @@
     "month_2": 27
   },
   "drift": {
-    "booking_drift_pct": 1.8,
-    "gap_bookings": -1,
+    "booking_drift_pct": 7.0,
+    "gap_bookings": -4,
     "gap_direction": "system_has_more"
   },
   "status": "investigate",
   "show_gaps": {
     "tracker_held_count": 14,
-    "pipeline_shows": 15,
+    "pipeline_shows": 16,
     "gap_count": 2,
     "gap_leads": [
       {

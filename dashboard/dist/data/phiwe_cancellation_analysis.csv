@@ -1,8 +1,8 @@
 booking_id,first_name,last_name,booking_location,cancelled_by,cancellation_timing,days_before_appointment,booking_window_category,booking_window_days,booking_day_of_week,booking_date,current_status
 730056719,Askel,Matre,StretchLab Bellaire,Customer,Last Minute (<24hr),0,<7 days,0.0,Friday,2026-03-06,Cancelled Within Policy Rules - No session credit lost
 731303867,Euronda,Jefferson,StretchLab Shreveport,Customer,Last Minute (<24hr),0,<7 days,0.0,Tuesday,2026-03-10,Cancelled Within Policy Rules - No session credit lost
-727567342,Juan,Bryant,StretchLab Shreveport,Customer,Last Minute (<24hr),0,<7 days,0.0,Tuesday,2026-03-10,Cancelled Within Policy Rules - No session credit lost
 727567010,Tamara,Bryant,StretchLab Shreveport,Customer,Last Minute (<24hr),0,<7 days,0.0,Tuesday,2026-03-10,Cancelled Within Policy Rules - No session credit lost
+727567342,Juan,Bryant,StretchLab Shreveport,Customer,Last Minute (<24hr),0,<7 days,0.0,Tuesday,2026-03-10,Cancelled Within Policy Rules - No session credit lost
 731669864,Caltoniavanta,Tippins,StretchLab Shreveport,Customer,Last Minute (<24hr),0,<7 days,0.0,Tuesday,2026-03-10,Cancelled Outside Policy Rules - Session Lost
 731251306,Felicia,Jewitt,StretchLab Shreveport,Admin,Short Notice (1-7 days),2,<7 days,2.0,Saturday,2026-03-14,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
 731651951,Rochelle,Hargrove,StretchLab Shreveport,Customer,Short Notice (1-7 days),2,<7 days,2.0,Saturday,2026-03-14,Cancelled Within Policy Rules - No session credit lost
@@ -35,4 +35,5 @@ booking_id,first_name,last_name,booking_location,cancelled_by,cancellation_timin
 749325255,Cortez,Cortez,StretchLab Heights,Customer,Short Notice (1-7 days),1,<7 days,-1.0,Friday,2026-04-24,Cancelled Outside Policy Rules - Session Lost
 738898309,Rochelle,Ashe,StretchLab Bunker Hill,Customer,Short Notice (1-7 days),1,<7 days,-1.0,Monday,2026-04-27,Cancelled Outside Policy Rules - Session Lost
 745417419,Jacorian,Oes,StretchLab Shreveport,Customer,Short Notice (1-7 days),1,<7 days,-1.0,Monday,2026-04-27,Cancelled Outside Policy Rules - Session Lost
+749290964,Jorge,Miranda,StretchLab Heights,Admin,Last Minute (<24hr),0,<7 days,0.0,Wednesday,2026-04-29,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
 738174359,Rafael,Smith,StretchLab Heights,Admin,Last Minute (<24hr),0,<7 days,0.0,Tuesday,2026-03-31,Cancelled By Admin - Not Customer Fault - No Session Credit Lost

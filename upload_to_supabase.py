@@ -14,10 +14,17 @@ import math
 import pandas as pd
 from pathlib import Path
 from supabase import create_client, Client
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # ─── Config ───────────────────────────────────────────────────────────────────
 SUPABASE_URL     = "https://txpevcdoyjemswzrmzqa.supabase.co"
-SUPABASE_KEY     = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR4cGV2Y2RveWplbXN3enJtenFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyODQ0NzMsImV4cCI6MjA5Mjg2MDQ3M30.aX2mqMnBiVhAC7UwE-6BdF3bImaHgXP1d90rMi1Gk5I"
+# Use service role key (bypasses RLS for pipeline uploads) — falls back to anon
+SUPABASE_KEY     = os.environ.get(
+    "SUPABASE_SERVICE_KEY",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR4cGV2Y2RveWplbXN3enJtenFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyODQ0NzMsImV4cCI6MjA5Mjg2MDQ3M30.aX2mqMnBiVhAC7UwE-6BdF3bImaHgXP1d90rMi1Gk5I"
+)
 DATA_DIR         = Path(__file__).parent / "dashboard/public/data"
 SQL_OUTPUT       = Path(__file__).parent / "setup_supabase.sql"
 BATCH_SIZE       = 1000
