@@ -37,7 +37,7 @@ function bm(benchmarks, metricKey) {
 }
 
 // ─── SOW Progress Bar (inline, matches PartnershipActions pattern) ─────────────
-function SowProgressBar({ confirmedShows, upcoming, showRate }) {
+function SowProgressBar({ confirmedShows, upcoming, showRate, deadline }) {
   const projectedFromUpcoming = Math.round(upcoming * (showRate / 100))
   const remaining             = Math.max(0, SOW_TARGET - confirmedShows - projectedFromUpcoming)
   const pctConfirmed  = (confirmedShows / SOW_TARGET) * 100
@@ -49,7 +49,7 @@ function SowProgressBar({ confirmedShows, upcoming, showRate }) {
         <p style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 600, margin: 0 }}>
           {confirmedShows} confirmed · {upcoming} upcoming · {remaining} still needed
         </p>
-        <p style={{ fontSize: '12px', color: 'var(--muted)', margin: 0 }}>Deadline: May 24, 2026</p>
+        <p style={{ fontSize: '12px', color: 'var(--muted)', margin: 0 }}>Deadline: {deadline}</p>
       </div>
       <div style={{ height: '10px', borderRadius: '6px', background: 'var(--border)', overflow: 'hidden', display: 'flex', marginBottom: '12px' }}>
         <div style={{ width: `${pctConfirmed}%`, background: '#22c55e', transition: 'width 0.4s ease' }} />
@@ -77,7 +77,7 @@ function SowProgressBar({ confirmedShows, upcoming, showRate }) {
 function CampaignHealthScore({ convRate, bookingConvRate, showRate, adminRate }) {
   const normalize = (val, min, max) => Math.min(100, Math.max(0, ((val - min) / (max - min)) * 100))
   const convScore    = normalize(convRate, 0, 18)
-  const bookingScore = normalize(bookingConvRate, 0, 5)
+  const bookingScore = normalize(bookingConvRate, 0, COLD_OUTREACH_BENCHMARKS.booking_rate.max)
   const showScore    = normalize(showRate, 0, 15)
   const adminScore   = Math.max(0, 100 - normalize(adminRate * 100, 0, 30))
   const score        = Math.round(convScore * 0.20 + bookingScore * 0.30 + showScore * 0.30 + adminScore * 0.20)
@@ -127,11 +127,7 @@ function CampaignHealthScore({ convRate, bookingConvRate, showRate, adminRate })
 function MonthComparison({ ramp = [], upcoming = 0 }) {
   if (!ramp.length) return null
 
-  const months = [
-    { num: 1, label: 'Month 1', dateRange: 'Feb 24 – Mar 24', target: 30 },
-    { num: 2, label: 'Month 2', dateRange: 'Mar 25 – Apr 24', target: 50 },
-    { num: 3, label: 'Month 3', dateRange: 'Apr 25 – May 24', target: 77 },
-  ]
+  const fmt = s => new Date(s + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 
   return (
     <Card style={{ marginBottom: '24px' }}>
@@ -139,33 +135,34 @@ function MonthComparison({ ramp = [], upcoming = 0 }) {
         Month-over-Month — kept sessions vs target
       </p>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 0 }}>
-        {months.map((m, i) => {
-          const row    = ramp.find(r => +r.month === m.num)
+        {CAMPAIGN_MONTHS.map((cm, i) => {
+          const row    = ramp.find(r => +r.month === cm.num)
           const actual = row ? +row.actual_kept_appts : 0
-          const pct    = m.target > 0 ? Math.min((actual / m.target) * 100, 100) : 0
-          const isM3   = m.num === 3
-          const isLast = i === months.length - 1
+          const pct    = cm.target > 0 ? Math.min((actual / cm.target) * 100, 100) : 0
+          const isM3   = cm.num === 3
+          const isLast = i === CAMPAIGN_MONTHS.length - 1
           const color  = pct >= 60 ? '#22c55e' : pct >= 30 ? '#f59e0b' : 'var(--muted)'
+          const dateRange = `${fmt(cm.start)} – ${fmt(cm.end)}`
 
           return (
-            <div key={m.num} style={{
+            <div key={cm.num} style={{
               borderRight: !isLast ? '1px solid var(--border)' : 'none',
               paddingRight: !isLast ? '20px' : '0',
               paddingLeft: i > 0 ? '20px' : '0',
             }}>
               <p style={{ fontSize: '10px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 6px' }}>
-                {m.label}
+                {cm.label}
                 {isM3 && <span style={{ marginLeft: '6px', color: 'var(--accent)', fontSize: '9px' }}>Active</span>}
               </p>
               <p style={{ fontSize: '28px', fontWeight: 800, fontFamily: 'JetBrains Mono, monospace', color, margin: '0 0 2px', lineHeight: 1 }}>
                 {actual}
-                <span style={{ fontSize: '14px', color: 'var(--muted)', fontWeight: 400 }}> / {m.target}</span>
+                <span style={{ fontSize: '14px', color: 'var(--muted)', fontWeight: 400 }}> / {cm.target}</span>
               </p>
               <div style={{ height: '4px', borderRadius: '3px', background: 'var(--border)', overflow: 'hidden', margin: '8px 0' }}>
                 <div style={{ height: '100%', width: `${pct}%`, background: color, transition: 'width 0.4s ease' }} />
               </div>
               <p style={{ fontSize: '11px', color: 'var(--muted)', margin: 0 }}>
-                {m.dateRange} · {pct.toFixed(0)}% of target
+                {dateRange} · {pct.toFixed(0)}% of target
                 {isM3 && upcoming > 0 && ` · ${upcoming} upcoming`}
               </p>
             </div>
@@ -208,7 +205,7 @@ export default function CampaignStatus() {
   const meaningfulConvs  = useMemo(() => calls.filter(c => parseFloat(c.live_talk_min || 0) >= 0.5).length, [calls])
   const totalCalls       = calls.length
   const convRate         = totalCalls > 0 ? (meaningfulConvs / totalCalls) * 100 : 0
-  const bookingConvRate  = meaningfulConvs > 0 ? (bookings.length / meaningfulConvs) * 100 : 0
+  const bookingConvRate  = totalCalls > 0 ? (bookings.length / totalCalls) * 100 : 0
   const confirmedShows   = useMemo(() => bookings.filter(b => { const v = b.has_show; return v === true || v === 1 || String(v ?? '').trim() === '1' }).length, [bookings])
   const cancelledCustomer = useMemo(() => bookings.filter(b => { const s = String(b.current_status || ''); return s.includes('Cancelled Within Policy') || s.includes('Cancelled Outside Policy') }).length, [bookings])
   const cancelledAdminCs  = useMemo(() => bookings.filter(b => String(b.current_status || '').includes('Cancelled By Admin')).length, [bookings])
@@ -237,9 +234,15 @@ export default function CampaignStatus() {
   const cancelRangeLabel = cancelRate <= COLD_OUTREACH_BENCHMARKS.cancel_rate.max
     ? 'within cold range'
     : 'above cold range — monitor'
-  const showRangeLabel = showRate >= COLD_OUTREACH_BENCHMARKS.show_rate.max
+  const showRangeLabel = showRatePct >= COLD_OUTREACH_BENCHMARKS.show_rate.max
     ? 'above cold range'
-    : showRate >= COLD_OUTREACH_BENCHMARKS.show_rate.min
+    : showRatePct >= COLD_OUTREACH_BENCHMARKS.show_rate.min
+    ? 'within cold range'
+    : 'below cold range'
+
+  const bookingRangeLabel = bookingConvRate >= COLD_OUTREACH_BENCHMARKS.booking_rate.max
+    ? 'above cold range'
+    : bookingConvRate >= COLD_OUTREACH_BENCHMARKS.booking_rate.min
     ? 'within cold range'
     : 'below cold range'
 
@@ -251,8 +254,8 @@ export default function CampaignStatus() {
     if (loading) return ''
     return `Campaign manager status — internal Execo view.
 Conversation rate: ${convRate.toFixed(1)}% (cold outreach benchmark 10–18% — ABOVE ceiling).
-Booking conversion: ${bookingConvRate.toFixed(1)}% (cold outreach benchmark 2–5% — ABOVE ceiling).
-Show rate: ${showRate.toFixed(1)}% (cold outreach benchmark 8–15% — ${showRangeLabel.toUpperCase()}).
+Booking conversion: ${bookingConvRate.toFixed(1)}% (bookings÷total calls; cold outreach benchmark ${COLD_OUTREACH_BENCHMARKS.booking_rate.min}–${COLD_OUTREACH_BENCHMARKS.booking_rate.max}% — ${bookingRangeLabel.toUpperCase()}).
+Show rate: ${showRatePct.toFixed(1)}% (pipeline-authoritative; cold outreach benchmark ${COLD_OUTREACH_BENCHMARKS.show_rate.min}–${COLD_OUTREACH_BENCHMARKS.show_rate.max}% — ${showRangeLabel.toUpperCase()}).
 Cancel rate: ${cancelRate.toFixed(1)}% (cold outreach benchmark 20–35% — ${cancelRangeLabel.toUpperCase()}).
 Total calls: ${totalCalls.toLocaleString()}. Meaningful conversations: ${meaningfulConvs.toLocaleString()}.
 Bookings: ${bookings.length}. Confirmed shows: ${confirmedShows}. Upcoming: ${upcoming}.
@@ -262,7 +265,7 @@ Churn risk: ${churnRisk}.
 Booking drift vs manual tracker: ${driftPct}%.
 Month 3 SOW target: ${RAMP_TARGETS[3]} kept appointments by May 24.
 Write the manager-facing campaign status insight. Be direct. Acknowledge what EXECO controls (conversation, booking, show rate — all above/within cold benchmark). Identify what StretchLab must fix (admin disruptions, ClubReady logging). State Month 3 path.`
-  }, [loading, convRate, bookingConvRate, showRate, cancelRate, totalCalls, meaningfulConvs, bookings.length, confirmedShows, upcoming, churnRisk, driftPct, adminCancelled, customerCancelled, showRangeLabel, cancelRangeLabel])
+  }, [loading, convRate, bookingConvRate, showRatePct, cancelRate, totalCalls, meaningfulConvs, bookings.length, confirmedShows, upcoming, churnRisk, driftPct, adminCancelled, customerCancelled, showRangeLabel, bookingRangeLabel, cancelRangeLabel])
 
   const { insight, loading: iL, error: iE, refresh } = useInsight('manager', promptText)
 
@@ -336,13 +339,13 @@ Write the manager-facing campaign status insight. Be direct. Acknowledge what EX
           label="Booking Conversion"
           actual={bookingConvRate}
           benchmark={COLD_OUTREACH_BENCHMARKS.booking_rate.max}
-          tooltip="Real conversations → booked appointments. Cold outreach benchmark: 2–5%."
+          tooltip={`Total bookings ÷ total calls dialled. Cold outreach benchmark: ${COLD_OUTREACH_BENCHMARKS.booking_rate.min}–${COLD_OUTREACH_BENCHMARKS.booking_rate.max}%.`}
         />
         <BenchmarkBar
           label="Show Rate"
-          actual={showRate}
+          actual={showRatePct}
           benchmark={COLD_OUTREACH_BENCHMARKS.show_rate.max}
-          tooltip="Booked appointments → attended intro sessions. Cold outreach benchmark: 8–15%."
+          tooltip={`Attended ÷ resolved appointments (pipeline-authoritative). Cold outreach benchmark: ${COLD_OUTREACH_BENCHMARKS.show_rate.min}–${COLD_OUTREACH_BENCHMARKS.show_rate.max}%.`}
         />
         <BenchmarkBar
           label="Cancel Rate"
@@ -365,10 +368,10 @@ Write the manager-facing campaign status insight. Be direct. Acknowledge what EX
               Cold Outreach Standard (this campaign)
             </p>
             <ul style={{ fontSize: '12px', color: 'var(--text-2)', lineHeight: 1.9, margin: 0, padding: '0 0 0 14px' }}>
-              <li>Conversation rate: 10–18%</li>
-              <li>Booking conversion: 2–5%</li>
-              <li>Show rate: 8–15%</li>
-              <li>Cancel rate: 20–35%</li>
+              <li>Conversation rate: {COLD_OUTREACH_BENCHMARKS.connect_rate.min}–{COLD_OUTREACH_BENCHMARKS.connect_rate.max}%</li>
+              <li>Booking conversion: {COLD_OUTREACH_BENCHMARKS.booking_rate.min}–{COLD_OUTREACH_BENCHMARKS.booking_rate.max}%</li>
+              <li>Show rate: {COLD_OUTREACH_BENCHMARKS.show_rate.min}–{COLD_OUTREACH_BENCHMARKS.show_rate.max}%</li>
+              <li>Cancel rate: {COLD_OUTREACH_BENCHMARKS.cancel_rate.min}–{COLD_OUTREACH_BENCHMARKS.cancel_rate.max}%</li>
             </ul>
             <p style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '8px', lineHeight: 1.6 }}>
               Calibrated for dormant leads 6–12 months inactive. If Brian ever compares to industry norms, these are the correct benchmarks to cite.
@@ -396,8 +399,8 @@ Write the manager-facing campaign status insight. Be direct. Acknowledge what EX
             </p>
             <ul style={{ fontSize: '12px', color: 'var(--text-2)', lineHeight: 1.9, margin: 0, padding: '0 0 0 14px' }}>
               <li>Conversation rate: <strong style={{ color: '#22c55e' }}>{convRate.toFixed(1)}%</strong> — above cold ceiling</li>
-              <li>Booking conversion: <strong style={{ color: '#22c55e' }}>{bookingConvRate.toFixed(1)}%</strong> — above cold ceiling</li>
-              <li>Show rate: <strong style={{ color: 'var(--accent)' }}>{showRate.toFixed(1)}%</strong> — {showRangeLabel}</li>
+              <li>Booking conversion: <strong style={{ color: '#22c55e' }}>{bookingConvRate.toFixed(1)}%</strong> — {bookingRangeLabel}</li>
+              <li>Show rate: <strong style={{ color: 'var(--accent)' }}>{showRatePct.toFixed(1)}%</strong> — {showRangeLabel}</li>
               <li>Cancel rate: <strong style={{ color: cancelRate > COLD_OUTREACH_BENCHMARKS.cancel_rate.max ? 'var(--warn)' : 'var(--accent)' }}>{cancelRate.toFixed(1)}%</strong> — {cancelRangeLabel}</li>
             </ul>
             <p style={{ fontSize: '11px', color: cancelRate > COLD_OUTREACH_BENCHMARKS.cancel_rate.max ? 'var(--warn)' : '#22c55e', fontWeight: 600, marginTop: '8px' }}>
@@ -452,7 +455,12 @@ Write the manager-facing campaign status insight. Be direct. Acknowledge what EX
 
       {/* ── SOW Ramp Progress ─────────────────────────────────────────────── */}
       <Card title="SOW Ramp Progress · Target 77 Kept Appointments by May 24" style={{ marginBottom: '24px' }}>
-        <SowProgressBar confirmedShows={confirmedShows} upcoming={upcoming} showRate={showRate} />
+        <SowProgressBar
+          confirmedShows={confirmedShows}
+          upcoming={upcoming}
+          showRate={showRatePct}
+          deadline={new Date(CAMPAIGN_MONTHS[2].end + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+        />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginTop: '16px' }}>
           {CAMPAIGN_MONTHS.map(cm => {
             const today = new Date()
@@ -485,7 +493,7 @@ Write the manager-facing campaign status insight. Be direct. Acknowledge what EX
       <CampaignHealthScore
         convRate={convRate}
         bookingConvRate={bookingConvRate}
-        showRate={showRate}
+        showRate={showRatePct}
         adminRate={adminRate}
       />
 
@@ -539,7 +547,7 @@ Write the manager-facing campaign status insight. Be direct. Acknowledge what EX
             <ul style={{ fontSize: '12px', color: 'var(--text-2)', lineHeight: 1.9, margin: 0, padding: '0 0 0 14px' }}>
               <li>{totalCalls.toLocaleString()} calls made — campaign fully operational</li>
               <li>{convRate.toFixed(1)}% conversation rate — above cold outreach ceiling</li>
-              <li>{bookingConvRate.toFixed(1)}% booking conversion — above cold outreach ceiling</li>
+              <li>{bookingConvRate.toFixed(1)}% booking conversion — {bookingRangeLabel} of cold outreach standard</li>
               <li>{bookings.length} appointments booked from dormant leads</li>
               <li>{upcoming} upcoming appointments still in pipeline</li>
             </ul>
@@ -551,7 +559,7 @@ Write the manager-facing campaign status insight. Be direct. Acknowledge what EX
             </p>
             <ul style={{ fontSize: '12px', color: 'var(--text-2)', lineHeight: 1.9, margin: 0, padding: '0 0 0 14px' }}>
               <li>{adminCancelled} admin-initiated cancellations reducing show rate ({customerCancelled} customer-initiated)</li>
-              <li>Without admin cancels: show rate ~{bookings.length > 0 ? (((confirmedShows + adminCancelled) / bookings.length) * 100).toFixed(0) : '—'}% (vs {showRate.toFixed(1)}% current)</li>
+              <li>Without admin cancels: show rate ~{bookings.length > 0 ? (((confirmedShows + adminCancelled) / bookings.length) * 100).toFixed(0) : '—'}% (vs {showRatePct.toFixed(1)}% current)</li>
               <li>{showGap > 0 ? `${showGap} show${showGap !== 1 ? 's' : ''} differ between manual tracker and system` : 'Manual tracker and system show counts aligned'}</li>
               <li>{bookingGap > 0 ? `${bookingGap} booking gap between tracker and ClubReady` : 'Booking counts aligned between tracker and ClubReady'}</li>
             </ul>

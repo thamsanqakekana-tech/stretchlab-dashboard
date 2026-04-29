@@ -25,7 +25,8 @@ function connectColor(rate) {
 }
 
 function Heatmap({ slots }) {
-  const ref = useRef(null)
+  const ref        = useRef(null)
+  const tooltipRef = useRef(null)
 
   useEffect(() => {
     if (!ref.current || !slots?.length) return
@@ -37,7 +38,7 @@ function Heatmap({ slots }) {
     const marginTop  = 40
     const height     = DAYS.length * cellH + marginTop + 20
 
-    d3.select(ref.current).selectAll('*').remove()
+    d3.select(ref.current).selectAll('svg').remove()
 
     const svg = d3.select(ref.current)
       .append('svg')
@@ -50,6 +51,8 @@ function Heatmap({ slots }) {
 
     const idx = {}
     slots.forEach((d) => { idx[`${d.day_of_week}_${d.hour}`] = d })
+
+    const tip = d3.select(tooltipRef.current)
 
     // Day labels
     DAYS.forEach((day, di) => {
@@ -85,6 +88,7 @@ function Heatmap({ slots }) {
 
         const g = svg.append('g')
           .attr('transform', `translate(${marginLeft + hi * cellW}, ${marginTop + di * cellH})`)
+          .style('cursor', hasData ? 'default' : 'default')
 
         g.append('rect')
           .attr('width', cellW - 2)
@@ -117,11 +121,45 @@ function Heatmap({ slots }) {
             .text(`${vol}c`)
         }
 
-        g.append('title').text(
-          hasData
-            ? `${day} ${formatHour(hour)}\nConnect rate: ${Math.round(rate * 100)}%\nCalls: ${vol}`
-            : `${day} ${formatHour(hour)}\nInsufficient data (<5 calls)`
-        )
+        // Invisible hit area to ensure mouseover fires on the full cell
+        g.append('rect')
+          .attr('width', cellW - 2)
+          .attr('height', cellH - 2)
+          .attr('rx', 4)
+          .attr('fill', 'transparent')
+          .on('mouseover', (event) => {
+            tip.style('display', 'block')
+            if (hasData) {
+              tip.html(
+                `<div style="font-weight:700;font-size:12px;margin-bottom:6px;color:var(--text)">${day} · ${formatHour(hour)}</div>` +
+                `<div style="display:flex;justify-content:space-between;gap:20px;font-size:12px">` +
+                  `<span style="color:var(--muted)">Connect rate</span>` +
+                  `<span style="font-family:JetBrains Mono,monospace;font-weight:700;color:${connectColor(rate)}">${Math.round(rate * 100)}%</span>` +
+                `</div>` +
+                `<div style="display:flex;justify-content:space-between;gap:20px;font-size:12px;margin-top:4px">` +
+                  `<span style="color:var(--muted)">Calls</span>` +
+                  `<span style="font-family:JetBrains Mono,monospace;font-weight:600;color:var(--text)">${vol}</span>` +
+                `</div>` +
+                `<div style="display:flex;justify-content:space-between;gap:20px;font-size:12px;margin-top:4px">` +
+                  `<span style="color:var(--muted)">Connects</span>` +
+                  `<span style="font-family:JetBrains Mono,monospace;font-weight:600;color:var(--text)">${cell.connected}</span>` +
+                `</div>`
+              )
+            } else {
+              tip.html(
+                `<div style="font-weight:700;font-size:12px;margin-bottom:4px;color:var(--text)">${day} · ${formatHour(hour)}</div>` +
+                `<div style="font-size:11px;color:var(--muted)">Insufficient data (< 5 calls)</div>`
+              )
+            }
+          })
+          .on('mousemove', (event) => {
+            tip
+              .style('left',  (event.clientX + 14) + 'px')
+              .style('top',   (event.clientY - 10) + 'px')
+          })
+          .on('mouseout', () => {
+            tip.style('display', 'none')
+          })
       })
     })
 
@@ -153,7 +191,26 @@ function Heatmap({ slots }) {
     }
   }, [slots])
 
-  return <div ref={ref} style={{ width: '100%' }} />
+  return (
+    <div style={{ position: 'relative' }}>
+      <div ref={ref} style={{ width: '100%' }} />
+      <div
+        ref={tooltipRef}
+        style={{
+          display: 'none',
+          position: 'fixed',
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
+          borderRadius: '8px',
+          padding: '10px 14px',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+          pointerEvents: 'none',
+          zIndex: 1000,
+          minWidth: '160px',
+        }}
+      />
+    </div>
+  )
 }
 
 export default function CallTimingHeatmap() {

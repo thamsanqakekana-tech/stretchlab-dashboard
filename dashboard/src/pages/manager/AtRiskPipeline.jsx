@@ -77,6 +77,21 @@ Write manager-facing pipeline insight. State which bookings need calls today.`
         Future bookings ranked by cancellation risk — High needs action today
       </p>
 
+      {/* Risk level definitions */}
+      <div style={{
+        display: 'flex', gap: '24px', flexWrap: 'wrap',
+        fontSize: '11px', color: 'var(--muted)',
+        background: 'var(--surface)', border: '1px solid var(--border)',
+        borderRadius: '8px', padding: '10px 16px', marginBottom: '20px',
+      }}>
+        <span style={{ fontWeight: 700, color: 'var(--text)', marginRight: '4px' }}>Risk definitions:</span>
+        <span><strong style={{ color: 'var(--danger)' }}>High</strong> — ≤ 7 days out with fewer than 2 confirmation calls made</span>
+        <span style={{ color: 'var(--border)' }}>·</span>
+        <span><strong style={{ color: 'var(--warn)' }}>Medium</strong> — 8–14 days out or only 1 call on record</span>
+        <span style={{ color: 'var(--border)' }}>·</span>
+        <span><strong style={{ color: 'var(--accent)' }}>Low</strong> — 15+ days out, monitor and confirm closer to date</span>
+      </div>
+
       {/* Summary bar */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
         {(['High', 'Medium', 'Low']).map((level) => {

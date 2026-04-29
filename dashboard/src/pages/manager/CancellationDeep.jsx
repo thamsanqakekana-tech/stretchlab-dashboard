@@ -120,6 +120,21 @@ Write manager-facing deep dive. Distinguish admin-initiated disruptions from lea
         </p>
       </div>
 
+      {/* Impact level definitions */}
+      <div style={{
+        display: 'flex', gap: '24px', flexWrap: 'wrap',
+        fontSize: '11px', color: 'var(--muted)',
+        background: 'var(--surface)', border: '1px solid var(--border)',
+        borderRadius: '8px', padding: '10px 16px', marginBottom: '16px',
+      }}>
+        <span style={{ fontWeight: 700, color: 'var(--text)', marginRight: '4px' }}>Impact definitions:</span>
+        <span><strong style={{ color: 'var(--danger)' }}>High</strong> — direct process failure (no pre-appointment call made)</span>
+        <span style={{ color: 'var(--border)' }}>·</span>
+        <span><strong style={{ color: 'var(--warn)' }}>Medium</strong> — studio-side scheduling disruption (admin-initiated)</span>
+        <span style={{ color: 'var(--border)' }}>·</span>
+        <span><strong style={{ color: 'var(--muted)' }}>Low</strong> — lead-quality signal (lead went cold or wrong timing)</span>
+      </div>
+
       {/* Root cause summary */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
         {causes.map((c) => (
@@ -133,7 +148,7 @@ Write manager-facing deep dive. Distinguish admin-initiated disruptions from lea
                 ({c.percentage}%)
               </span>
             </p>
-            <p style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500, marginBottom: '6px' }}>{c.cause}</p>
+            <p title={c.action} style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500, marginBottom: '6px', cursor: 'help' }}>{c.cause}</p>
             <p style={{ fontSize: '12px', color: 'var(--accent)', fontWeight: 600 }}>Fix: {c.action}</p>
           </Card>
         ))}

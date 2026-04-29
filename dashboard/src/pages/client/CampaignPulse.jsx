@@ -330,7 +330,7 @@ function ConversionFunnel({ totalCalls, meaningfulConvs, bookingCount, confirmed
   // excluded because they haven't had an outcome yet and would dilute the rate.
   const arrows = [
     { rate: convRate,          status: benchmarkStatus('connect_rate', convRate),        note: null },
-    { rate: funnelBookingRate, status: benchmarkStatus('booking_rate', bookingConvRate), note: 'of conversations' },
+    { rate: funnelBookingRate, status: benchmarkStatus('booking_rate', bookingConvRate), note: 'of conversations (scorecard: of all calls)' },
     { rate: showRate,          status: benchmarkStatus('show_rate',    showRate),        note: `of ${resolved} outcomes` },
   ]
 
