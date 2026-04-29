@@ -1,19 +1,3 @@
-import React, { createContext, useContext, useState } from 'react'
-
-const RoleContext = createContext(null)
-
-export function RoleProvider({ children }) {
-  const [role, setRole] = useState('client')
-
-  return (
-    <RoleContext.Provider value={{ role, setRole }}>
-      {children}
-    </RoleContext.Provider>
-  )
-}
-
-export function useRole() {
-  const ctx = useContext(RoleContext)
-  if (!ctx) throw new Error('useRole must be used within RoleProvider')
-  return ctx
-}
+// Deprecated — all auth and role state is now in AuthContext.jsx
+// This shim keeps any missed import from crashing.
+export { useAuth as useRole, AuthProvider as RoleProvider } from './AuthContext.jsx'

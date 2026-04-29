@@ -1,5 +1,5 @@
 import React from 'react'
-import { useRole } from '../context/RoleContext.jsx'
+import { useAuth } from '../context/AuthContext.jsx'
 
 const META = {
   client:  { color: '#6366f1', label: 'Client View' },
@@ -8,7 +8,7 @@ const META = {
 }
 
 export default function RoleBadge() {
-  const { role } = useRole()
+  const { viewRole: role } = useAuth()
   const { color, label } = META[role] ?? META.client
   return (
     <span style={{

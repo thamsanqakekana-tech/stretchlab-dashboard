@@ -1,5 +1,5 @@
 import React from 'react'
-import { useRole } from '../context/RoleContext.jsx'
+import { useAuth } from '../context/AuthContext.jsx'
 
 const ROLE_META = {
   client:  { color: '#6366f1', label: 'AI Insight' },
@@ -8,7 +8,7 @@ const ROLE_META = {
 }
 
 export default function InsightBlock({ insight, loading, error, onRefresh, style = {} }) {
-  const { role } = useRole()
+  const { viewRole: role } = useAuth()
   const { color, label } = ROLE_META[role] ?? ROLE_META.client
 
   return (

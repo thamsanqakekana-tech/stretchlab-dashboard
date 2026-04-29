@@ -1,9 +1,9 @@
 import React from 'react'
 import { isBelowBenchmark } from '../utils/config.js'
-import { useRole } from '../context/RoleContext.jsx'
+import { useAuth } from '../context/AuthContext.jsx'
 
 export default function KpiCard({ label, value, unit = '', sub, metricKey, color, icon, accentColor }) {
-  const { role } = useRole()
+  const { viewRole: role } = useAuth()
   const warn = role !== 'client' && metricKey && isBelowBenchmark(metricKey, parseFloat(value))
 
   const topColor = accentColor ?? (warn ? 'var(--warn)' : 'var(--accent)')

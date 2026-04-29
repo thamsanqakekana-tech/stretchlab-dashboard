@@ -1,8 +1,9 @@
 import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { useRole } from './context/RoleContext.jsx'
+import { useAuth } from './context/AuthContext.jsx'
 import Sidebar from './components/Sidebar.jsx'
 import TopBar from './components/TopBar.jsx'
+import LoginPage from './pages/LoginPage.jsx'
 
 // Client pages
 import CampaignPulse from './pages/client/CampaignPulse.jsx'
@@ -23,20 +24,29 @@ import FlexologistPerformance from './pages/admin/FlexologistPerformance.jsx'
 import RawDataExplorer from './pages/admin/RawDataExplorer.jsx'
 import SystemHealth from './pages/admin/SystemHealth.jsx'
 
-function RequireRole({ allowed, children }) {
-  const { role } = useRole()
-  if (!allowed.includes(role)) {
-    return <Navigate to="/" replace />
-  }
-  return children
+function FullScreenSpinner() {
+  return (
+    <div style={{
+      height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: 'var(--bg)',
+    }}>
+      <span style={{
+        width: '20px', height: '20px',
+        border: '2px solid var(--border)', borderTopColor: 'var(--accent)',
+        borderRadius: '50%', display: 'inline-block',
+        animation: 'spin 0.7s linear infinite',
+      }} />
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  )
 }
 
-export default function App() {
-  const { role } = useRole()
+function Dashboard() {
+  const { viewRole } = useAuth()
 
   return (
     <div
-      data-role={role}
+      data-role={viewRole}
       style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: 'var(--bg)' }}
     >
       <Sidebar />
@@ -44,102 +54,32 @@ export default function App() {
         <TopBar />
         <main style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
           <Routes>
-            {/* Client routes — 4 pages */}
-            <Route path="/" element={<CampaignPulse />} />
-            <Route path="/results" element={<Results />} />
-            <Route path="/markets" element={<Navigate to="/" replace />} />
+            {/* Client routes */}
+            <Route path="/"            element={<CampaignPulse />} />
+            <Route path="/results"     element={<Results />} />
             <Route path="/partnership" element={<PartnershipActions />} />
 
-            {/* Legacy redirects — old routes preserved so existing links don't break */}
-            <Route path="/studios"         element={<Navigate to="/results"      replace />} />
-            <Route path="/outcomes"        element={<Navigate to="/results"      replace />} />
-            <Route path="/cancellations"   element={<Navigate to="/partnership"  replace />} />
-            <Route path="/forecast"        element={<Navigate to="/"             replace />} />
-            <Route path="/recommendations" element={<Navigate to="/partnership"  replace />} />
+            {/* Legacy redirects */}
+            <Route path="/markets"         element={<Navigate to="/"            replace />} />
+            <Route path="/studios"         element={<Navigate to="/results"     replace />} />
+            <Route path="/outcomes"        element={<Navigate to="/results"     replace />} />
+            <Route path="/cancellations"   element={<Navigate to="/partnership" replace />} />
+            <Route path="/forecast"        element={<Navigate to="/"            replace />} />
+            <Route path="/recommendations" element={<Navigate to="/partnership" replace />} />
 
-            {/* Manager routes */}
-            <Route
-              path="/manager/status"
-              element={
-                <RequireRole allowed={['manager', 'admin']}>
-                  <CampaignStatus />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="/manager/cancellations"
-              element={
-                <RequireRole allowed={['manager', 'admin']}>
-                  <CancellationDeep />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="/manager/calltiming"
-              element={
-                <RequireRole allowed={['manager', 'admin']}>
-                  <CallTimingHeatmap />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="/manager/pipeline"
-              element={
-                <RequireRole allowed={['manager', 'admin']}>
-                  <AtRiskPipeline />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="/manager/actionplan"
-              element={
-                <RequireRole allowed={['manager', 'admin']}>
-                  <ActionPlan />
-                </RequireRole>
-              }
-            />
+            {/* Manager routes — DB RLS enforces data access */}
+            <Route path="/manager/status"        element={<CampaignStatus />} />
+            <Route path="/manager/cancellations" element={<CancellationDeep />} />
+            <Route path="/manager/calltiming"    element={<CallTimingHeatmap />} />
+            <Route path="/manager/pipeline"      element={<AtRiskPipeline />} />
+            <Route path="/manager/actionplan"    element={<ActionPlan />} />
 
             {/* Admin routes */}
-            <Route
-              path="/admin/drift"
-              element={
-                <RequireRole allowed={['admin']}>
-                  <DataDrift />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="/admin/reconciliation"
-              element={
-                <RequireRole allowed={['admin']}>
-                  <PipelineReconciliation />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="/admin/flexologists"
-              element={
-                <RequireRole allowed={['admin']}>
-                  <FlexologistPerformance />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="/admin/explorer"
-              element={
-                <RequireRole allowed={['admin']}>
-                  <RawDataExplorer />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="/admin/health"
-              element={
-                <RequireRole allowed={['admin']}>
-                  <SystemHealth />
-                </RequireRole>
-              }
-            />
+            <Route path="/admin/drift"          element={<DataDrift />} />
+            <Route path="/admin/reconciliation" element={<PipelineReconciliation />} />
+            <Route path="/admin/flexologists"   element={<FlexologistPerformance />} />
+            <Route path="/admin/explorer"       element={<RawDataExplorer />} />
+            <Route path="/admin/health"         element={<SystemHealth />} />
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
@@ -147,4 +87,12 @@ export default function App() {
       </div>
     </div>
   )
+}
+
+export default function App() {
+  const { user, loading } = useAuth()
+
+  if (loading) return <FullScreenSpinner />
+  if (!user)   return <LoginPage />
+  return <Dashboard />
 }

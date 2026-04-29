@@ -9,7 +9,7 @@ import {
   loadCampaignHealth,
   pivotToObject,
 } from '../../utils/dataLoader.js'
-import { useRole } from '../../context/RoleContext.jsx'
+import { useAuth } from '../../context/AuthContext.jsx'
 import Card from '../../components/Card.jsx'
 import Tooltip from '../../components/Tooltip.jsx'
 
@@ -110,7 +110,7 @@ function AdminDisruptionsCard({ cancellations, bookings }) {
       .sort((a, b) => b.count - a.count)
   }, [adminCancels])
 
-  const { role } = useRole()
+  const { viewRole: role } = useAuth()
 
   if (adminCancelled === 0) return null
 

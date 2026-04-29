@@ -23,7 +23,7 @@ import {
   benchmarkColor,
   COLD_OUTREACH_BENCHMARKS,
 } from '../../utils/config.js'
-import { useRole } from '../../context/RoleContext.jsx'
+import { useAuth } from '../../context/AuthContext.jsx'
 import Card from '../../components/Card.jsx'
 import Tooltip from '../../components/Tooltip.jsx'
 import InsightBlock from '../../components/InsightBlock.jsx'
@@ -912,7 +912,7 @@ function PipelineSection({ pipeline = [], isClientView = false }) {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function CampaignPulse() {
-  const { role, setRole } = useRole()
+  const { viewRole: role, setViewRole: setRole } = useAuth()
   const isClientView  = role === 'client'
   const isManagerView = role === 'manager'
 

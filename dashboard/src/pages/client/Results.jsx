@@ -7,7 +7,7 @@ import {
   loadCancellationAnalysis,
   loadPipeline,
 } from '../../utils/dataLoader.js'
-import { useRole } from '../../context/RoleContext.jsx'
+import { useAuth } from '../../context/AuthContext.jsx'
 import Card from '../../components/Card.jsx'
 import InsightBlock from '../../components/InsightBlock.jsx'
 
@@ -664,7 +664,7 @@ function ResponsibilityModel({ studioOpsStudios, isManagerView }) {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function Results() {
-  const { role } = useRole()
+  const { viewRole: role } = useAuth()
   const isManagerView = role === 'manager' || role === 'admin'
 
   const { data, loading } = useMultiData({

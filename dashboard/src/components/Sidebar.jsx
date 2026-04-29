@@ -1,6 +1,6 @@
 import React from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { useRole } from '../context/RoleContext.jsx'
+import { useAuth } from '../context/AuthContext.jsx'
 
 const NAV = {
   client: [
@@ -9,18 +9,18 @@ const NAV = {
     { path: '/partnership', label: 'Partnership Actions', icon: '✦' },
   ],
   manager: [
-    { path: '/manager/status',       label: 'Campaign Status',   icon: '◉' },
-    { path: '/manager/cancellations',label: 'Cancellation Dive', icon: '◇' },
-    { path: '/manager/calltiming',   label: 'Call Timing',       icon: '⊡' },
-    { path: '/manager/pipeline',     label: 'At-Risk Pipeline',  icon: '◈' },
-    { path: '/manager/actionplan',   label: 'Action Plan',       icon: '✦' },
+    { path: '/manager/status',        label: 'Campaign Status',   icon: '◉' },
+    { path: '/manager/cancellations', label: 'Cancellation Dive', icon: '◇' },
+    { path: '/manager/calltiming',    label: 'Call Timing',       icon: '⊡' },
+    { path: '/manager/pipeline',      label: 'At-Risk Pipeline',  icon: '◈' },
+    { path: '/manager/actionplan',    label: 'Action Plan',       icon: '✦' },
   ],
   admin: [
-    { path: '/admin/drift',          label: 'Data Drift',     icon: '◎' },
-    { path: '/admin/reconciliation', label: 'Reconciliation', icon: '⊞' },
-    { path: '/admin/flexologists',   label: 'Flexologists',   icon: '◇' },
-    { path: '/admin/explorer',       label: 'Raw Data',       icon: '⊡' },
-    { path: '/admin/health',         label: 'System Health',  icon: '◷' },
+    { path: '/admin/drift',           label: 'Data Drift',     icon: '◎' },
+    { path: '/admin/reconciliation',  label: 'Reconciliation', icon: '⊞' },
+    { path: '/admin/flexologists',    label: 'Flexologists',   icon: '◇' },
+    { path: '/admin/explorer',        label: 'Raw Data',       icon: '⊡' },
+    { path: '/admin/health',          label: 'System Health',  icon: '◷' },
   ],
 }
 
@@ -52,7 +52,7 @@ function NavItem({ path, label, color }) {
   )
 }
 
-function Section({ sectionKey, items, color, label }) {
+function Section({ items, color, label }) {
   return (
     <div style={{ marginBottom: '24px' }}>
       <p style={{
@@ -70,7 +70,7 @@ function Section({ sectionKey, items, color, label }) {
 }
 
 export default function Sidebar() {
-  const { role } = useRole()
+  const { viewRole } = useAuth()
 
   return (
     <nav style={{
@@ -81,7 +81,7 @@ export default function Sidebar() {
       overflowY: 'auto',
       display: 'flex', flexDirection: 'column',
     }}>
-      {/* Logo mark */}
+      {/* Logo */}
       <div style={{
         padding: '4px 10px 16px',
         borderBottom: '1px solid var(--border)',
@@ -107,14 +107,14 @@ export default function Sidebar() {
         </div>
       </div>
 
-      <Section sectionKey="client" items={NAV.client}  color={SECTION_COLORS.client}  label="Client" />
+      <Section items={NAV.client}  color={SECTION_COLORS.client}  label="Client" />
 
-      {(role === 'manager' || role === 'admin') && (
-        <Section sectionKey="manager" items={NAV.manager} color={SECTION_COLORS.manager} label="Manager" />
+      {(viewRole === 'manager' || viewRole === 'admin') && (
+        <Section items={NAV.manager} color={SECTION_COLORS.manager} label="Manager" />
       )}
 
-      {role === 'admin' && (
-        <Section sectionKey="admin" items={NAV.admin} color={SECTION_COLORS.admin} label="Admin" />
+      {viewRole === 'admin' && (
+        <Section items={NAV.admin} color={SECTION_COLORS.admin} label="Admin" />
       )}
     </nav>
   )
