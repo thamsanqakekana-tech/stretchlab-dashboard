@@ -35,6 +35,12 @@ import { recordVisit, calculateDelta } from '../../utils/deltaTracking.js'
 // ─── Month 1 context line (hardcoded fallback — phiwe_insights.json has no month_1_context field) ──
 const MONTH1_CONTEXT = 'Month 1 established baseline contact patterns and refined the active lead list across studios.'
 
+// ─── Validation field normalizers ─────────────────────────────────────────────
+// Supabase stores paid/held as BOOLEAN (true/false); local CSV fallback returns
+// them as strings ("Yes"/"No"). Both forms must be handled.
+const isYesVal   = v => v === true || v === 1 || String(v ?? '').trim().toLowerCase() === 'yes'
+const isBlankVal = v => v === null || v === undefined || String(v ?? '').trim() === ''
+
 // ─── Render-time safety net: strip call-count language from root cause text ───
 function sanitiseCauseText(text) {
   if (!text) return text
@@ -144,9 +150,9 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, validation
     const rampRow    = ramp.find(r => +r.month === m.num)
 
     const monthLeads  = validationLeads.filter(l => +l.month === m.num)
-    const paidCount   = monthLeads.filter(l => String(l.paid  || '').trim().toLowerCase() === 'yes').length
-    const heldCount   = monthLeads.filter(l => String(l.held  || '').trim().toLowerCase() === 'yes').length
-    const futureLeads = monthLeads.filter(l => String(l.held  || '').trim() === '')
+    const paidCount   = monthLeads.filter(l => isYesVal(l.paid)).length
+    const heldCount   = monthLeads.filter(l => isYesVal(l.held)).length
+    const futureLeads = monthLeads.filter(l => isBlankVal(l.held))
 
     return { ...m, fillPct, isActive, isComplete, monthLeads, paidCount, heldCount, futureLeads }
   })
@@ -263,10 +269,9 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, validation
                 </thead>
                 <tbody>
                   {seg.monthLeads.map((lead, i) => {
-                    const isPaid     = String(lead.paid || '').trim().toLowerCase() === 'yes'
-                    const heldVal    = String(lead.held || '').trim().toLowerCase()
-                    const isHeld     = heldVal === 'yes'
-                    const isUpcoming = heldVal === ''
+                    const isPaid     = isYesVal(lead.paid)
+                    const isHeld     = isYesVal(lead.held)
+                    const isUpcoming = isBlankVal(lead.held)
                     const heldLabel  = isUpcoming ? 'Upcoming' : isHeld ? 'Yes' : 'No'
                     const heldColor  = isUpcoming ? 'var(--status-within)' : isHeld ? 'var(--status-above)' : 'var(--muted)'
                     return (
@@ -1004,8 +1009,8 @@ export default function CampaignPulse() {
   const upcoming           = buckets.upcoming.length
 
   // ── Validation lead counts (paid / held) across all months ──────────────────
-  const valPaidCount = validationLeads.filter(l => String(l.paid || '').trim().toLowerCase() === 'yes').length
-  const valHeldCount = validationLeads.filter(l => String(l.held || '').trim().toLowerCase() === 'yes').length
+  const valPaidCount = validationLeads.filter(l => isYesVal(l.paid)).length
+  const valHeldCount = validationLeads.filter(l => isYesVal(l.held)).length
 
   // ── SOW target (derived from ramp CSV; fallback 77) ─────────────────────────
   const sowTarget = useMemo(
