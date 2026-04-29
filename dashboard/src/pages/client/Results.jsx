@@ -37,7 +37,11 @@ function buildStudioStats(bookings, cancellations = []) {
   const isHasShow = b => { const v = b['has_show'] ?? b.has_show; return v === true || v === 1 || String(v).trim() === '1' }
 
   const grouped = {}
-  bookings.forEach(b => {
+  const phiweOnly = bookings.filter(b => {
+    const madeBy = String(b.booking_made_by || b['Booking Made By'] || '')
+    return madeBy.toLowerCase().includes('phiwe')
+  })
+  phiweOnly.forEach(b => {
     const loc = String(b.booking_location || b['Booking Location'] || 'Unknown').trim()
     if (!grouped[loc]) grouped[loc] = []
     grouped[loc].push(b)
@@ -589,9 +593,8 @@ function StudioSignalCard({ s, isManagerView, pipeline = [] }) {
                   const days    = +r.days_until
                   const isToday = days === 0
                   const risk    = String(r.risk_level ?? '').toLowerCase()
-                  const urgencyColor = isToday ? '#ef4444' : risk === 'high' ? '#f59e0b' : 'var(--info)'
                   return (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', background: 'var(--bg)', borderRadius: '6px', border: `1px solid ${urgencyColor}` }}>
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', background: 'var(--bg)', borderRadius: '6px', border: '1px solid var(--border)' }}>
                       {isToday && (
                         <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#ef4444', flexShrink: 0, animation: 'results-pulse 1.5s ease-in-out infinite' }} />
                       )}
