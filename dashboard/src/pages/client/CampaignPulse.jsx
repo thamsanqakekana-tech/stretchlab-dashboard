@@ -175,42 +175,41 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, validation
               }}>
                 <div style={{
                   height: '100%', width: `${seg.fillPct}%`,
-                  background: seg.isComplete ? '#22c55e' : seg.isActive ? 'var(--accent)' : 'var(--muted)',
+                  background: seg.isComplete ? 'var(--status-above)' : seg.isActive ? 'var(--accent)' : 'var(--border)',
                   borderRadius: '4px', transition: 'width 0.4s ease',
                 }} />
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px', flexWrap: 'nowrap' }}>
                 <span style={{
-                  fontSize: '11px', fontWeight: seg.isActive ? 700 : 500,
-                  color: seg.isActive ? 'var(--text)' : seg.isComplete ? '#22c55e' : 'var(--muted)',
+                  fontSize: '11px', fontWeight: seg.isActive ? 700 : 500, flexShrink: 0,
+                  color: seg.isActive ? 'var(--text)' : seg.isComplete ? 'var(--status-above)' : 'var(--muted)',
                 }}>
                   {seg.label}
                   {seg.isActive && (
                     <span style={{ fontSize: '9px', marginLeft: '5px', color: 'var(--accent)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em' }}>Active</span>
                   )}
                   {seg.isComplete && (
-                    <span style={{ fontSize: '9px', marginLeft: '5px', color: '#22c55e', fontWeight: 700 }}>✓</span>
+                    <span style={{ fontSize: '9px', marginLeft: '5px', color: 'var(--status-above)', fontWeight: 700 }}>✓</span>
                   )}
                 </span>
-                <span style={{ fontSize: '10px', color: 'var(--muted)' }}>
+                {hasLeads && (
+                  <span style={{ fontSize: '10px', color: 'var(--text-2)', flex: 1, textAlign: 'center', whiteSpace: 'nowrap' }}>
+                    <span style={{ color: 'var(--status-above)', fontWeight: 700 }}>{seg.paidCount} paid</span>
+                    {' · '}
+                    <span style={{ color: 'var(--status-within)', fontWeight: 700 }}>{seg.heldCount} held</span>
+                    {seg.futureLeads.length > 0 && (
+                      <span style={{ color: 'var(--muted)' }}> · {seg.futureLeads.length} upcoming</span>
+                    )}
+                  </span>
+                )}
+                {!hasLeads && (seg.isActive || seg.isComplete) && (
+                  <span style={{ fontSize: '10px', color: 'var(--muted)', flex: 1, textAlign: 'center', fontStyle: 'italic' }}>No data yet</span>
+                )}
+                <span style={{ fontSize: '10px', color: 'var(--muted)', flexShrink: 0 }}>
                   Target: {seg.target}
                 </span>
               </div>
               <p style={{ fontSize: '10px', color: 'var(--muted)', margin: '2px 0 4px' }}>{seg.dateRange}</p>
-
-              {/* Paid / Held counts */}
-              {hasLeads ? (
-                <div style={{ fontSize: '11px', color: 'var(--text)', margin: '4px 0' }}>
-                  <span style={{ color: '#22c55e', fontWeight: 700 }}>{seg.paidCount} paid</span>
-                  <span style={{ color: 'var(--muted)', margin: '0 4px' }}>·</span>
-                  <span style={{ color: 'var(--accent)', fontWeight: 700 }}>{seg.heldCount} held</span>
-                  {seg.futureLeads.length > 0 && (
-                    <span style={{ color: 'var(--warn)', marginLeft: '6px' }}>· {seg.futureLeads.length} upcoming</span>
-                  )}
-                </div>
-              ) : (seg.isActive || seg.isComplete) ? (
-                <div style={{ fontSize: '11px', color: 'var(--muted)', margin: '4px 0', fontStyle: 'italic' }}>No data yet</div>
-              ) : null}
 
               {/* Expandable lead table toggle */}
               {hasLeads && (
@@ -269,13 +268,13 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, validation
                     const isHeld     = heldVal === 'yes'
                     const isUpcoming = heldVal === ''
                     const heldLabel  = isUpcoming ? 'Upcoming' : isHeld ? 'Yes' : 'No'
-                    const heldColor  = isUpcoming ? 'var(--warn)' : isHeld ? '#22c55e' : 'var(--muted)'
+                    const heldColor  = isUpcoming ? 'var(--status-within)' : isHeld ? 'var(--status-above)' : 'var(--muted)'
                     return (
                       <tr key={i} style={{ background: i % 2 === 0 ? 'transparent' : 'var(--bg)' }}>
                         <td style={{ padding: '7px 10px', color: 'var(--text)', fontWeight: 500, whiteSpace: 'nowrap' }}>{lead.name || '—'}</td>
                         <td style={{ padding: '7px 10px', color: 'var(--muted)', whiteSpace: 'nowrap', fontSize: '11px' }}>{lead.date_of_appointment || '—'}</td>
                         <td style={{ padding: '7px 10px', color: 'var(--muted)', whiteSpace: 'nowrap' }}>{(lead.location || '').replace('StretchLab ', '')}</td>
-                        <td style={{ padding: '7px 10px', color: isPaid ? '#22c55e' : 'var(--muted)', fontWeight: 600 }}>{isPaid ? 'Yes' : 'No'}</td>
+                        <td style={{ padding: '7px 10px', color: isPaid ? 'var(--status-above)' : 'var(--muted)', fontWeight: 600 }}>{isPaid ? 'Yes' : 'No'}</td>
                         <td style={{ padding: '7px 10px', color: heldColor, fontWeight: 600 }}>{heldLabel}</td>
                         <td style={{ padding: '7px 10px', color: 'var(--muted)', fontSize: '11px', maxWidth: '260px' }}>{lead.notes || '—'}</td>
                       </tr>
@@ -365,15 +364,15 @@ function SowProgressMini({ confirmedShows, upcoming, sowTarget = 77 }) {
   return (
     <div style={{ marginBottom: 0 }}>
       <div style={{ height: '8px', borderRadius: '6px', background: 'var(--border)', overflow: 'hidden', display: 'flex', marginBottom: '10px' }}>
-        <div style={{ width: `${confirmedPct}%`, background: '#22c55e', transition: 'width 0.4s ease' }} />
-        <div style={{ width: `${upcomingPct}%`, background: 'var(--warn)', transition: 'width 0.4s ease' }} />
+        <div style={{ width: `${confirmedPct}%`, background: 'var(--status-above)', transition: 'width 0.4s ease' }} />
+        <div style={{ width: `${upcomingPct}%`, background: 'var(--status-within)', transition: 'width 0.4s ease' }} />
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-        <span style={{ fontSize: '12px', color: '#22c55e', fontWeight: 600 }}>
-          ● {confirmedShows} sessions attended
+        <span style={{ fontSize: '12px', color: 'var(--status-above)', fontWeight: 600 }}>
+          {confirmedShows} sessions attended
         </span>
-        <span style={{ fontSize: '12px', color: 'var(--warn)', fontWeight: 600 }}>
-          ● {upcoming} appointments booked
+        <span style={{ fontSize: '12px', color: 'var(--status-within)', fontWeight: 600 }}>
+          {upcoming} appointments booked
         </span>
         <span style={{ fontSize: '12px', color: 'var(--muted)' }}>
           {remaining > 0
@@ -388,16 +387,29 @@ function SowProgressMini({ confirmedShows, upcoming, sowTarget = 77 }) {
   )
 }
 
-// ─── Conversion Funnel — 6-stage sequential ───────────────────────────────────
-function ConversionFunnel({ totalCalls, meaningfulConvs, bookingCount, paidCount, heldCount, upcomingCount }) {
+// ─── Conversion Funnel — 6-stage sequential with pipeline drill-down ──────────
+function ConversionFunnel({ totalCalls, meaningfulConvs, bookingCount, paidCount, heldCount, upcomingCount, pipeline = [], isClientView = false }) {
+  const [pipelineOpen, setPipelineOpen] = useState(false)
+
   const stages = [
-    { label: 'Calls Made',   count: totalCalls,      color: 'var(--muted)' },
-    { label: 'Connections',  count: meaningfulConvs, color: 'var(--accent)' },
-    { label: 'Bookings',     count: bookingCount,    color: 'var(--text)' },
-    { label: 'Paid',         count: paidCount,       color: '#f59e0b' },
-    { label: 'Kept',         count: heldCount,       color: '#22c55e' },
-    { label: 'Upcoming',     count: upcomingCount,   color: 'var(--warn)' },
+    { key: 'calls',    label: 'Calls Made',  count: totalCalls,      color: 'var(--text-2)' },
+    { key: 'convs',    label: 'Connections', count: meaningfulConvs, color: 'var(--accent)' },
+    { key: 'bookings', label: 'Bookings',    count: bookingCount,    color: 'var(--text)' },
+    { key: 'paid',     label: 'Paid',        count: paidCount,       color: 'var(--status-above)' },
+    { key: 'kept',     label: 'Kept',        count: heldCount,       color: 'var(--status-above)' },
+    { key: 'upcoming', label: 'Upcoming',    count: upcomingCount,   color: 'var(--status-within)', drillable: true },
   ]
+
+  const riskOrder  = { High: 0, Medium: 1, Low: 2 }
+  const sortedPipe = [...pipeline].sort((a, b) => {
+    const dA = new Date(a.booking_date), dB = new Date(b.booking_date)
+    if (dA - dB !== 0) return dA - dB
+    return (riskOrder[a.risk_level] ?? 3) - (riskOrder[b.risk_level] ?? 3)
+  })
+  const highRiskCount  = pipeline.filter(r => r.risk_level === 'High').length
+  const riskBadgeColor = (level) =>
+    level === 'High'   ? 'var(--accent)' :
+    level === 'Medium' ? 'var(--status-below)' : 'var(--status-above)'
 
   return (
     <Card style={{ marginBottom: '24px', padding: '20px 24px' }}>
@@ -408,32 +420,93 @@ function ConversionFunnel({ totalCalls, meaningfulConvs, bookingCount, paidCount
         {stages.map((stage, i) => {
           const prev = stages[i - 1]
           const rate = prev && prev.count > 0 ? (stage.count / prev.count) * 100 : null
+          const isExpanded = stage.drillable && pipelineOpen
           return (
-            <React.Fragment key={stage.label}>
+            <React.Fragment key={stage.key}>
               {i > 0 && (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 6px', minWidth: '60px' }}>
-                  <span style={{ fontSize: '18px', color: 'var(--muted)', lineHeight: 1 }}>→</span>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 6px', minWidth: '56px' }}>
+                  <span style={{ fontSize: '16px', color: 'var(--border)', lineHeight: 1 }}>→</span>
                   {rate !== null && (
-                    <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', fontFamily: 'JetBrains Mono, monospace', margin: '2px 0 0' }}>
+                    <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--text-2)', fontFamily: 'JetBrains Mono, monospace', margin: '2px 0 0' }}>
                       {rate.toFixed(1)}%
                     </span>
                   )}
                 </div>
               )}
-              <div style={{
-                flex: '0 0 auto', minWidth: '100px', textAlign: 'center',
-                background: 'var(--bg)', border: '1px solid var(--border)',
-                borderRadius: '10px', padding: '14px 10px',
-              }}>
+              <div
+                onClick={stage.drillable ? () => setPipelineOpen(o => !o) : undefined}
+                style={{
+                  flex: '0 0 auto', minWidth: '96px', textAlign: 'center',
+                  background: isExpanded ? `${stage.color}10` : 'var(--bg)',
+                  border: `1px solid ${isExpanded ? stage.color : 'var(--border)'}`,
+                  borderRadius: '10px', padding: '14px 10px',
+                  cursor: stage.drillable ? 'pointer' : 'default',
+                  transition: 'border-color 0.15s ease, background 0.15s ease',
+                }}
+              >
                 <p style={{ fontSize: '28px', fontWeight: 800, fontFamily: 'JetBrains Mono, monospace', color: stage.color, margin: '0 0 4px', lineHeight: 1 }}>
                   {stage.count.toLocaleString()}
                 </p>
                 <p style={{ fontSize: '11px', color: 'var(--muted)', margin: 0, fontWeight: 500 }}>{stage.label}</p>
+                {stage.drillable && (
+                  <p style={{ fontSize: '9px', color: 'var(--muted)', margin: '5px 0 0', opacity: 0.7 }}>
+                    {isExpanded ? 'collapse ▲' : 'see pipeline ▼'}
+                  </p>
+                )}
               </div>
             </React.Fragment>
           )
         })}
       </div>
+
+      {/* Pipeline drill-down under Upcoming */}
+      {pipelineOpen && (
+        <div style={{ marginTop: '20px', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+          {highRiskCount > 0 && (
+            <p style={{ fontSize: '12px', color: 'var(--text-2)', margin: '0 0 14px', lineHeight: 1.6 }}>
+              <strong>{highRiskCount}</strong> of {pipeline.length} upcoming appointment{pipeline.length !== 1 ? 's' : ''} {highRiskCount === 1 ? 'is' : 'are'} due for confirmation contact this week.
+            </p>
+          )}
+          {sortedPipe.length === 0 ? (
+            <p style={{ fontSize: '13px', color: 'var(--muted)', fontStyle: 'italic' }}>No upcoming sessions in the pipeline.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {sortedPipe.map((r, i) => {
+                const name   = [r.first_name, r.last_name].filter(Boolean).join(' ') || '—'
+                const studio = String(r.booking_location || '').replace('StretchLab ', '')
+                const date   = r.booking_date
+                  ? new Date(r.booking_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                  : '—'
+                const rColor = riskBadgeColor(r.risk_level)
+                return (
+                  <div key={i} style={{
+                    display: 'flex', alignItems: 'center', gap: '20px',
+                    padding: '9px 0',
+                    borderBottom: i < sortedPipe.length - 1 ? '1px solid var(--border)' : 'none',
+                  }}>
+                    <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text)', minWidth: '160px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {name}
+                    </span>
+                    <span style={{ fontSize: '12px', color: 'var(--muted)', minWidth: '100px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {studio}
+                    </span>
+                    <span style={{ fontSize: '12px', color: 'var(--text-2)', fontFamily: 'JetBrains Mono, monospace', minWidth: '64px', whiteSpace: 'nowrap' }}>
+                      {date}
+                    </span>
+                    <span style={{
+                      fontSize: '9px', fontWeight: 700, padding: '2px 7px',
+                      borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '0.06em',
+                      background: `${rColor}14`, color: rColor, whiteSpace: 'nowrap',
+                    }}>
+                      {r.risk_level}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
     </Card>
   )
 }
@@ -527,7 +600,7 @@ function StudioStrip({ studios = [], bookings = [], isClientView = false }) {
 
           const srColor     = studioState !== 'active' ? 'var(--muted)'
                             : showRatePct === null ? 'var(--muted)'
-                            : showRatePct >= 15 ? 'var(--positive)' : showRatePct >= 8 ? 'var(--warn)' : 'var(--danger)'
+                            : showRatePct >= 15 ? 'var(--status-above)' : showRatePct >= 8 ? 'var(--status-within)' : 'var(--status-below)'
           const borderStyle = studioState !== 'active' ? '1px dashed var(--border)' : '1px solid var(--border)'
 
           return (
@@ -546,7 +619,7 @@ function StudioStrip({ studios = [], bookings = [], isClientView = false }) {
               {studioState === 'inactive' ? (
                 <p style={{ fontSize: '11px', color: 'var(--muted)', margin: 0 }}>Pipeline inactive</p>
               ) : studioState === 'activating' ? (
-                <p style={{ fontSize: '11px', color: 'var(--warn)', margin: 0 }}>
+                <p style={{ fontSize: '11px', color: 'var(--muted)', margin: 0 }}>
                   {total} booked · {upcoming} upcoming — awaiting first resolved outcome
                 </p>
               ) : isClientView ? (
@@ -563,9 +636,9 @@ function StudioStrip({ studios = [], bookings = [], isClientView = false }) {
                     const pendingPct   = total > 0 ? Math.max(0, 100 - attendedPct - cancelledPct) : 0
                     return (
                       <div style={{ height: '6px', borderRadius: '3px', overflow: 'hidden', display: 'flex', marginBottom: '6px', background: 'var(--border)' }}>
-                        <div style={{ width: `${attendedPct}%`,  background: '#1D9E75', transition: 'width 0.4s ease' }} />
-                        <div style={{ width: `${cancelledPct}%`, background: '#E24B4A', transition: 'width 0.4s ease' }} />
-                        <div style={{ width: `${pendingPct}%`,   background: '#EF9F27', transition: 'width 0.4s ease' }} />
+                        <div style={{ width: `${attendedPct}%`,  background: 'var(--status-above)', transition: 'width 0.4s ease' }} />
+                        <div style={{ width: `${cancelledPct}%`, background: '#64748b', transition: 'width 0.4s ease' }} />
+                        <div style={{ width: `${pendingPct}%`,   background: '#94a3b8', transition: 'width 0.4s ease' }} />
                       </div>
                     )
                   })()}
@@ -592,9 +665,9 @@ function StudioStrip({ studios = [], bookings = [], isClientView = false }) {
                     const pendingPct   = total > 0 ? Math.max(0, 100 - attendedPct - cancelledPct) : 0
                     return (
                       <div style={{ height: '6px', borderRadius: '3px', overflow: 'hidden', display: 'flex', marginBottom: '6px', background: 'var(--border)' }}>
-                        <div style={{ width: `${attendedPct}%`,  background: '#1D9E75', transition: 'width 0.4s ease' }} />
-                        <div style={{ width: `${cancelledPct}%`, background: '#E24B4A', transition: 'width 0.4s ease' }} />
-                        <div style={{ width: `${pendingPct}%`,   background: '#EF9F27', transition: 'width 0.4s ease' }} />
+                        <div style={{ width: `${attendedPct}%`,  background: 'var(--status-above)', transition: 'width 0.4s ease' }} />
+                        <div style={{ width: `${cancelledPct}%`, background: '#64748b', transition: 'width 0.4s ease' }} />
+                        <div style={{ width: `${pendingPct}%`,   background: '#94a3b8', transition: 'width 0.4s ease' }} />
                       </div>
                     )
                   })()}
@@ -647,7 +720,7 @@ function NarrativeCard({ totalCalls, meaningfulConvs, convRate, bookingCount, up
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0' }}>
 
         <div style={{ borderRight: '1px solid var(--border)', paddingRight: '20px' }}>
-          <p style={{ fontSize: '10px', fontWeight: 700, color: 'var(--danger)', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 8px' }}>The Challenge</p>
+          <p style={{ fontSize: '10px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 8px' }}>The Challenge</p>
           <p style={{ fontSize: '13px', color: 'var(--text)', lineHeight: 1.7, margin: 0 }}>
             {bookingCount > 0 && cancelledCustomer > 0
               ? <>
@@ -733,8 +806,8 @@ function PipelineSection({ pipeline = [], isClientView = false }) {
   const totalCount = pipeline.length
 
   const riskColor = (level) =>
-    level === 'High'   ? '#E24B4A' :
-    level === 'Medium' ? '#EF9F27' : '#1D9E75'
+    level === 'High'   ? 'var(--accent)' :
+    level === 'Medium' ? 'var(--status-below)' : 'var(--status-above)'
 
   const appointmentContext = (r) => {
     const calls = Number(r.total_calls_made || 0)
@@ -773,7 +846,7 @@ function PipelineSection({ pipeline = [], isClientView = false }) {
           Active Pipeline — {totalCount} upcoming session{totalCount !== 1 ? 's' : ''}
         </p>
         {!isClientView && highRisk > 0 && (
-          <span style={{ fontSize: '11px', color: '#E24B4A', fontWeight: 600 }}>
+          <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>
             {highRisk} high-risk · priority this week
           </span>
         )}
@@ -989,8 +1062,7 @@ export default function CampaignPulse() {
     return Math.round(lastMin / cancellations.length * 100)
   }, [cancellations])
 
-  // Cancel rate color: green ≤20%, yellow ≤35%, red >35%
-  const cancelColor = cancelRate <= 20 ? 'var(--positive)' : cancelRate <= 35 ? 'var(--warn)' : 'var(--danger)'
+  const cancelColor = cancelRate <= 20 ? 'var(--status-above)' : cancelRate <= 35 ? 'var(--status-within)' : 'var(--status-below)'
 
   // ── Benchmark detail strings (show actual vs. standard in badge sub-line) ────
   const bmRowLookup = (key) => benchmarks.find(r => r.metric === key) ?? {}
@@ -1360,9 +1432,9 @@ export default function CampaignPulse() {
           {/* Outcome counts */}
           <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap' }}>
             {[
-              { label: 'Attended',        count: confirmedShows,        color: '#1D9E75' },
-              { label: 'Pending outcome', count: upcoming + buckets.rescheduled.length, color: '#EF9F27' },
-              { label: 'Cancelled',       count: cancels,               color: '#E24B4A' },
+              { label: 'Attended',        count: confirmedShows,        color: 'var(--status-above)' },
+              { label: 'Pending outcome', count: upcoming + buckets.rescheduled.length, color: '#94a3b8' },
+              { label: 'Cancelled',       count: cancels,               color: '#64748b' },
               { label: 'No-show',         count: buckets.noShow.length, color: 'var(--muted)' },
             ].filter(o => o.count > 0).map(o => (
               <div key={o.label} style={{ flex: '1 1 90px', background: 'var(--bg)', borderRadius: '6px', padding: '10px 14px' }}>
@@ -1413,10 +1485,10 @@ export default function CampaignPulse() {
                         </span>
                       </div>
                       <div style={{ height: '8px', background: 'var(--border)', borderRadius: '4px', overflow: 'hidden', display: 'flex' }}>
-                        <div style={{ width: `${showSegPct}%`,    background: '#1D9E75', transition: 'width 0.4s ease' }} />
-                        <div style={{ width: `${cancelSegPct}%`,  background: '#E24B4A', transition: 'width 0.4s ease' }} />
-                        <div style={{ width: `${noShowSegPct}%`,  background: '#C25E1B', transition: 'width 0.4s ease' }} />
-                        <div style={{ width: `${pendingSegPct}%`, background: '#EF9F27', transition: 'width 0.4s ease' }} />
+                        <div style={{ width: `${showSegPct}%`,    background: 'var(--status-above)', transition: 'width 0.4s ease' }} />
+                        <div style={{ width: `${cancelSegPct}%`,  background: '#64748b', transition: 'width 0.4s ease' }} />
+                        <div style={{ width: `${noShowSegPct}%`,  background: '#475569', transition: 'width 0.4s ease' }} />
+                        <div style={{ width: `${pendingSegPct}%`, background: '#94a3b8', transition: 'width 0.4s ease' }} />
                       </div>
                       {hasResolved && (
                         <p style={{ fontSize: '10px', color: 'var(--muted)', margin: '2px 0 0', textAlign: 'right' }}>
@@ -1428,10 +1500,10 @@ export default function CampaignPulse() {
                 })}
                 <div style={{ display: 'flex', gap: '12px', marginTop: '4px', flexWrap: 'wrap' }}>
                   {[
-                    { color: '#1D9E75', label: 'Attended' },
-                    { color: '#E24B4A', label: 'Cancelled' },
-                    { color: '#C25E1B', label: 'No-show' },
-                    { color: '#EF9F27', label: 'Pending outcome' },
+                    { color: 'var(--status-above)', label: 'Attended' },
+                    { color: '#64748b', label: 'Cancelled' },
+                    { color: '#475569', label: 'No-show' },
+                    { color: '#94a3b8', label: 'Pending outcome' },
                   ].map(l => (
                     <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <div style={{ width: '10px', height: '10px', borderRadius: '2px', background: l.color }} />
@@ -1457,8 +1529,8 @@ export default function CampaignPulse() {
                   Who initiated cancellations
                 </p>
                 {[
-                  { label: 'Lead-initiated', count: byCustomer, color: '#E24B4A' },
-                  { label: 'Studio-initiated', count: byAdmin, color: '#EF9F27' },
+                  { label: 'Lead-initiated', count: byCustomer, color: '#64748b' },
+                  { label: 'Studio-initiated', count: byAdmin, color: '#94a3b8' },
                 ].map(row => (
                   <div key={row.label} style={{ marginBottom: '8px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
@@ -1515,8 +1587,8 @@ export default function CampaignPulse() {
                       Cancel rate breakdown
                     </p>
                     {[
-                      { label: 'Full cancel rate',         pct: cancelRate,         note: 'all cancellations',         color: cancelRate > 35 ? '#E24B4A' : cancelRate > 20 ? '#EF9F27' : '#1D9E75' },
-                      { label: 'Lead-initiated only',      pct: cancelRateCustomer, note: 'excludes studio-initiated', color: cancelRateCustomer > 35 ? '#E24B4A' : cancelRateCustomer > 20 ? '#EF9F27' : '#1D9E75' },
+                      { label: 'Full cancel rate',         pct: cancelRate,         note: 'all cancellations',         color: cancelRate > 35 ? '#64748b' : cancelRate > 20 ? '#94a3b8' : 'var(--status-above)' },
+                      { label: 'Lead-initiated only',      pct: cancelRateCustomer, note: 'excludes studio-initiated', color: cancelRateCustomer > 35 ? '#64748b' : cancelRateCustomer > 20 ? '#94a3b8' : 'var(--status-above)' },
                       { label: 'Cold re-engagement std',   pct: benchmarkCancelPct, note: 'reference',                 color: 'var(--muted)' },
                     ].map(row => (
                       <div key={row.label} style={{ marginBottom: '10px' }}>
@@ -1544,8 +1616,8 @@ export default function CampaignPulse() {
                   })
                   const timingRows = Object.entries(groups).sort((a, b) => b[1] - a[1])
                   const timingColor = (t) =>
-                    t.includes('Last Minute') ? '#E24B4A' :
-                    t.includes('Short Notice') ? '#EF9F27' : '#1D9E75'
+                    t.includes('Last Minute') ? '#64748b' :
+                    t.includes('Short Notice') ? '#94a3b8' : 'var(--status-above)'
                   return (
                     <div style={{ marginBottom: '16px' }}>
                       <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 10px' }}>
@@ -1576,8 +1648,8 @@ export default function CampaignPulse() {
                         Initiated by
                       </p>
                       {[
-                        { label: 'Lead-initiated', count: byCustomer, color: '#E24B4A' },
-                        { label: 'Studio-initiated', count: byAdmin, color: '#EF9F27' },
+                        { label: 'Lead-initiated', count: byCustomer, color: '#64748b' },
+                        { label: 'Studio-initiated', count: byAdmin, color: '#94a3b8' },
                       ].map(row => (
                         <div key={row.label} style={{ marginBottom: '8px' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
@@ -1602,7 +1674,7 @@ export default function CampaignPulse() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                       {activeCauses.map((c, i) => {
                         const pct       = parseFloat(c.percentage || 0)
-                        const barColor  = i === 0 ? '#E24B4A' : '#EF9F27'
+                        const barColor  = i === 0 ? '#64748b' : '#94a3b8'
                         const actionText = sanitiseCauseText(String(c.action || ''))
                         return (
                           <div key={i} style={{ background: 'var(--bg)', borderRadius: '6px', padding: '10px 14px' }}>
@@ -1611,8 +1683,8 @@ export default function CampaignPulse() {
                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <span style={{
                                   fontSize: '9px', fontWeight: 700, padding: '2px 6px', borderRadius: '3px', textTransform: 'uppercase',
-                                  background: c.impact === 'High' ? '#EF9F2720' : '#378ADD20',
-                                  color: c.impact === 'High' ? '#EF9F27' : '#378ADD',
+                                  background: c.impact === 'High' ? '#94a3b820' : '#378ADD20',
+                                  color: c.impact === 'High' ? '#94a3b8' : '#378ADD',
                                 }}>{c.impact} impact</span>
                                 <span style={{ fontSize: '12px', fontWeight: 700, color: barColor, fontFamily: 'JetBrains Mono, monospace' }}>
                                   {c.count} · {pct.toFixed(0)}%
@@ -1643,10 +1715,7 @@ export default function CampaignPulse() {
         <SowProgressMini confirmedShows={confirmedShows} upcoming={upcoming} sowTarget={sowTarget} />
       </Card>
 
-      {/* Pipeline — named upcoming appointments */}
-      <PipelineSection pipeline={pipeline} isClientView={isClientView} />
-
-      {/* Conversion funnel */}
+      {/* Conversion funnel — Upcoming node expands to pipeline drill-down */}
       <ConversionFunnel
         totalCalls={totalCalls}
         meaningfulConvs={meaningfulConvs}
@@ -1654,6 +1723,8 @@ export default function CampaignPulse() {
         paidCount={valPaidCount}
         heldCount={valHeldCount}
         upcomingCount={upcoming}
+        pipeline={pipeline}
+        isClientView={isClientView}
       />
 
       {/* Narrative card */}

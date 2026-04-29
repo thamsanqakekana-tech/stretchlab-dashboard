@@ -142,9 +142,9 @@ export function benchmarkLabel(status, lowerIsBetter = false) {
 
 /** Status color for a benchmarkStatus result */
 export function benchmarkColor(status) {
-  if (status === 'above')  return 'var(--positive)'
-  if (status === 'within') return 'var(--positive)'
-  return 'var(--warn)'
+  if (status === 'above')  return 'var(--status-above)'
+  if (status === 'within') return 'var(--status-within)'
+  return 'var(--status-below)'
 }
 
 /** Returns true if a metric key should be hidden for the given role. */

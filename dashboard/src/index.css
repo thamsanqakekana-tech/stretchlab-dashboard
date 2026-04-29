@@ -9,8 +9,8 @@
   --surface-2: #18181b;   /* Zinc-900 — second elevation (tables, inputs) */
   --border:    #27272a;   /* Zinc-800 — crisp neutral separator           */
   --accent:    #6366f1;   /* Indigo-500 — primary brand / UI              */
-  --positive:  #22c55e;   /* Green-500  — positive metric / chart bar     */
-  --muted:     #71717a;   /* Zinc-500  — secondary text                   */
+  --positive:  #22c55e;   /* Green-500 — kept for legacy manager pages    */
+  --muted:     #8b8c98;   /* Lightened from Zinc-500 for WCAG AA contrast */
   --text:      #fafafa;   /* Zinc-50   — primary text                     */
   --text-2:    #a1a1aa;   /* Zinc-400  — tertiary text                    */
   --warn:      #f59e0b;   /* Amber-500                                    */
@@ -18,8 +18,38 @@
   --info:      #38bdf8;   /* Sky-400                                      */
   --admin:     #a855f7;   /* Purple-500                                   */
 
-  /* Aliases kept for backward compat with existing components */
+  /* ─── Neutral status palette (replaces traffic-light green/amber/red) ── */
+  --status-above:  #0d9488;   /* Teal-600  — above benchmark              */
+  --status-within: #6366f1;   /* Indigo-500 — on track (= --accent)       */
+  --status-below:  #94a3b8;   /* Slate-400 — below benchmark              */
+
+  /* Alias kept for backward compat with existing manager/admin pages */
   --accent-old: #22c55e;
+}
+
+/* ─── Light mode overrides ─────────────────────────────────────────────── */
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg:           #ffffff;
+    --surface:      #f4f4f5;   /* Zinc-100                               */
+    --surface-2:    #e4e4e7;   /* Zinc-200                               */
+    --border:       #d4d4d8;   /* Zinc-300                               */
+    --accent:       #4f46e5;   /* Indigo-600 — darker for white bg       */
+    --positive:     #0f766e;   /* Teal-700                               */
+    --muted:        #52525b;   /* Zinc-600 — 8:1 contrast on white       */
+    --text:         #18181b;   /* Zinc-900                               */
+    --text-2:       #3f3f46;   /* Zinc-700                               */
+    --warn:         #b45309;   /* Amber-700 — darker for white bg        */
+    --danger:       #dc2626;   /* Red-600                                */
+    --info:         #0284c7;   /* Sky-600                                */
+    --admin:        #7c3aed;   /* Violet-600                             */
+    --status-above:  #0f766e;  /* Teal-700                               */
+    --status-within: #4f46e5;  /* Indigo-600                             */
+    --status-below:  #64748b;  /* Slate-500 — 5:1 contrast on white      */
+  }
+  /* ─── Card and input tinting for light mode ─────────────────────────── */
+  [data-role="admin"]   { --accent: #7c3aed; }
+  [data-role="manager"] { --accent: #b45309; }
 }
 
 /* Role-tint overrides */
