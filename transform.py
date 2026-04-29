@@ -4,6 +4,7 @@ CORRECT LOGIC: Direct + Tamryn only (NO phone matching)
 FIXED: Proper show matching with first_visits sheet
 """
 
+import re as _re
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
@@ -11,6 +12,16 @@ import logging
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+def _norm_name(s):
+    """Normalise a name for fuzzy matching: lowercase, strip punctuation, collapse spaces."""
+    if pd.isna(s): return None
+    return _re.sub(r'\s+', ' ', _re.sub(r'[^\w\s]', '', str(s)).lower()).strip()
+
+# Known name corrections: manual tracker misspellings → canonical ClubReady spelling (normalised)
+_NAME_CORRECTIONS = {
+    'edgar monray': 'edgar monroy',
+}
 
 # Area code to region mapping
 AREA_CODE_MAP = {
@@ -359,17 +370,27 @@ class DataTransformer:
             first_visits=self.raw_data.get('first_visits')
         )
         
-        # Build outputs
-        lead_funnel = self._build_lead_funnel(bookings, calls)
+        # Build validation FIRST so gap_details can feed unified leads
+        validation_outputs = {}
+        gap_details = None
+        if manual_tracker_path:
+            validation_outputs = self._build_validation(bookings, manual_tracker_path)
+            gap_details = validation_outputs.get('validation_lead_details')
+
+        # Build lead funnel and unified leads (ClubReady + manual tracker merge)
+        lead_funnel   = self._build_lead_funnel(bookings, calls)
+        unified_leads = self._build_unified_leads(lead_funnel, gap_details)
+
         outputs = {
             'calls': calls,
             'bookings': bookings,
             'daily_performance': self._build_daily_performance(calls, bookings),
-            'by_studio': self._build_by_studio(bookings, calls),
+            'by_studio': self._build_by_studio(bookings, calls, unified_leads=unified_leads),
             'by_area_code': self._build_by_area_code(calls, bookings),
             'pipeline': self._build_pipeline(bookings, calls),
             'call_timing': self._build_call_timing(calls),
             'lead_funnel': lead_funnel,
+            'unified_leads': unified_leads,
             'cancellation_analysis': self._build_cancellation_analysis(bookings),
             'booking_outcomes': self._build_booking_outcomes(bookings),
             'booking_window_analysis': self._build_booking_window(bookings),
@@ -382,7 +403,7 @@ class DataTransformer:
             'ramp_vs_target': self._build_ramp_vs_target(bookings, calls),
             'velocity_trend': self._build_velocity_trend(lead_funnel, calls),
         }
-        
+
         # Unattributed flags — output only, does not affect any booking or show counts
         flags_df = self._build_unattributed_flags(
             outputs.get('calls', pd.DataFrame()),
@@ -393,9 +414,38 @@ class DataTransformer:
             outputs['unattributed_flags'] = flags_df
             logger.info(f"\n  UNATTRIBUTED FLAGS: {len(flags_df)} leads flagged for Brian review")
 
-        # Validation if manual tracker provided
-        if manual_tracker_path:
-            validation_outputs = self._build_validation(bookings, manual_tracker_path)
+        # Annotate validation_report with manual-tracker-only flags for Action Plan
+        if validation_outputs and 'validation_report' in validation_outputs:
+            vr = validation_outputs['validation_report']
+            manual_only_rows = unified_leads[unified_leads['source'] == 'manual_tracker']
+
+            vr['unlogged_attended'] = [
+                {
+                    'name':     f"{r['first_name']} {r['last_name']}".strip(),
+                    'location': str(r['booking_location'] or ''),
+                    'date':     str(r['booking_date'] or ''),
+                }
+                for _, r in manual_only_rows[manual_only_rows['unified_outcome'] == 'attended'].iterrows()
+            ]
+
+            cr_first_names = set(
+                unified_leads[unified_leads['source'] != 'manual_tracker']['first_name']
+                .astype(str).str.strip().str.lower()
+            )
+            vr['possible_duplicates'] = [
+                {
+                    'name':     f"{r['first_name']} {r['last_name']}".strip(),
+                    'location': str(r['booking_location'] or ''),
+                    'outcome':  str(r['unified_outcome'] or ''),
+                    'date':     str(r['booking_date'] or ''),
+                    'note':     'First name matches a ClubReady lead — verify if same person',
+                }
+                for _, r in manual_only_rows.iterrows()
+                if str(r.get('first_name') or '').strip().lower() in cr_first_names
+            ]
+
+        # Merge validation outputs (validation_report + validation_lead_details)
+        if validation_outputs:
             outputs.update(validation_outputs)
         
         logger.info("="*70)
@@ -727,54 +777,55 @@ class DataTransformer:
         logger.info(f"  {len(daily)} days")
         return daily
     
-    def _build_by_studio(self, bookings, calls):
-        """Performance by studio - ALL 9 STUDIOS"""
+    def _build_by_studio(self, bookings, calls, unified_leads=None):
+        """Performance by studio — regenerated from unified leads when available."""
         logger.info("\nBuilding studio performance...")
-        
-        # All expected studios — update this list when a new studio is onboarded
+
         all_studios = [
-            'StretchLab Bellaire',
-            'StretchLab Brighton',
-            'StretchLab Bunker Hill',
-            'StretchLab Cherry Street',
-            'StretchLab Clarkston',
-            'StretchLab Heights',
-            'StretchLab Pearland',
-            'StretchLab River Oaks',
-            'StretchLab Shreveport',
-            'StretchLab South Tulsa'
+            'StretchLab Bellaire', 'StretchLab Brighton', 'StretchLab Bunker Hill',
+            'StretchLab Cherry Street', 'StretchLab Clarkston', 'StretchLab Heights',
+            'StretchLab Pearland', 'StretchLab River Oaks', 'StretchLab Shreveport',
+            'StretchLab South Tulsa',
         ]
-        
-        # Aggregate actual data
-        studio_data = bookings.groupby('booking_location').agg({
-            'booking_id': 'count',
-            'has_show': 'sum',
-            'is_cancelled': 'sum',
-            'is_no_show': 'sum'
-        }).reset_index()
-        
-        studio_data.columns = ['studio', 'bookings', 'shows', 'cancellations', 'no_shows']
-        
-        # Create full studio list with 0s for missing
-        all_studios_df = pd.DataFrame({'studio': all_studios})
-        studio_perf = all_studios_df.merge(studio_data, on='studio', how='left').fillna(0)
-        
-        # Calculate rates
-        studio_perf['show_rate_pct'] = np.where(
-            studio_perf['bookings'] > 0,
-            (studio_perf['shows'] / studio_perf['bookings']) * 100,
-            0
-        )
-        studio_perf['cancel_rate_pct'] = np.where(
-            studio_perf['bookings'] > 0,
-            (studio_perf['cancellations'] / studio_perf['bookings']) * 100,
-            0
-        )
-        
-        studio_perf = studio_perf.sort_values('bookings', ascending=False)
-        
-        logger.info(f"  {len(all_studios)} studios (including {(studio_perf['bookings'] == 0).sum()} with 0 bookings)")
-        return studio_perf
+
+        if unified_leads is not None and len(unified_leads) > 0:
+            rows = []
+            for studio in all_studios:
+                sdf = unified_leads[
+                    unified_leads['booking_location'].str.strip() == studio.strip()
+                ]
+                attended    = int((sdf['unified_outcome'] == 'attended').sum())
+                upcoming    = int((sdf['unified_outcome'] == 'upcoming').sum())
+                cancelled   = int(sdf['unified_outcome'].isin(['cancelled', 'paid_no_show']).sum())
+                no_show     = int((sdf['unified_outcome'] == 'no_show').sum())
+                rescheduled = int((sdf['unified_outcome'] == 'rescheduled').sum())
+                total       = len(sdf)
+                denom       = attended + cancelled + no_show
+                show_rate   = round(attended / denom * 100, 2) if denom > 0 else 0
+                rows.append({
+                    'studio': studio, 'bookings': total,
+                    'attended': attended, 'upcoming': upcoming,
+                    'cancelled': cancelled, 'no_show': no_show,
+                    'rescheduled': rescheduled,
+                    'show_rate_pct': show_rate,
+                })
+            total_bk = sum(r['bookings'] for r in rows)
+            logger.info(f"  by_studio from unified leads: {total_bk} bookings across {len(all_studios)} studios")
+            return pd.DataFrame(rows).sort_values('bookings', ascending=False)
+
+        # Fallback: ClubReady bookings only (no manual tracker provided)
+        studio_data = bookings.groupby('booking_location').agg(
+            bookings=('booking_id', 'count'),
+            shows=('has_show', 'sum'),
+            cancellations=('is_cancelled', 'sum'),
+            no_shows=('is_no_show', 'sum'),
+        ).reset_index().rename(columns={'booking_location': 'studio'})
+        all_df   = pd.DataFrame({'studio': all_studios})
+        perf     = all_df.merge(studio_data, on='studio', how='left').fillna(0)
+        perf['show_rate_pct']   = np.where(perf['bookings'] > 0, perf['shows'] / perf['bookings'] * 100, 0)
+        perf['cancel_rate_pct'] = np.where(perf['bookings'] > 0, perf['cancellations'] / perf['bookings'] * 100, 0)
+        logger.info(f"  {len(all_studios)} studios (fallback — no unified leads)")
+        return perf.sort_values('bookings', ascending=False)
     
     def _build_by_area_code(self, calls, bookings):
         """Performance by area code/region"""
@@ -924,7 +975,118 @@ class DataTransformer:
         logger.info(f"  {len(funnel)} leads")
         logger.info(f"    With call records: {funnel['has_call_record'].sum()}")
         return funnel
-    
+
+    def _build_unified_leads(self, lead_funnel, gap_details=None):
+        """Merge ClubReady lead funnel with manual tracker. Produces phiwe_unified_leads.csv."""
+        logger.info("\nBuilding unified leads (ClubReady + manual tracker merge)...")
+
+        STATUS_TO_OUTCOME = {
+            'completed booking':                    'attended',
+            'open booking - not yet logged':        'upcoming',
+            'no show booking':                      'no_show',
+            'rescheduled by admin':                 'rescheduled',
+            'cancelled within policy rules':        'cancelled',
+            'cancelled outside policy rules':       'cancelled',
+            'cancelled by admin':                   'cancelled',
+        }
+
+        def map_outcome(status):
+            s = str(status or '').strip().lower()
+            for key, val in STATUS_TO_OUTCOME.items():
+                if key in s:
+                    return val
+            return 'upcoming'  # safe default for unknown statuses
+
+        def norm_location(loc):
+            loc = str(loc or '').strip()
+            if not loc.lower().startswith('stretchlab'):
+                return f'StretchLab {loc}'
+            return loc
+
+        # ── ClubReady base: Phiwe-only bookings ──────────────────────────────
+        funnel = lead_funnel[
+            lead_funnel['booking_made_by'].astype(str).str.lower().str.contains('phiwe', na=False)
+        ].copy()
+        funnel['_norm']           = funnel['full_name_lower'].apply(_norm_name)
+        funnel['unified_outcome'] = funnel['current_status'].apply(map_outcome)
+        funnel['source']          = 'clubready'
+        funnel['held']            = ''
+        funnel['paid']            = ''
+
+        manual_only_rows = pd.DataFrame()
+
+        if gap_details is not None and len(gap_details) > 0:
+            val = gap_details.copy()
+            val['_norm']      = val['name'].apply(_norm_name).apply(lambda n: _NAME_CORRECTIONS.get(n, n) if n else n)
+            val['held_clean'] = val['held'].astype(str).str.strip().str.lower()
+            val['paid_clean'] = val['paid'].astype(str).str.strip().str.lower()
+
+            # Override: manual tracker held=Yes + ClubReady status=Cancelled → attended
+            held_norms    = set(val.loc[val['held_clean'] == 'yes', '_norm'].dropna())
+            cancel_mask   = funnel['current_status'].str.contains('Cancelled', na=False, case=False)
+            override_mask = funnel['_norm'].isin(held_norms) & cancel_mask
+            funnel.loc[override_mask, 'unified_outcome'] = 'attended'
+            funnel.loc[override_mask, 'source']          = 'both'
+
+            # Mark other ClubReady rows that appear in the manual tracker
+            all_val_norms = set(val['_norm'].dropna())
+            funnel.loc[
+                funnel['_norm'].isin(all_val_norms) & (funnel['source'] == 'clubready'),
+                'source'
+            ] = 'both'
+
+            # Manual-tracker-only leads (name not found in ClubReady funnel)
+            funnel_norms = set(funnel['_norm'].dropna())
+            manual_only  = val[~val['_norm'].isin(funnel_norms)].copy()
+
+            _now = pd.Timestamp.now()
+
+            def derive_outcome(row):
+                held = row['held_clean']
+                paid = row['paid_clean']
+                appt = pd.to_datetime(row.get('date_of_appointment'), errors='coerce')
+                is_future = pd.notna(appt) and appt > _now
+                if held == 'yes':
+                    return 'attended'
+                if is_future:
+                    return 'upcoming'
+                if held in ('nan', 'none', 'nat', '', '<na>'):
+                    return 'upcoming'
+                if paid == 'yes':
+                    return 'paid_no_show'
+                return 'cancelled'
+
+            if len(manual_only) > 0:
+                manual_only = manual_only.copy()
+                manual_only['unified_outcome'] = manual_only.apply(derive_outcome, axis=1)
+                name_parts = manual_only['name'].str.strip().str.split(r'\s+', n=1, expand=True)
+                manual_only_rows = pd.DataFrame({
+                    'unified_outcome':  manual_only['unified_outcome'].values,
+                    'booking_location': manual_only['location'].apply(norm_location).values,
+                    'first_name':       name_parts[0].fillna('').values,
+                    'last_name':        (name_parts[1].fillna('').values if 1 in name_parts.columns else ['']*len(manual_only)),
+                    'booking_date':     pd.to_datetime(manual_only['date_of_appointment'], errors='coerce').values,
+                    'source':           'manual_tracker',
+                    'held':             manual_only['held'].astype(str).values,
+                    'paid':             manual_only['paid'].astype(str).values,
+                    'current_status':   None,
+                    'booking_made_by':  None,
+                })
+                logger.info(f"  Manual-tracker-only leads added: {len(manual_only_rows)}")
+
+        out_cols = ['unified_outcome', 'booking_location', 'first_name', 'last_name',
+                    'booking_date', 'source', 'held', 'paid', 'current_status', 'booking_made_by']
+        funnel_out = funnel.reindex(columns=out_cols)
+
+        if len(manual_only_rows) > 0:
+            result = pd.concat([funnel_out, manual_only_rows.reindex(columns=out_cols)], ignore_index=True)
+        else:
+            result = funnel_out.reset_index(drop=True)
+
+        logger.info(f"  Unified leads: {len(result)} total "
+                    f"({len(funnel_out)} ClubReady + {len(manual_only_rows)} manual-only)")
+        return result
+
     def _build_cancellation_analysis(self, bookings):
         """Detailed cancellation analysis"""
         logger.info("\nBuilding cancellation analysis...")
@@ -1464,11 +1626,6 @@ class DataTransformer:
         }
         
         # Per-record gap: match manual tracker names to system bookings
-        def _norm_name(s):
-            import re
-            if pd.isna(s): return None
-            return re.sub(r'\s+', ' ', re.sub(r'[^\w\s]', '', str(s)).lower()).strip()
-
         m1['_month'] = 1
         m2['_month'] = 2
         for col in ['Status', 'Held', 'Notes']:

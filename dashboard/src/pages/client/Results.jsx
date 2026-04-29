@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useMultiData } from '../../hooks/useData.js'
 import {
-  loadLeadFunnel,
+  loadUnifiedLeads,
   loadInsights,
   loadCancellationAnalysis,
   loadPipeline,
@@ -31,105 +31,70 @@ const SEGMENT_ACCENT = {
 const DAYS_OF_WEEK = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
 
 // ─── Studio stats builder ─────────────────────────────────────────────────────
-function buildStudioStats(bookings, cancellations = []) {
-  const getStatus = b => String(b.current_status || b['Current Status'] || '').trim()
-  const isHasShow = b => { const v = b['has_show'] ?? b.has_show; return v === true || v === 1 || String(v).trim() === '1' }
+function buildStudioStats(leads, cancellations = []) {
+  const outcome    = b => String(b.unified_outcome || '').toLowerCase()
+  const getStatus  = b => String(b.current_status || '').trim()
 
   const grouped = {}
-  const phiweOnly = bookings.filter(b => {
-    const madeBy = String(b.booking_made_by || b['Booking Made By'] || '')
-    return madeBy.toLowerCase().includes('phiwe')
-  })
-  phiweOnly.forEach(b => {
-    const loc = String(b.booking_location || b['Booking Location'] || 'Unknown').trim()
+  leads.forEach(b => {
+    const loc = String(b.booking_location || b['Booking Location'] || '').trim()
+    if (!loc) return
     if (!grouped[loc]) grouped[loc] = []
     grouped[loc].push(b)
   })
 
   return Object.entries(grouped).map(([studio, bks]) => {
-    // attended-first: has_show wins, even if current_status is Cancelled
-    const attendedSet = new Set()
-    const attended    = bks.filter(b => isHasShow(b))
-    attended.forEach(b => attendedSet.add(b.booking_id))
+    const attended    = bks.filter(b => outcome(b) === 'attended').length
+    const upcoming    = bks.filter(b => outcome(b) === 'upcoming').length
+    const noShows     = bks.filter(b => outcome(b) === 'no_show').length
+    const totalCancels = bks.filter(b => outcome(b) === 'cancelled' || outcome(b) === 'paid_no_show').length
+    const rescheduled = bks.filter(b => outcome(b) === 'rescheduled').length
+    const total       = bks.length
+    const resolved    = attended + totalCancels + noShows
+    const showRate    = resolved > 0 ? attended / resolved : 0
 
-    const rest              = bks.filter(b => !attendedSet.has(b.booking_id))
-    // Cancelled status is authoritative regardless of is_past/is_future (a future-dated cancellation is still resolved)
-    const cancelledCustBks  = rest.filter(b =>
-      getStatus(b).includes('Cancelled Within Policy') ||
-      getStatus(b).includes('Cancelled Outside Policy')
-    )
-    const cancelledAdminBks = rest.filter(b => getStatus(b).includes('Cancelled By Admin'))
-    // No-shows still require is_past — can't no-show a future session
-    const pastNonCancelledRest = rest.filter(b => {
-      const v = b.is_past; const s = getStatus(b)
-      return (v === true || v === 1 || String(v ?? '').trim() === '1') && !s.includes('Cancelled')
-    })
-    const noShowBks         = pastNonCancelledRest.filter(b => getStatus(b).includes('No Show'))
-    const rescheduledBks    = rest.filter(b => getStatus(b).includes('Rescheduled') && !getStatus(b).includes('Cancelled'))
-    const upcomingBks       = rest.filter(b => getStatus(b).includes('Open Booking'))
-
-    const shows         = attended.length
-    const adminCancels  = cancelledAdminBks.length
-    const custCancels   = cancelledCustBks.length
-    const totalCancels  = adminCancels + custCancels
-    const noShows       = noShowBks.length
-    const rescheduled   = rescheduledBks.length
-    const upcomingCount = upcomingBks.length
-    const total         = bks.length
-    const resolved      = shows + noShows + totalCancels
-    const showRate      = resolved > 0 ? shows / resolved : 0
+    // Admin vs customer cancel — current_status available only for ClubReady rows
+    const adminCancels  = bks.filter(b => outcome(b) === 'cancelled' && getStatus(b).includes('Cancelled By Admin')).length
+    const custCancels   = totalCancels - adminCancels
     const adminCancelPct = resolved >= 2 ? adminCancels / resolved : 0
 
-    // Cancel by day of week (booking_day_of_week field)
+    // Cancel by day of week — available on ClubReady rows only
     const cancelByDay = {}
     DAYS_OF_WEEK.forEach(d => { cancelByDay[d] = 0 })
-    ;[...cancelledCustBks, ...cancelledAdminBks].forEach(b => {
+    bks.filter(b => outcome(b) === 'cancelled').forEach(b => {
       const d = String(b.booking_day_of_week ?? '').trim()
       if (cancelByDay[d] !== undefined) cancelByDay[d]++
     })
 
-    // Cancel timing pills — cross-reference cancellations CSV by booking_id
-    const cancelIds = new Set([...cancelledCustBks, ...cancelledAdminBks].map(b => String(b.booking_id)))
-    const matchedCancels = cancellations.filter(c => cancelIds.has(String(c.booking_id)))
+    // Cancel timing — cross-reference cancellations CSV by booking_id
+    const cancelIds = new Set(bks.filter(b => outcome(b) === 'cancelled').map(b => String(b.booking_id)))
+    const matched = cancellations.filter(c => cancelIds.has(String(c.booking_id)))
     const cancelByTiming = { lastMinute: 0, shortNotice: 0, advance: 0 }
-    matchedCancels.forEach(c => {
+    matched.forEach(c => {
       const t = String(c.cancellation_timing ?? '')
       if (t.includes('<24')) cancelByTiming.lastMinute++
       else if (t.includes('1-7')) cancelByTiming.shortNotice++
-      else if (t.includes('7+') || t.toLowerCase().includes('advance')) cancelByTiming.advance++
+      else cancelByTiming.advance++
     })
-
-    // Fast-booking stat (booked within 7 days of appointment)
-    // Exclude null (upcoming — no timing computed) and negatives (booked before SDR called)
-    const fastBookingBks     = bks.filter(b => {
-      const dtb = b.days_to_booking
-      return dtb !== null && dtb !== undefined && dtb >= 0 && dtb <= 7
-    })
-    const fastBookings       = fastBookingBks.length
-    const fastBookingCancels = fastBookingBks.filter(b =>
-      getStatus(b).includes('Cancelled Within Policy') ||
-      getStatus(b).includes('Cancelled Outside Policy') ||
-      getStatus(b).includes('Cancelled By Admin')
-    ).length
 
     const segment =
-      total === 0                                               ? 'inactive'
-      : resolved === 0                                          ? 'activating'
-      : resolved <= 2                                           ? 'small-sample'
-      : adminCancelPct >= 0.30 && shows === 0 && resolved >= 2  ? 'studio-ops'
-      : showRate >= 0.25                                        ? 'working'
-      :                                                           'needs-attention'
+      total === 0                                                  ? 'inactive'
+      : attended >= 1 && showRate >= 0.25                          ? 'working'
+      : attended === 0 && upcoming >= 1                            ? 'activating'
+      : attended >= 1 || (upcoming === 0 && totalCancels > 0)     ? 'needs-attention'
+      :                                                              'activating'
 
     if (import.meta.env.DEV) {
-      console.log(`[Studio] ${studio}: total=${total} shows=${shows} resolved=${resolved} showRate=${(showRate * 100).toFixed(1)}% segment=${segment}`)
+      console.log(`[Studio] ${studio}: total=${total} attended=${attended} upcoming=${upcoming} cancelled=${totalCancels} showRate=${(showRate * 100).toFixed(1)}% segment=${segment}`)
     }
 
     const smallSample = resolved > 0 && resolved <= 4
 
     return {
-      studio, total, shows, noShows, custCancels, adminCancels, totalCancels,
-      rescheduled, upcoming: upcomingCount, resolved, showRate, adminCancelPct,
-      segment, smallSample, bookings: bks, cancelByDay, cancelByTiming, fastBookings, fastBookingCancels,
+      studio, total, shows: attended, noShows, custCancels, adminCancels, totalCancels,
+      rescheduled, upcoming, resolved, showRate, adminCancelPct,
+      segment, smallSample, bookings: bks, cancelByDay, cancelByTiming,
+      fastBookings: 0, fastBookingCancels: 0,
     }
   }).sort((a, b) => b.total - a.total)
 }
@@ -695,7 +660,7 @@ export default function Results() {
   const isManagerView = role === 'manager' || role === 'admin'
 
   const { data, loading } = useMultiData({
-    bookings:      loadLeadFunnel,
+    bookings:      loadUnifiedLeads,
     insights:      loadInsights,
     cancellations: loadCancellationAnalysis,
     pipeline:      loadPipeline,

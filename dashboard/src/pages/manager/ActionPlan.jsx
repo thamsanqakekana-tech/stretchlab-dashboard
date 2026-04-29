@@ -9,6 +9,7 @@ import {
   loadRampVsTarget,
   loadCampaignHealth,
   loadRootCauseAnalysis,
+  loadValidationReport,
   pivotToObject,
 } from '../../utils/dataLoader.js'
 import Card from '../../components/Card.jsx'
@@ -40,7 +41,7 @@ function weekRange() {
 }
 
 // ─── Action generator — derives 7–10 actions from raw CSV data ────────────────
-function generateActions({ pipeline, bookings, cancellations, validationLeads, callTiming, ramp, rootCause }) {
+function generateActions({ pipeline, bookings, cancellations, validationLeads, callTiming, ramp, rootCause, validationReport }) {
   const actions = []
   const today = new Date(); today.setHours(0,0,0,0)
 
@@ -135,6 +136,44 @@ function generateActions({ pipeline, bookings, cancellations, validationLeads, c
         description: heldUnlogged.length > 0
           ? `${heldUnlogged.length} held session${heldUnlogged.length !== 1 ? 's' : ''} unrecorded × $${INTRO_PRICE} = $${revenueImpact} in unaccounted session revenue`
           : `${notInSystem.length} record${notInSystem.length !== 1 ? 's' : ''} need ClubReady status update`,
+      },
+      deadline: addDays(2),
+      status:   'not_started',
+    })
+  }
+
+  // ── CRITICAL: Attended sessions not in ClubReady ────────────────────────────
+  const unloggedAttended = validationReport?.unlogged_attended ?? []
+  if (unloggedAttended.length > 0) {
+    const names = unloggedAttended.map(r => `${r.name} (${r.location})`).join(', ')
+    actions.push({
+      id:       'unlogged-attended',
+      priority: 'critical',
+      title:    `Log ${unloggedAttended.length} attended session${unloggedAttended.length !== 1 ? 's' : ''} into ClubReady — not yet in the system`,
+      owner:    'tamryn',
+      why:      `The manual tracker records ${unloggedAttended.length} session${unloggedAttended.length !== 1 ? 's' : ''} as attended (held=Yes) with no matching ClubReady booking record. These sessions are confirmed on the studio floor but are invisible to the pipeline — they suppress the measured show rate and undercount revenue. Tamryn to create or update the ClubReady record for each:\n\n${names}`,
+      impact:   {
+        revenue:     unloggedAttended.length * INTRO_PRICE,
+        description: `${unloggedAttended.length} confirmed session${unloggedAttended.length !== 1 ? 's' : ''} × $${INTRO_PRICE} intro = $${unloggedAttended.length * INTRO_PRICE} in unrecorded session revenue`,
+      },
+      deadline: addDays(1),
+      status:   'not_started',
+    })
+  }
+
+  // ── IMPORTANT: Possible duplicate leads — manual tracker vs ClubReady ────────
+  const possibleDups = validationReport?.possible_duplicates ?? []
+  if (possibleDups.length > 0) {
+    const lines = possibleDups.map(r => `${r.name} (${r.location}) — ${r.note}`).join('\n')
+    actions.push({
+      id:       'possible-duplicates',
+      priority: 'important',
+      title:    `Verify ${possibleDups.length} manual tracker lead${possibleDups.length !== 1 ? 's' : ''} — possible duplicate of a ClubReady record`,
+      owner:    'tamryn',
+      why:      `The pipeline found ${possibleDups.length} manual tracker lead${possibleDups.length !== 1 ? 's' : ''} whose first name matches a ClubReady lead but whose full name did not match (possible spelling variant or different family member). If these are the same people, they are being double-counted. Tamryn to confirm identity and merge or remove the duplicate:\n\n${lines}`,
+      impact:   {
+        revenue:     0,
+        description: 'Data integrity — prevents double-counting in show rate and pipeline totals',
       },
       deadline: addDays(2),
       status:   'not_started',
@@ -420,8 +459,9 @@ export default function ActionPlan() {
     validationLeads: loadValidationLeadDetails,
     callTiming:      loadCallTimingOptimized,
     ramp:            loadRampVsTarget,
-    healthRows:      loadCampaignHealth,
-    rootCause:       loadRootCauseAnalysis,
+    healthRows:        loadCampaignHealth,
+    rootCause:         loadRootCauseAnalysis,
+    validationReport:  loadValidationReport,
   })
 
   // ── Completed state ──────────────────────────────────────────────────────────
@@ -455,7 +495,8 @@ export default function ActionPlan() {
       validationLeads: data.validationLeads ?? [],
       callTiming:      data.callTiming      ?? [],
       ramp:            data.ramp            ?? [],
-      rootCause:       data.rootCause       ?? {},
+      rootCause:         data.rootCause         ?? {},
+      validationReport:  data.validationReport  ?? {},
     })
   }, [loading, data])
 

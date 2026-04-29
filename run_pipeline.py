@@ -48,7 +48,7 @@ def run_pipeline(workbook_path, manual_tracker_path=None, output_dir='outputs'):
     # Save CSV outputs
     csv_outputs = [
         'calls', 'bookings', 'daily_performance', 'by_studio', 'by_area_code',
-        'pipeline', 'call_timing', 'lead_funnel', 'cancellation_analysis',
+        'pipeline', 'call_timing', 'lead_funnel', 'unified_leads', 'cancellation_analysis',
         'booking_outcomes', 'booking_window_analysis', 'day_of_week_performance',
         'validation_lead_details', 'cohort_analysis',
         # V4.1 new outputs
