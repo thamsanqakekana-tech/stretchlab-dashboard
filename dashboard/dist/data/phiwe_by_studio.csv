@@ -1,11 +1,11 @@
 studio,bookings,shows,cancellations,no_shows,show_rate_pct,cancel_rate_pct
-StretchLab Shreveport,21.0,7.0,16.0,0.0,33.33333333333333,76.19047619047619
-StretchLab Bunker Hill,10.0,1.0,5.0,0.0,10.0,50.0
+StretchLab Shreveport,21.0,7.0,17.0,0.0,33.33333333333333,80.95238095238095
+StretchLab Bunker Hill,10.0,1.0,6.0,0.0,10.0,60.0
 StretchLab Cherry Street,7.0,1.0,5.0,0.0,14.285714285714285,71.42857142857143
 StretchLab Bellaire,5.0,1.0,2.0,0.0,20.0,40.0
+StretchLab Heights,5.0,1.0,2.0,0.0,20.0,40.0
 StretchLab Pearland,4.0,2.0,1.0,0.0,50.0,25.0
 StretchLab Brighton,3.0,1.0,1.0,0.0,33.33333333333333,33.33333333333333
 StretchLab Clarkston,2.0,0.0,2.0,0.0,0.0,100.0
-StretchLab Heights,1.0,0.0,1.0,0.0,0.0,100.0
 StretchLab River Oaks,0.0,0.0,0.0,0.0,0.0,0.0
 StretchLab South Tulsa,0.0,0.0,0.0,0.0,0.0,0.0

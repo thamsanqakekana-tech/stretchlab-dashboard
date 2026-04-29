@@ -1,4 +1,4 @@
 cohort,total_bookings,shows,cancellations,no_shows,show_rate,cancel_rate,no_show_rate,insight
-Fast (0-3 days),29,4,26,0,0.13793103448275862,0.896551724137931,0.0,Impulsive bookers - higher cancel risk
+Fast (0-3 days),29,5,26,0,0.1724137931034483,0.896551724137931,0.0,Impulsive bookers - higher cancel risk
 Quick (3-7 days),1,1,1,0,1.0,1.0,0.0,Quick decision - moderate risk
 Very Slow (30+ days),1,0,1,0,0.0,1.0,0.0,Too far out - commitment fades

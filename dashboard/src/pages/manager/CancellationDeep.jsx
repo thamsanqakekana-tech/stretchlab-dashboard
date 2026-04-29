@@ -59,6 +59,11 @@ export default function CancellationDeep() {
   const hypotheticalShowRate = totalBookings > 0
     ? ((currentShows + adminCancelled) / totalBookings) * 100
     : 0
+  const cancelMax = COLD_OUTREACH_BENCHMARKS.cancel_rate.max
+  const cancelMin = COLD_OUTREACH_BENCHMARKS.cancel_rate.min
+  const cancelRangeText = cancelRate <= cancelMax
+    ? `is within the cold outreach range (${cancelMin}–${cancelMax}%)`
+    : `exceeds the cold outreach ceiling of ${cancelMax}%. The lead-driven rate, excluding ${adminCancelled} admin-initiated cancellations, is substantially lower`
 
   const promptText = useMemo(() => {
     if (loading) return ''
@@ -256,12 +261,12 @@ Write manager-facing deep dive. Distinguish admin-initiated disruptions from lea
       {/* Industry context */}
       <Card style={{ marginBottom: '24px', borderLeft: '3px solid var(--info)' }}>
         <p style={{ fontSize: '13px', color: 'var(--text)', lineHeight: 1.7 }}>
-          <strong>Cold outreach context:</strong> Cancel rate benchmark for dormant leads (6–12 months inactive) is 20–35%.
+          <strong>Cold outreach context:</strong> Cancel rate benchmark for dormant leads (6–12 months inactive) is {cancelMin}–{cancelMax}%.
           This campaign is calibrated for revival — not fresh studio leads. Current rate{' '}
-          <strong>{typeof cancelRate === 'number' ? cancelRate.toFixed(1) : cancelRate}%</strong> is within the cold outreach range.
-          The issue is not the overall rate but the composition: <strong>{adminCancelled}</strong> of the {totalCancellations} cancellations
+          <strong>{typeof cancelRate === 'number' ? cancelRate.toFixed(1) : cancelRate}%</strong> {cancelRangeText}.
+          <strong>{adminCancelled}</strong> of the {totalCancellations} cancellations
           were admin-initiated (Cancelled By Admin), not lead-driven.
-          Without these studio-side disruptions, show rate would be ~<strong>{hypotheticalShowRate.toFixed(0)}%</strong> — well above the 8–15% cold outreach standard.
+          Without these studio-side disruptions, show rate would be ~<strong>{hypotheticalShowRate.toFixed(0)}%</strong> — well above the {COLD_OUTREACH_BENCHMARKS.show_rate.min}–{COLD_OUTREACH_BENCHMARKS.show_rate.max}% cold outreach show rate standard.
         </p>
       </Card>
 
