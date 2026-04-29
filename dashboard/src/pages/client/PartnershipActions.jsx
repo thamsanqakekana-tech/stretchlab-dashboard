@@ -1,446 +1,469 @@
-import React, { useMemo, useState } from 'react'
-import { useMultiData } from '../../hooks/useData.js'
-import {
-  loadBookings,
-  loadByStudio,
-  loadCancellationAnalysis,
-  loadValidationLeadDetails,
-  loadCalls,
-  loadCampaignHealth,
-  pivotToObject,
-} from '../../utils/dataLoader.js'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '../../context/AuthContext.jsx'
+import { supabase } from '../../lib/supabaseClient.js'
 import Card from '../../components/Card.jsx'
-import Tooltip from '../../components/Tooltip.jsx'
 
-const SOW_TARGET = 77
+// ─── Seed items (state persisted in Supabase, definitions stay in code) ───────
+const SEED_ITEMS = [
+  {
+    key: 'sl_1', owner: 'StretchLab',
+    label: 'Log session outcomes in ClubReady within 24 hours of each appointment',
+    urgency: 'High', deadline: 'Ongoing SLA',
+  },
+  {
+    key: 'sl_2', owner: 'StretchLab',
+    label: 'Notify Execo before cancelling or rescheduling any booked session',
+    urgency: 'High', deadline: 'Ongoing',
+  },
+  {
+    key: 'sl_3', owner: 'StretchLab',
+    label: 'Keep flexologist calendars up to date before sessions are booked',
+    urgency: 'High', deadline: 'Ongoing',
+  },
+  {
+    key: 'sl_4', owner: 'StretchLab',
+    label: 'Review admin cancellation triggers at Bunker Hill and Shreveport',
+    urgency: 'Medium', deadline: 'Weekly',
+  },
+  {
+    key: 'sl_5', owner: 'StretchLab',
+    label: 'Notify Execo when a re-engaged lead converts to a membership',
+    urgency: 'Medium', deadline: 'Ongoing',
+  },
+  {
+    key: 'ex_1', owner: 'Execo',
+    label: 'Confirm upcoming pipeline sessions for the current week',
+    urgency: 'High', deadline: 'Every Monday',
+  },
+  {
+    key: 'ex_2', owner: 'Execo',
+    label: 'Flag unpaid leads in pipeline as pre-session priority',
+    urgency: 'High', deadline: 'Ongoing',
+  },
+  {
+    key: 'ex_3', owner: 'Execo',
+    label: 'Update StretchLab on any data drift between ClubReady and the manual tracker',
+    urgency: 'Medium', deadline: 'Weekly',
+  },
+]
 
-const sectionLabel = {
-  fontSize: '10px', fontWeight: 700, textTransform: 'uppercase',
-  letterSpacing: '0.08em', margin: '0 0 12px',
+// ─── Urgency palette (neutral, no traffic-lights) ─────────────────────────────
+const URGENCY_CONFIG = {
+  High:   { color: '#d97706', bg: 'rgba(217,119,6,0.10)'  },
+  Medium: { color: '#6366f1', bg: 'rgba(99,102,241,0.10)' },
+  Watch:  { color: '#94a3b8', bg: 'rgba(148,163,184,0.10)' },
 }
 
-// ─── SOW Progress Bar ─────────────────────────────────────────────────────────
-function ProgressBar({ bookings }) {
-  const confirmedShows = bookings.filter(b => +b.has_show === 1).length
-  const upcoming       = bookings.filter(b => {
-    const v = b.is_future; const isFut = v === true || v === 1 || String(v ?? '').trim() === '1'
-    return isFut && !String(b.current_status || '').includes('Cancelled')
-  }).length
-  const resolved       = bookings.filter(b => {
-    const v = b.is_past; const isPast = v === true || v === 1 || String(v ?? '').trim() === '1'
-    return isPast && !String(b.current_status || '').includes('Rescheduled')
-  }).length
-  const showRate            = resolved > 0 ? confirmedShows / resolved : 0
-  const projectedFromUpcoming = Math.round(upcoming * showRate)
-  const stillToBook         = Math.max(0, SOW_TARGET - confirmedShows - upcoming)
-
-  const pctConfirmed = Math.min(100, (confirmedShows / SOW_TARGET) * 100)
-  const pctUpcoming  = Math.min(100 - pctConfirmed, (upcoming / SOW_TARGET) * 100)
-
-  return (
-    <Card style={{ marginBottom: '24px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '12px' }}>
-        <p style={{ ...sectionLabel, color: 'var(--muted)', margin: 0 }}>SOW Progress — Target: {SOW_TARGET} kept appointments</p>
-        <p style={{ fontSize: '11px', color: 'var(--muted)', margin: 0 }}>Deadline: May 24, 2026</p>
-      </div>
-      <div style={{ height: '10px', borderRadius: '6px', background: 'var(--border)', overflow: 'hidden', display: 'flex', marginBottom: '12px' }}>
-        <div style={{ width: `${pctConfirmed}%`, background: '#22c55e', transition: 'width 0.4s ease' }} />
-        <div style={{ width: `${pctUpcoming}%`, background: '#6366f1', opacity: 0.55, transition: 'width 0.4s ease' }} />
-      </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', marginBottom: '10px' }}>
-        <span style={{ fontSize: '12px', color: 'var(--text-2)' }}>
-          <strong style={{ color: '#22c55e' }}>{confirmedShows}</strong> sessions held
-        </span>
-        <span style={{ fontSize: '12px', color: 'var(--text-2)' }}>
-          <strong style={{ color: '#6366f1' }}>{upcoming}</strong> scheduled, pending
-        </span>
-        <span style={{ fontSize: '12px', color: 'var(--text-2)' }}>
-          <strong style={{ color: 'var(--muted)' }}>{stillToBook}</strong> still to be booked
-        </span>
-      </div>
-      {upcoming > 0 && projectedFromUpcoming > 0 && (
-        <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '0 0 10px', lineHeight: 1.5 }}>
-          At the current {(showRate * 100).toFixed(0)}% show rate, approximately <strong>{projectedFromUpcoming}</strong> of the {upcoming} scheduled appointments are expected to hold — confirming each one before the session date is the most reliable lever for improving that outcome.
-        </p>
-      )}
-      {stillToBook > 0 && (
-        <div style={{ background: 'rgba(99,102,241,0.07)', borderRadius: '8px', padding: '10px 14px', border: '1px solid rgba(99,102,241,0.2)' }}>
-          <p style={{ fontSize: '12px', color: '#6366f1', margin: 0, lineHeight: 1.6 }}>
-            <strong>{confirmedShows} held · {upcoming} scheduled · {stillToBook} still to book</strong> — Month 3 outreach runs through May 24. Phiwe is actively calling and converting leads every day — each confirmed session and membership conversion builds toward the partnership goal.
-          </p>
-        </div>
-      )}
-    </Card>
-  )
+// ─── Week helpers for non-ongoing reset ───────────────────────────────────────
+function getMondayOf(d) {
+  const day = new Date(d)
+  const dow  = day.getDay()              // 0 = Sun
+  const diff = dow === 0 ? -6 : 1 - dow // back to Monday
+  day.setDate(day.getDate() + diff)
+  day.setHours(0, 0, 0, 0)
+  return day
 }
 
-// ─── Admin Disruptions Card ───────────────────────────────────────────────────
-function AdminDisruptionsCard({ cancellations, bookings }) {
-  const [drillOpen, setDrillOpen] = useState(false)
-
-  const adminCancels   = useMemo(() => cancellations.filter(c => c.cancelled_by === 'Admin'), [cancellations])
-  const leadCancels    = useMemo(() => cancellations.filter(c => c.cancelled_by !== 'Admin'), [cancellations])
-  const adminCancelled = adminCancels.length
-  const confirmedShows = bookings.filter(b => +b.has_show === 1).length
-
-  const ratioText = leadCancels.length > 0 ? `${(adminCancelled / leadCancels.length).toFixed(1)}×` : null
-
-  const resolvedCount = useMemo(() => {
-    const past = bookings.filter(b => { const v = b.is_past; return v === true || v === 1 || String(v ?? '').trim() === '1' })
-    const resch = past.filter(b => String(b.current_status || '').includes('Rescheduled'))
-    return past.length - resch.length
-  }, [bookings])
-
-  const hypotheticalShows    = confirmedShows + adminCancelled
-  const hypotheticalDenom    = resolvedCount + adminCancelled
-  const hypotheticalShowRate = hypotheticalDenom > 0
-    ? ((hypotheticalShows / hypotheticalDenom) * 100).toFixed(0)
-    : '0'
-
-  const byStudio = useMemo(() => {
-    const map = {}
-    adminCancels.forEach(c => {
-      const key = (c.booking_location ?? 'Unknown').replace('StretchLab ', '')
-      if (!map[key]) map[key] = 0
-      map[key]++
-    })
-    return Object.entries(map)
-      .map(([studio, count]) => ({ studio, count }))
-      .sort((a, b) => b.count - a.count)
-  }, [adminCancels])
-
-  const { viewRole: role } = useAuth()
-
-  if (adminCancelled === 0) return null
-
-  return (
-    <Card style={{ borderLeft: '3px solid #f59e0b', marginBottom: '20px' }}>
-      <p style={{ ...sectionLabel, color: '#f59e0b' }}>
-        Studio-Initiated Disruptions — {adminCancelled} appointment{adminCancelled !== 1 ? 's' : ''} cancelled by admin
-      </p>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0', marginBottom: '14px' }}>
-        <div style={{ borderRight: '1px solid var(--border)', paddingRight: '20px' }}>
-          <p style={{ fontSize: '10px', fontWeight: 700, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 8px' }}>What happened</p>
-          <p style={{ fontSize: '13px', color: 'var(--text)', lineHeight: 1.7, margin: 0 }}>
-            <strong>{adminCancelled}</strong> appointment{adminCancelled !== 1 ? 's' : ''} were cancelled by a studio admin before the session occurred.
-            {ratioText && ` This is ${ratioText} the volume of lead-initiated cancellations — the studio side is the primary source of disruption, not lead commitment.`}
-          </p>
-        </div>
-
-        <div style={{ borderRight: '1px solid var(--border)', padding: '0 20px' }}>
-          <p style={{ fontSize: '10px', fontWeight: 700, color: 'var(--warn)', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 8px' }}>Impact on show rate</p>
-          <p style={{ fontSize: '13px', color: 'var(--text)', lineHeight: 1.7, margin: 0 }}>
-            Without these studio-side reschedules, the show rate on lead-committed bookings would be approximately{' '}
-            <strong style={{ color: '#22c55e' }}>{hypotheticalShowRate}%</strong> — well above the benchmark for this lead type.
-            Coordinating schedule changes proactively with Execo before a session is moved is the most direct way to protect those outcomes.
-          </p>
-        </div>
-
-        <div style={{ paddingLeft: '20px' }}>
-          <p style={{ fontSize: '10px', fontWeight: 700, color: '#38bdf8', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 8px' }}>StretchLab can fix this</p>
-          <p style={{ fontSize: '13px', color: 'var(--text)', lineHeight: 1.7, margin: '0 0 6px' }}>
-            {byStudio.length > 0 && (
-              <>{byStudio.slice(0, 2).map(s => `${s.studio} (${s.count})`).join(' and ')} account for the highest admin disruption volume.</>
-            )}
-          </p>
-          <p style={{ fontSize: '12px', color: 'var(--muted)', margin: 0, lineHeight: 1.6 }}>
-            Action: Review scheduling at these studios and notify EXECO before any session needs to be moved — not after.
-          </p>
-        </div>
-      </div>
-
-      <button
-        onClick={() => setDrillOpen(o => !o)}
-        style={{
-          background: 'none', border: '1px solid var(--border)',
-          borderRadius: '6px', padding: '5px 12px', fontSize: '11px', color: 'var(--muted)',
-          cursor: 'pointer', fontFamily: 'inherit',
-        }}
-      >
-        {drillOpen ? 'Hide detail ▲' : `Show ${adminCancelled} affected appointment${adminCancelled !== 1 ? 's' : ''} ▼`}
-      </button>
-
-      {drillOpen && (
-        <div style={{ marginTop: '14px', overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                <th style={{ padding: '6px 12px', textAlign: 'left', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '10px' }}>Studio</th>
-                <th style={{ padding: '6px 12px', textAlign: 'left', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '10px' }}>Appointment Date</th>
-                <th style={{ padding: '6px 12px', textAlign: 'left', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '10px' }}>Cancelled by</th>
-                {role !== 'client' && (
-                  <th style={{ padding: '6px 12px', textAlign: 'left', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '10px' }}>Lead</th>
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {adminCancels.map((c, i) => (
-                <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                  <td style={{ padding: '7px 12px', color: 'var(--text-2)' }}>{(c.booking_location ?? '—').replace('StretchLab ', '')}</td>
-                  <td style={{ padding: '7px 12px', color: 'var(--text-2)' }}>
-                    {c.booking_date ? new Date(c.booking_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}
-                  </td>
-                  <td style={{ padding: '7px 12px' }}>
-                    <span style={{ fontSize: '10px', fontWeight: 600, color: '#f59e0b', background: '#f59e0b18', padding: '1px 6px', borderRadius: '3px' }}>
-                      Studio Admin
-                    </span>
-                  </td>
-                  {role !== 'client' && (
-                    <td style={{ padding: '7px 12px', color: 'var(--text-2)' }}>
-                      {c.first_name && c.last_name ? `${c.first_name} ${c.last_name}` : '—'}
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </Card>
-  )
+function isSameWeek(d1, d2) {
+  return getMondayOf(d1).getTime() === getMondayOf(d2).getTime()
 }
 
-// ─── ClubReady Hygiene Card ────────────────────────────────────────────────────
-function ClubReadyCard({ bookings, leadDetails }) {
-  const [drillOpen, setDrillOpen] = useState(false)
-  const pastPending = useMemo(() => (
-    bookings.filter(b => +b.is_past === 1 && b.booking_outcome === 'New')
-  ), [bookings])
-
-  const trackerGaps = useMemo(() => {
-    const today = new Date().toISOString().slice(0, 10)
-    return Array.isArray(leadDetails)
-      ? leadDetails.filter(r =>
-          (r.in_system === false || r.in_system === 'False' || r.in_system === 0) &&
-          r.date_of_appointment != null &&
-          String(r.date_of_appointment).slice(0, 10) <= today
-        )
-      : []
-  }, [leadDetails])
-
-  if (pastPending.length === 0 && trackerGaps.length === 0) return null
-
-  return (
-    <Card style={{ borderLeft: '3px solid #38bdf8', marginBottom: '20px' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: trackerGaps.length > 0 ? '1fr 1fr' : '1fr', gap: '24px' }}>
-
-        {pastPending.length > 0 && (
-          <div>
-            <p style={{ ...sectionLabel, color: '#38bdf8' }}>
-              Outcome Logging — {pastPending.length} past appointment{pastPending.length !== 1 ? 's' : ''} awaiting update
-            </p>
-            <p style={{ fontSize: '13px', color: 'var(--text)', lineHeight: 1.7, margin: '0 0 8px' }}>
-              {pastPending.length} appointment{pastPending.length !== 1 ? 's' : ''} have passed their scheduled date but the outcome hasn't been formally logged in ClubReady.
-              Until these are updated, the dashboard cannot count them in show or cancel metrics — which understates confirmed sessions.
-            </p>
-            <p style={{ fontSize: '12px', color: '#38bdf8', fontWeight: 600, margin: '0 0 12px', lineHeight: 1.6 }}>
-              Action required: Log the outcome of each past appointment in ClubReady within 24 hours of the session date.
-            </p>
-            <button
-              onClick={() => setDrillOpen(o => !o)}
-              style={{ background: 'none', border: '1px solid var(--border)', borderRadius: '6px', padding: '5px 12px', fontSize: '11px', color: 'var(--muted)', cursor: 'pointer', fontFamily: 'inherit' }}
-            >
-              {drillOpen ? 'Hide ▲' : `View ${pastPending.length} appointment${pastPending.length !== 1 ? 's' : ''} ▼`}
-            </button>
-            {drillOpen && (
-              <div style={{ marginTop: '12px' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
-                  <thead>
-                    <tr>
-                      {['Lead', 'Studio', 'Date'].map(h => (
-                        <th key={h} style={{ textAlign: 'left', padding: '6px 10px', color: 'var(--muted)', fontWeight: 600, borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {pastPending.map((bk, i) => {
-                      const name   = [bk.first_name, bk.last_name].filter(Boolean).join(' ') || '—'
-                      const studio = (bk.booking_location ?? '—').replace('StretchLab ', '')
-                      const date   = bk.booking_date ? new Date(bk.booking_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'
-                      return (
-                        <tr key={i} style={{ background: i % 2 === 0 ? 'transparent' : 'var(--bg)' }}>
-                          <td style={{ padding: '8px 10px', color: 'var(--text)', fontWeight: 500 }}>{name}</td>
-                          <td style={{ padding: '8px 10px', color: 'var(--muted)' }}>{studio}</td>
-                          <td style={{ padding: '8px 10px', color: 'var(--muted)', fontFamily: 'JetBrains Mono, monospace' }}>{date}</td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
-
-        {trackerGaps.length > 0 && (
-          <div style={{ borderLeft: pastPending.length > 0 ? '1px solid var(--border)' : 'none', paddingLeft: pastPending.length > 0 ? '24px' : '0' }}>
-            <p style={{ ...sectionLabel, color: '#38bdf8' }}>
-              Tracker Gaps — {trackerGaps.length} booking{trackerGaps.length !== 1 ? 's' : ''} not yet in ClubReady
-            </p>
-            <p style={{ fontSize: '13px', color: 'var(--text)', lineHeight: 1.7, margin: '0 0 8px' }}>
-              Our internal tracking records {trackerGaps.length} appointment{trackerGaps.length !== 1 ? 's' : ''} that {trackerGaps.length !== 1 ? 'are' : 'is'} not yet logged in ClubReady.
-              These sessions exist — they just can't be counted toward the SOW target until they appear in the system.
-            </p>
-            <p style={{ fontSize: '12px', color: '#38bdf8', fontWeight: 600, margin: '0 0 12px', lineHeight: 1.6 }}>
-              Action required: Log {trackerGaps.length} appointment{trackerGaps.length !== 1 ? 's' : ''} in ClubReady so they appear in campaign metrics.
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              {trackerGaps.map((r, i) => (
-                <div key={i} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '7px', padding: '8px 12px', fontSize: '12px' }}>
-                  <span style={{ color: 'var(--text)', fontWeight: 600 }}>{r.name ?? '—'}</span>
-                  <span style={{ color: 'var(--muted)', marginLeft: '8px' }}>
-                    {r.date_of_appointment ? new Date(r.date_of_appointment).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}
-                  </span>
-                  <span style={{ color: 'var(--muted)', marginLeft: '8px' }}>{r.location ?? '—'}</span>
-                  {r.paid === 'Yes' && <span style={{ marginLeft: '8px', fontSize: '10px', color: '#22c55e', fontWeight: 700 }}>PAID</span>}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    </Card>
-  )
+function isEffectivelyChecked(row, deadline) {
+  if (!row?.checked) return false
+  const ongoing = deadline.toLowerCase().includes('ongoing')
+  if (ongoing) return true                         // stays until manually unchecked
+  if (!row.checked_at) return false
+  return isSameWeek(new Date(row.checked_at), new Date()) // weekly items reset each Mon
 }
 
-// ─── Lead Bucket Transparency Card ────────────────────────────────────────────
-// Evans directive: client must understand the quality of leads being called
-function LeadBucketCard({ calls }) {
-  const buckets = useMemo(() => {
-    if (!calls.length) return null
-    const withAge = calls.filter(c => c.lead_age_months != null && c.lead_age_months !== '')
-    if (!withAge.length) return null
-    const b = {
-      fresh:  calls.filter(c => +c.lead_age_months <  12).length,
-      mid:    calls.filter(c => +c.lead_age_months >= 12 && +c.lead_age_months < 24).length,
-      stale:  calls.filter(c => +c.lead_age_months >= 24).length,
-    }
-    return b
-  }, [calls])
+// ─── Author label from email ──────────────────────────────────────────────────
+function authorFromEmail(email) {
+  if (!email) return 'Execo'
+  return email.endsWith('@stretchlab.com') ? 'StretchLab' : 'Execo'
+}
 
-  // Even without lead_age_months, show the structural framing Evans called out
+// ─── Format date for display ──────────────────────────────────────────────────
+function fmtDate(ts) {
+  if (!ts) return ''
+  return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
+// ─── ChecklistItem ────────────────────────────────────────────────────────────
+function ChecklistItem({ item, row, onToggle, saving, isLast = false }) {
+  const checked  = isEffectivelyChecked(row, item.deadline)
+  const urg      = URGENCY_CONFIG[item.urgency] ?? URGENCY_CONFIG.Watch
+  const isOngoing = item.deadline.toLowerCase().includes('ongoing')
+
   return (
-    <Card style={{ borderLeft: '3px solid var(--accent)', marginBottom: '20px' }}>
-      <p style={{ ...sectionLabel, color: 'var(--accent)' }}>The Lead Profile</p>
-      <p style={{ fontSize: '13px', color: 'var(--text)', lineHeight: 1.75, margin: '0 0 14px' }}>
-        Phiwe is calling dormant StretchLab leads — people who enquired or signed up, then went quiet for 6 months or longer.
-        {' '}These are not fresh inquiries; the cold re-engagement benchmarks (10–18% connect rate, 0.5–1.5% booking rate) are calibrated specifically for this lead profile.
-        {' '}Leads with prior visits are the highest-conversion segment — they have already experienced the studio and understand the product.
-      </p>
+    <div
+      style={{
+        display: 'flex', gap: '12px', padding: '12px 0',
+        borderBottom: isLast ? 'none' : '1px solid var(--border)',
+        opacity: checked ? 0.5 : 1,
+        transition: 'opacity 0.2s ease',
+      }}
+    >
+      {/* Checkbox */}
+      <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: saving ? 'wait' : 'pointer', flex: 1 }}>
+        <input
+          type="checkbox"
+          checked={checked}
+          disabled={saving}
+          onChange={() => onToggle(item, row, checked)}
+          style={{
+            marginTop: '2px', width: '16px', height: '16px',
+            accentColor: 'var(--accent)', cursor: 'pointer', flexShrink: 0,
+          }}
+        />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{
+            fontSize: '13px', fontWeight: 500, color: 'var(--text)',
+            margin: '0 0 6px', lineHeight: 1.5,
+            textDecoration: checked ? 'line-through' : 'none',
+          }}>
+            {item.label}
+          </p>
 
-      {buckets && (
-        <div style={{ display: 'flex', gap: '16px', paddingTop: '14px', borderTop: '1px solid var(--border)' }}>
-          <div style={{ flex: 1, background: 'rgba(99,102,241,0.07)', borderRadius: '8px', padding: '12px 16px' }}>
-            <p style={{ fontSize: '22px', fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: 'var(--accent)', margin: '0 0 2px' }}>{buckets.fresh.toLocaleString()}</p>
-            <p style={{ fontSize: '11px', color: 'var(--muted)', margin: 0 }}>6–12 months inactive</p>
+          {/* Tags row */}
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <span style={{
+              fontSize: '10px', fontWeight: 700, padding: '2px 7px', borderRadius: '4px',
+              color: urg.color, background: urg.bg,
+              textTransform: 'uppercase', letterSpacing: '0.06em',
+            }}>
+              {item.urgency}
+            </span>
+            <span style={{
+              fontSize: '10px', fontWeight: 600, padding: '2px 7px', borderRadius: '4px',
+              color: 'var(--muted)', background: 'var(--surface-2)',
+              letterSpacing: '0.04em',
+            }}>
+              {isOngoing ? 'Ongoing' : `Due ${item.deadline}`}
+            </span>
           </div>
-          <div style={{ flex: 1, background: 'rgba(245,158,11,0.07)', borderRadius: '8px', padding: '12px 16px' }}>
-            <p style={{ fontSize: '22px', fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: '#f59e0b', margin: '0 0 2px' }}>{buckets.mid.toLocaleString()}</p>
-            <p style={{ fontSize: '11px', color: 'var(--muted)', margin: 0 }}>12–24 months inactive</p>
-          </div>
-          <div style={{ flex: 1, background: 'rgba(239,68,68,0.07)', borderRadius: '8px', padding: '12px 16px' }}>
-            <p style={{ fontSize: '22px', fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: '#ef4444', margin: '0 0 2px' }}>{buckets.stale.toLocaleString()}</p>
-            <p style={{ fontSize: '11px', color: 'var(--muted)', margin: 0 }}>24+ months inactive</p>
-          </div>
+
+          {/* Completion note */}
+          {checked && row?.checked_by && (
+            <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '6px 0 0', fontStyle: 'italic' }}>
+              {row.checked_by} marked complete {fmtDate(row.checked_at)}
+            </p>
+          )}
         </div>
-      )}
-    </Card>
-  )
-}
-
-// ─── Partnership Accountability Matrix ────────────────────────────────────────
-function PartnershipMatrix({ bookings, calls, healthObj = {} }) {
-  const rawMeaningful   = calls.filter(c => parseFloat(c.live_talk_min || 0) >= 0.5).length
-  const meaningfulConvs = healthObj.meaningful_convs != null ? +healthObj.meaningful_convs : rawMeaningful
-  const totalCalls      = healthObj.total_calls      != null ? +healthObj.total_calls      : calls.length
-  const connectRate     = (meaningfulConvs > 0 && totalCalls > 0) ? ((meaningfulConvs / totalCalls) * 100).toFixed(1) : '0.0'
-  const bookingConvRate = meaningfulConvs > 0 ? ((bookings.length / meaningfulConvs) * 100).toFixed(1) : '0.0'
-
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
-      <Card>
-        <p style={{ ...sectionLabel, color: 'var(--accent)' }}>EXECO Is Delivering</p>
-        <ul style={{ margin: 0, padding: '0 0 0 16px', fontSize: '13px', color: 'var(--text-2)', lineHeight: 1.9 }}>
-          <li><strong style={{ color: 'var(--text)' }}>{totalCalls.toLocaleString()} calls</strong> made across all active studios</li>
-          <li>Connect rate <strong style={{ color: '#22c55e' }}>{connectRate}%</strong> — within the expected range for dormant lead re-engagement</li>
-          <li><strong style={{ color: '#22c55e' }}>{bookingConvRate}%</strong> of real conversations became a booked session</li>
-          <li>Phiwe follows up with every upcoming appointment to confirm attendance before the session date</li>
-        </ul>
-      </Card>
-
-      <Card style={{ borderLeft: '3px solid #f59e0b' }}>
-        <p style={{ ...sectionLabel, color: '#f59e0b' }}>StretchLab Action Items</p>
-        <ul style={{ margin: 0, padding: '0 0 0 16px', fontSize: '13px', color: 'var(--text-2)', lineHeight: 1.9 }}>
-          <li>Log session outcomes in the studio system within <strong style={{ color: 'var(--text)' }}>24 hours</strong> of each appointment</li>
-          <li>Review admin cancellation triggers at <strong style={{ color: 'var(--text)' }}>Bunker Hill and Shreveport</strong></li>
-          <li>Notify EXECO <strong style={{ color: 'var(--text)' }}>before</strong> cancelling or rescheduling any booked session</li>
-          <li>Confirm studio availability before booking sessions — unavailability after booking is the primary source of admin cancellations</li>
-          <li>Share any warm leads or re-engaged members directly with Phiwe</li>
-          <li>After each intro session — <strong style={{ color: 'var(--text)' }}>membership conversion is the goal</strong> — not just attendance</li>
-        </ul>
-      </Card>
+      </label>
     </div>
+  )
+}
+
+// ─── Notes panel ─────────────────────────────────────────────────────────────
+function NotesPanel({ notes, onAdd, saving }) {
+  const [text, setText] = useState('')
+
+  const handleSubmit = () => {
+    const trimmed = text.trim()
+    if (!trimmed) return
+    onAdd(trimmed)
+    setText('')
+  }
+
+  const handleKey = (e) => {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSubmit()
+  }
+
+  return (
+    <Card style={{ marginTop: '20px' }}>
+      <p style={{
+        fontSize: '11px', fontWeight: 700, color: 'var(--muted)',
+        textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 16px',
+      }}>
+        Shared Notes
+      </p>
+
+      {/* Input */}
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+        <textarea
+          value={text}
+          onChange={e => setText(e.target.value)}
+          onKeyDown={handleKey}
+          placeholder="Add a note visible to both sides… (Cmd+Enter to submit)"
+          rows={2}
+          style={{
+            flex: 1, background: 'var(--bg)', border: '1px solid var(--border)',
+            borderRadius: '8px', padding: '10px 12px',
+            color: 'var(--text)', fontSize: '13px', fontFamily: 'DM Sans, sans-serif',
+            resize: 'vertical', outline: 'none', lineHeight: 1.5,
+          }}
+        />
+        <button
+          onClick={handleSubmit}
+          disabled={saving || !text.trim()}
+          style={{
+            alignSelf: 'flex-end', padding: '9px 18px',
+            background: text.trim() ? 'var(--accent)' : 'var(--border)',
+            color: text.trim() ? '#fff' : 'var(--muted)',
+            border: 'none', borderRadius: '8px', fontSize: '12px',
+            fontWeight: 600, cursor: text.trim() ? 'pointer' : 'default',
+            fontFamily: 'inherit', transition: 'background 0.15s ease',
+          }}
+        >
+          {saving ? 'Saving…' : 'Add note'}
+        </button>
+      </div>
+
+      {/* Notes list — newest first */}
+      {notes.length === 0 ? (
+        <p style={{ fontSize: '13px', color: 'var(--muted)', fontStyle: 'italic', margin: 0 }}>
+          No notes yet. Add the first one above.
+        </p>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {[...notes].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).map((note, i) => (
+            <div key={note.id ?? i} style={{
+              background: 'var(--bg)', border: '1px solid var(--border)',
+              borderRadius: '8px', padding: '10px 14px',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                <span style={{
+                  fontSize: '10px', fontWeight: 700, color: 'var(--accent)',
+                  textTransform: 'uppercase', letterSpacing: '0.07em',
+                }}>
+                  {note.author ?? 'Unknown'}
+                </span>
+                <span style={{ fontSize: '10px', color: 'var(--muted)', fontFamily: 'JetBrains Mono, monospace' }}>
+                  {note.created_at
+                    ? new Date(note.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) +
+                      ' · ' + new Date(note.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+                    : ''}
+                </span>
+              </div>
+              <p style={{ fontSize: '13px', color: 'var(--text)', margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                {note.content}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+    </Card>
   )
 }
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function PartnershipActions() {
-  const { data, loading } = useMultiData({
-    bookings:      loadBookings,
-    byStudio:      loadByStudio,
-    cancellations: loadCancellationAnalysis,
-    leadDetails:   loadValidationLeadDetails,
-    calls:         loadCalls,
-    health:        loadCampaignHealth,
-  })
+  const { viewRole: role, user } = useAuth()
+  const isManagerView = role === 'manager' || role === 'admin'
 
-  const bookings      = data.bookings      ?? []
-  const cancellations = data.cancellations ?? []
-  const leadDetails   = data.leadDetails   ?? []
-  const calls         = data.calls         ?? []
-  const healthObj     = useMemo(() => pivotToObject(data.health ?? []), [data.health])
+  const authorLabel = authorFromEmail(user?.email)
 
-  if (loading) {
+  // State
+  const [rows,        setRows]        = useState({})   // { item_key: { checked, checked_by, checked_at } }
+  const [notes,       setNotes]       = useState([])
+  const [loadError,   setLoadError]   = useState(null)
+  const [savingItem,  setSavingItem]  = useState(false)
+  const [savingNote,  setSavingNote]  = useState(false)
+  const [dataLoaded,  setDataLoaded]  = useState(false)
+
+  // Load checklist state + notes from Supabase
+  useEffect(() => {
+    if (!supabase) { setDataLoaded(true); return }
+
+    Promise.all([
+      supabase.from('partnership_actions').select('*'),
+      supabase.from('partnership_notes').select('*').order('created_at', { ascending: false }).limit(100),
+    ]).then(([actionsRes, notesRes]) => {
+      if (actionsRes.error) {
+        console.warn('[PartnershipActions] actions load error:', actionsRes.error.message)
+        setLoadError('Checklist state could not be loaded — showing all items unchecked.')
+      } else {
+        const map = {}
+        ;(actionsRes.data ?? []).forEach(r => { map[r.item_key] = r })
+        setRows(map)
+      }
+      if (!notesRes.error) {
+        setNotes(notesRes.data ?? [])
+      }
+      setDataLoaded(true)
+    }).catch(err => {
+      console.warn('[PartnershipActions] load error:', err)
+      setLoadError('Could not connect to the database. Showing all items unchecked.')
+      setDataLoaded(true)
+    })
+  }, [])
+
+  // Toggle a checklist item
+  const handleToggle = useCallback(async (item, row, currentlyChecked) => {
+    const newChecked = !currentlyChecked
+    const now        = new Date().toISOString()
+
+    // Optimistic update
+    setRows(prev => ({
+      ...prev,
+      [item.key]: {
+        item_key:   item.key,
+        checked:    newChecked,
+        checked_by: newChecked ? authorLabel : null,
+        checked_at: newChecked ? now : null,
+      },
+    }))
+
+    if (!supabase) return
+    setSavingItem(true)
+    try {
+      const { error } = await supabase
+        .from('partnership_actions')
+        .upsert({
+          item_key:   item.key,
+          checked:    newChecked,
+          checked_by: newChecked ? authorLabel : null,
+          checked_at: newChecked ? now : null,
+        }, { onConflict: 'item_key' })
+      if (error) console.warn('[PartnershipActions] upsert error:', error.message)
+    } finally {
+      setSavingItem(false)
+    }
+  }, [authorLabel])
+
+  // Add a note
+  const handleAddNote = useCallback(async (content) => {
+    if (!content.trim()) return
+    const optimistic = {
+      id:         Date.now(),
+      content,
+      author:     authorLabel,
+      created_at: new Date().toISOString(),
+    }
+    setNotes(prev => [optimistic, ...prev])
+
+    if (!supabase) return
+    setSavingNote(true)
+    try {
+      const { data, error } = await supabase
+        .from('partnership_notes')
+        .insert({ content, author: authorLabel })
+        .select()
+        .single()
+      if (error) {
+        console.warn('[PartnershipActions] note insert error:', error.message)
+      } else if (data) {
+        // Replace optimistic with real row (has correct DB id and server timestamp)
+        setNotes(prev => prev.map(n => n.id === optimistic.id ? data : n))
+      }
+    } finally {
+      setSavingNote(false)
+    }
+  }, [authorLabel])
+
+  // Hidden from manager/admin — Action Plan page serves that view
+  if (isManagerView) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
-        <p style={{ color: 'var(--muted)', fontSize: '14px' }}>Loading partnership data…</p>
+        <p style={{ color: 'var(--muted)', fontSize: '14px' }}>
+          Partnership Actions is a client-facing page. Use Action Plan for the manager view.
+        </p>
       </div>
     )
   }
 
+  if (!dataLoaded) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
+        <p style={{ color: 'var(--muted)', fontSize: '14px' }}>Loading…</p>
+      </div>
+    )
+  }
+
+  const slItems = SEED_ITEMS.filter(i => i.owner === 'StretchLab')
+  const exItems = SEED_ITEMS.filter(i => i.owner === 'Execo')
+
   return (
     <div style={{ maxWidth: '1100px' }}>
 
-      <div style={{ marginBottom: '20px' }}>
+      {/* Header */}
+      <div style={{ marginBottom: '24px' }}>
         <h1 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text)', margin: '0 0 4px' }}>
           Partnership Actions
         </h1>
-        <p style={{ fontSize: '13px', color: 'var(--text-2)', lineHeight: 1.7, margin: 0, maxWidth: '720px' }}>
-          Outreach results are only half the equation. Every booked appointment that becomes an attended session requires smooth execution on the studio side.
-          This page tracks exactly where the partnership is delivering — and where actions are needed.
+        <p style={{ fontSize: '13px', color: 'var(--muted)', margin: 0, lineHeight: 1.6 }}>
+          A shared working space for StretchLab and Execo. Check off items as they're completed.
+          Items reset weekly unless marked as ongoing.
         </p>
       </div>
 
-      {/* Lead profile — first, so StretchLab understands the database */}
-      <LeadBucketCard calls={calls} />
+      {/* DB warning */}
+      {loadError && (
+        <div style={{
+          background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)',
+          borderRadius: '8px', padding: '10px 14px', marginBottom: '20px',
+        }}>
+          <p style={{ fontSize: '12px', color: '#d97706', margin: 0 }}>{loadError}</p>
+        </div>
+      )}
 
-      {/* Month 3 SOW Progress */}
-      <ProgressBar bookings={bookings} />
+      {/* Two-column checklist */}
+      <div style={{ display: 'flex', gap: '16px', marginBottom: '0', alignItems: 'flex-start' }}>
 
-      {/* EXECO / StretchLab accountability matrix */}
-      <PartnershipMatrix bookings={bookings} calls={calls} healthObj={healthObj} />
+        {/* StretchLab column */}
+        <Card style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+            <span style={{ fontSize: '10px', fontWeight: 700, color: '#6366f1', textTransform: 'uppercase', letterSpacing: '0.09em' }}>
+              StretchLab
+            </span>
+            <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--muted)', fontFamily: 'JetBrains Mono, monospace' }}>
+              {slItems.filter(i => isEffectivelyChecked(rows[i.key], i.deadline)).length}/{slItems.length}
+            </span>
+          </div>
+          <div style={{ height: '3px', background: 'var(--border)', borderRadius: '2px', marginBottom: '16px', overflow: 'hidden' }}>
+            <div style={{
+              width: `${slItems.length > 0 ? (slItems.filter(i => isEffectivelyChecked(rows[i.key], i.deadline)).length / slItems.length) * 100 : 0}%`,
+              height: '100%', background: '#6366f1', borderRadius: '2px', transition: 'width 0.3s ease',
+            }} />
+          </div>
+          {slItems.map((item, idx) => (
+            <ChecklistItem
+              key={item.key}
+              item={item}
+              row={rows[item.key]}
+              onToggle={handleToggle}
+              saving={savingItem}
+              isLast={idx === slItems.length - 1}
+            />
+          ))}
+        </Card>
 
-      {/* Studio disruptions */}
-      <AdminDisruptionsCard cancellations={cancellations} bookings={bookings} />
+        {/* Execo column */}
+        <Card style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+            <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.09em' }}>
+              Execo
+            </span>
+            <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--muted)', fontFamily: 'JetBrains Mono, monospace' }}>
+              {exItems.filter(i => isEffectivelyChecked(rows[i.key], i.deadline)).length}/{exItems.length}
+            </span>
+          </div>
+          <div style={{ height: '3px', background: 'var(--border)', borderRadius: '2px', marginBottom: '16px', overflow: 'hidden' }}>
+            <div style={{
+              width: `${exItems.length > 0 ? (exItems.filter(i => isEffectivelyChecked(rows[i.key], i.deadline)).length / exItems.length) * 100 : 0}%`,
+              height: '100%', background: 'var(--accent)', borderRadius: '2px', transition: 'width 0.3s ease',
+            }} />
+          </div>
+          {exItems.map((item, idx) => (
+            <ChecklistItem
+              key={item.key}
+              item={item}
+              row={rows[item.key]}
+              onToggle={handleToggle}
+              saving={savingItem}
+              isLast={idx === exItems.length - 1}
+            />
+          ))}
+        </Card>
 
-      {/* ClubReady hygiene + manual tracker gaps */}
-      <ClubReadyCard bookings={bookings} leadDetails={leadDetails} />
+      </div>
 
-      <p style={{ fontSize: '11px', color: 'var(--muted)', fontStyle: 'italic', marginTop: '8px', marginBottom: '20px' }}>
-        Member conversion tracking available once StretchLab shares session outcomes.
-      </p>
+      {/* Notes panel */}
+      <NotesPanel
+        notes={notes}
+        onAdd={handleAddNote}
+        saving={savingNote}
+      />
 
     </div>
   )
