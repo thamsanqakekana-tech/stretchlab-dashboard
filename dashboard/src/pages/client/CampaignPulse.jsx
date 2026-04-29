@@ -15,6 +15,7 @@ import {
   loadVelocityTrend,
   loadInsights,
   loadCampaignHealth,
+  loadValidationLeadDetails,
   pivotToObject,
 } from '../../utils/dataLoader.js'
 import {
@@ -120,10 +121,10 @@ const MONTHS = [
 ]
 
 // ─── Timeline Bar ─────────────────────────────────────────────────────────────
-function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77 }) {
+function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, validationLeads = [] }) {
   const today = new Date()
+  const [expanded, setExpanded] = useState(null)
 
-  // Outlook computation for active month
   const pessRow   = forecast.find(f => f.scenario === 'pessimistic')
   const likelyRow = forecast.find(f => f.scenario === 'likely')
   const optRow    = forecast.find(f => f.scenario === 'optimistic')
@@ -141,8 +142,13 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77 }) {
     const isActive   = today >= m.start && today <= m.end
     const isComplete = today > m.end
     const rampRow    = ramp.find(r => +r.month === m.num)
-    const actual     = rampRow ? +rampRow.actual_kept_appts : 0
-    return { ...m, fillPct, isActive, isComplete, actual }
+
+    const monthLeads  = validationLeads.filter(l => +l.month === m.num)
+    const paidCount   = monthLeads.filter(l => String(l.paid  || '').trim().toLowerCase() === 'yes').length
+    const heldCount   = monthLeads.filter(l => String(l.held  || '').trim().toLowerCase() === 'yes').length
+    const futureLeads = monthLeads.filter(l => String(l.held  || '').trim() === '')
+
+    return { ...m, fillPct, isActive, isComplete, monthLeads, paidCount, heldCount, futureLeads }
   })
 
   return (
@@ -157,61 +163,130 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77 }) {
       </div>
 
       <div style={{ display: 'flex', gap: '6px' }}>
-        {segments.map((seg) => (
-          <div key={seg.num} style={{ flex: 1 }}>
-            <div style={{
-              height: '6px', borderRadius: '4px', background: 'var(--border)',
-              overflow: 'hidden', marginBottom: '8px',
-              outline: seg.isActive ? '1px solid var(--accent)' : 'none', outlineOffset: '1px',
-            }}>
+        {segments.map((seg) => {
+          const isOpen = expanded === seg.num
+          const hasLeads = seg.monthLeads.length > 0
+          return (
+            <div key={seg.num} style={{ flex: 1 }}>
               <div style={{
-                height: '100%', width: `${seg.fillPct}%`,
-                background: seg.isComplete ? '#22c55e' : seg.isActive ? 'var(--accent)' : 'var(--muted)',
-                borderRadius: '4px', transition: 'width 0.4s ease',
-              }} />
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-              <span style={{
-                fontSize: '11px', fontWeight: seg.isActive ? 700 : 500,
-                color: seg.isActive ? 'var(--text)' : seg.isComplete ? '#22c55e' : 'var(--muted)',
+                height: '6px', borderRadius: '4px', background: 'var(--border)',
+                overflow: 'hidden', marginBottom: '8px',
+                outline: seg.isActive ? '1px solid var(--accent)' : 'none', outlineOffset: '1px',
               }}>
-                {seg.label}
-                {seg.isActive && (
-                  <span style={{ fontSize: '9px', marginLeft: '5px', color: 'var(--accent)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em' }}>Active</span>
-                )}
-                {seg.isComplete && (
-                  <span style={{ fontSize: '9px', marginLeft: '5px', color: '#22c55e', fontWeight: 700 }}>✓</span>
-                )}
-              </span>
-              <span style={{ fontSize: '10px', color: 'var(--muted)' }}>
-                {seg.isComplete
-                  ? `${seg.actual} kept / ${seg.target} target`
-                  : seg.isActive
-                  ? `${seg.actual} kept · ${seg.fillPct}% through`
-                  : `Target: ${seg.target}`}
-              </span>
-            </div>
-            <p style={{ fontSize: '10px', color: 'var(--muted)', margin: '2px 0 0' }}>{seg.dateRange}</p>
-            {seg.isActive && pessRow && likelyRow && optRow && (
-              <div style={{ marginTop: '4px' }}>
-                <p style={{ fontSize: '10px', color: 'var(--muted)', margin: '1px 0', fontStyle: 'italic' }}>
-                  30-day range: {pessRow.shows} shows (pessimistic) · {likelyRow.shows} likely · {optRow.shows} optimistic
-                </p>
-                <p style={{ fontSize: '10px', color: 'var(--muted)', margin: '1px 0', fontStyle: 'italic' }}>
-                  {Number(likelyRow.shows) + totalKept < sowTarget
-                    ? 'At the likely pace, the May 24 target requires a conversation about Month 3 scope.'
-                    : 'On track at the likely pace.'}
-                </p>
+                <div style={{
+                  height: '100%', width: `${seg.fillPct}%`,
+                  background: seg.isComplete ? '#22c55e' : seg.isActive ? 'var(--accent)' : 'var(--muted)',
+                  borderRadius: '4px', transition: 'width 0.4s ease',
+                }} />
               </div>
-            )}
-            {seg.num === 1 && (
-              <p style={{ fontSize: '10px', color: 'var(--muted)', margin: '3px 0 0', fontStyle: 'italic' }}>
-                {MONTH1_CONTEXT}
-              </p>
-            )}
-          </div>
-        ))}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                <span style={{
+                  fontSize: '11px', fontWeight: seg.isActive ? 700 : 500,
+                  color: seg.isActive ? 'var(--text)' : seg.isComplete ? '#22c55e' : 'var(--muted)',
+                }}>
+                  {seg.label}
+                  {seg.isActive && (
+                    <span style={{ fontSize: '9px', marginLeft: '5px', color: 'var(--accent)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em' }}>Active</span>
+                  )}
+                  {seg.isComplete && (
+                    <span style={{ fontSize: '9px', marginLeft: '5px', color: '#22c55e', fontWeight: 700 }}>✓</span>
+                  )}
+                </span>
+                <span style={{ fontSize: '10px', color: 'var(--muted)' }}>
+                  Target: {seg.target}
+                </span>
+              </div>
+              <p style={{ fontSize: '10px', color: 'var(--muted)', margin: '2px 0 4px' }}>{seg.dateRange}</p>
+
+              {/* Paid / Held counts */}
+              {hasLeads ? (
+                <div style={{ fontSize: '11px', color: 'var(--text)', margin: '4px 0' }}>
+                  <span style={{ color: '#22c55e', fontWeight: 700 }}>{seg.paidCount} paid</span>
+                  <span style={{ color: 'var(--muted)', margin: '0 4px' }}>·</span>
+                  <span style={{ color: 'var(--accent)', fontWeight: 700 }}>{seg.heldCount} held</span>
+                  {seg.futureLeads.length > 0 && (
+                    <span style={{ color: 'var(--warn)', marginLeft: '6px' }}>· {seg.futureLeads.length} upcoming</span>
+                  )}
+                </div>
+              ) : (seg.isActive || seg.isComplete) ? (
+                <div style={{ fontSize: '11px', color: 'var(--muted)', margin: '4px 0', fontStyle: 'italic' }}>No data yet</div>
+              ) : null}
+
+              {/* Expandable lead table toggle */}
+              {hasLeads && (
+                <button
+                  onClick={() => setExpanded(isOpen ? null : seg.num)}
+                  style={{
+                    background: 'none', border: 'none', padding: 0,
+                    fontSize: '10px', color: 'var(--accent)', cursor: 'pointer',
+                    marginTop: '2px',
+                  }}
+                >
+                  {isOpen ? 'hide leads ▲' : 'see leads ▼'}
+                </button>
+              )}
+
+              {/* Forecast text for active month */}
+              {seg.isActive && pessRow && likelyRow && optRow && (
+                <div style={{ marginTop: '4px' }}>
+                  <p style={{ fontSize: '10px', color: 'var(--muted)', margin: '1px 0', fontStyle: 'italic' }}>
+                    30-day range: {pessRow.shows} shows (pessimistic) · {likelyRow.shows} likely · {optRow.shows} optimistic
+                  </p>
+                  <p style={{ fontSize: '10px', color: 'var(--muted)', margin: '1px 0', fontStyle: 'italic' }}>
+                    {Number(likelyRow.shows) + totalKept < sowTarget
+                      ? 'At the likely pace, the May 24 target requires a conversation about Month 3 scope.'
+                      : 'On track at the likely pace.'}
+                  </p>
+                </div>
+              )}
+            </div>
+          )
+        })}
       </div>
+
+      {/* Expandable lead drill-down */}
+      {expanded !== null && (() => {
+        const seg = segments.find(s => s.num === expanded)
+        if (!seg) return null
+        return (
+          <div style={{ marginTop: '16px', borderTop: '1px solid var(--border)', paddingTop: '14px' }}>
+            <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 10px' }}>
+              {seg.label} leads — {seg.monthLeads.length} total
+            </p>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                <thead>
+                  <tr>
+                    {['Name', 'Appointment Date', 'Studio', 'Paid', 'Held', 'Notes'].map(h => (
+                      <th key={h} style={{ textAlign: 'left', padding: '6px 10px', color: 'var(--muted)', fontWeight: 600, borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap', fontSize: '11px' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {seg.monthLeads.map((lead, i) => {
+                    const isPaid     = String(lead.paid || '').trim().toLowerCase() === 'yes'
+                    const heldVal    = String(lead.held || '').trim().toLowerCase()
+                    const isHeld     = heldVal === 'yes'
+                    const isUpcoming = heldVal === ''
+                    const heldLabel  = isUpcoming ? 'Upcoming' : isHeld ? 'Yes' : 'No'
+                    const heldColor  = isUpcoming ? 'var(--warn)' : isHeld ? '#22c55e' : 'var(--muted)'
+                    return (
+                      <tr key={i} style={{ background: i % 2 === 0 ? 'transparent' : 'var(--bg)' }}>
+                        <td style={{ padding: '7px 10px', color: 'var(--text)', fontWeight: 500, whiteSpace: 'nowrap' }}>{lead.name || '—'}</td>
+                        <td style={{ padding: '7px 10px', color: 'var(--muted)', whiteSpace: 'nowrap', fontSize: '11px' }}>{lead.date_of_appointment || '—'}</td>
+                        <td style={{ padding: '7px 10px', color: 'var(--muted)', whiteSpace: 'nowrap' }}>{(lead.location || '').replace('StretchLab ', '')}</td>
+                        <td style={{ padding: '7px 10px', color: isPaid ? '#22c55e' : 'var(--muted)', fontWeight: 600 }}>{isPaid ? 'Yes' : 'No'}</td>
+                        <td style={{ padding: '7px 10px', color: heldColor, fontWeight: 600 }}>{heldLabel}</td>
+                        <td style={{ padding: '7px 10px', color: 'var(--muted)', fontSize: '11px', maxWidth: '260px' }}>{lead.notes || '—'}</td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )
+      })()}
     </Card>
   )
 }
@@ -313,203 +388,52 @@ function SowProgressMini({ confirmedShows, upcoming, sowTarget = 77 }) {
   )
 }
 
-// ─── Conversion Funnel ────────────────────────────────────────────────────────
-function ConversionFunnel({ totalCalls, meaningfulConvs, bookingCount, confirmedShows, convRate, bookingConvRate, showRate, resolved, bookings }) {
-  const [drill, setDrill] = useState(null)
-
-  const nodes = [
-    { key: 'calls',    label: 'Calls Made',    count: totalCalls,      color: 'var(--muted)',  canDrill: false },
-    { key: 'convs',    label: 'Connections',   count: meaningfulConvs, color: 'var(--accent)', canDrill: true  },
-    { key: 'bookings', label: 'Bookings',       count: bookingCount,    color: 'var(--text)',   canDrill: true  },
-    { key: 'shows',    label: 'Kept Sessions', count: confirmedShows,  color: '#22c55e',       canDrill: true  },
+// ─── Conversion Funnel — 6-stage sequential ───────────────────────────────────
+function ConversionFunnel({ totalCalls, meaningfulConvs, bookingCount, paidCount, heldCount, upcomingCount }) {
+  const stages = [
+    { label: 'Calls Made',   count: totalCalls,      color: 'var(--muted)' },
+    { label: 'Connections',  count: meaningfulConvs, color: 'var(--accent)' },
+    { label: 'Bookings',     count: bookingCount,    color: 'var(--text)' },
+    { label: 'Paid',         count: paidCount,       color: '#f59e0b' },
+    { label: 'Kept',         count: heldCount,       color: '#22c55e' },
+    { label: 'Upcoming',     count: upcomingCount,   color: 'var(--warn)' },
   ]
-
-  const funnelBookingRate = meaningfulConvs > 0 ? (bookingCount / meaningfulConvs) * 100 : 0
-
-  // Show rate uses resolved denominator (matches KPI scorecard) — pending appointments
-  // excluded because they haven't had an outcome yet and would dilute the rate.
-  const arrows = [
-    { rate: convRate,          status: benchmarkStatus('connect_rate', convRate),        note: null },
-    { rate: funnelBookingRate, status: benchmarkStatus('booking_rate', bookingConvRate), note: 'of conversations (scorecard: of all calls)' },
-    { rate: showRate,          status: benchmarkStatus('show_rate',    showRate),        note: `of ${resolved} outcomes` },
-  ]
-
-  // Bookings drill: all bookings sorted by date desc
-  const bookingsDrill = useMemo(() =>
-    [...bookings].sort((a, b) => new Date(b.booking_date) - new Date(a.booking_date)),
-    [bookings]
-  )
-
-  // Shows drill: attended only (has_show flag — pipeline-authoritative), sorted by date desc
-  const showsDrill = useMemo(() =>
-    bookings
-      .filter(b => +b.has_show === 1)
-      .sort((a, b) => new Date(b.booking_date) - new Date(a.booking_date)),
-    [bookings]
-  )
 
   return (
     <Card style={{ marginBottom: '24px', padding: '20px 24px' }}>
       <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 16px' }}>
-        Lead Journey — from first call to session kept
+        Lead Journey
       </p>
-
-      {/* Funnel row */}
       <div style={{ display: 'flex', alignItems: 'center', overflowX: 'auto', paddingBottom: '4px' }}>
-        {nodes.map((node, i) => (
-          <React.Fragment key={node.key}>
-            {i > 0 && (() => {
-              const arrow = arrows[i - 1]
-              const color = benchmarkColor(arrow.status)
-              return (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 8px', minWidth: '84px' }}>
-                  <span style={{ fontSize: '20px', color, lineHeight: 1 }}>→</span>
-                  <span style={{ fontSize: '13px', fontWeight: 700, color, fontFamily: 'JetBrains Mono, monospace', margin: '2px 0' }}>
-                    {arrow.rate.toFixed(1)}%
-                  </span>
-                  {arrow.note && (
-                    <span style={{ fontSize: '9px', color: 'var(--muted)', marginTop: '3px', textAlign: 'center' }}>
-                      {arrow.note}
+        {stages.map((stage, i) => {
+          const prev = stages[i - 1]
+          const rate = prev && prev.count > 0 ? (stage.count / prev.count) * 100 : null
+          return (
+            <React.Fragment key={stage.label}>
+              {i > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 6px', minWidth: '60px' }}>
+                  <span style={{ fontSize: '18px', color: 'var(--muted)', lineHeight: 1 }}>→</span>
+                  {rate !== null && (
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', fontFamily: 'JetBrains Mono, monospace', margin: '2px 0 0' }}>
+                      {rate.toFixed(1)}%
                     </span>
                   )}
                 </div>
-              )
-            })()}
-
-            <div
-              onClick={() => node.canDrill && setDrill(drill === node.key ? null : node.key)}
-              style={{
-                flex: '0 0 auto',
-                minWidth: '120px',
-                textAlign: 'center',
-                background: drill === node.key ? `${node.color}12` : 'var(--bg)',
-                border: `1px solid ${drill === node.key ? node.color : 'var(--border)'}`,
-                borderRadius: '10px',
-                padding: '14px 12px',
-                cursor: node.canDrill ? 'pointer' : 'default',
-                transition: 'border-color 0.15s ease, background 0.15s ease',
-              }}
-            >
-              <p style={{ fontSize: '28px', fontWeight: 800, fontFamily: 'JetBrains Mono, monospace', color: node.color, margin: '0 0 4px', lineHeight: 1 }}>
-                {node.count.toLocaleString()}
-              </p>
-              <p style={{ fontSize: '11px', color: 'var(--muted)', margin: 0, fontWeight: 500 }}>{node.label}</p>
-              {node.canDrill && (
-                <p style={{ fontSize: '9px', color: 'var(--muted)', margin: '5px 0 0', opacity: 0.6 }}>
-                  {drill === node.key ? 'collapse ▲' : 'see detail ▼'}
-                </p>
               )}
-            </div>
-          </React.Fragment>
-        ))}
+              <div style={{
+                flex: '0 0 auto', minWidth: '100px', textAlign: 'center',
+                background: 'var(--bg)', border: '1px solid var(--border)',
+                borderRadius: '10px', padding: '14px 10px',
+              }}>
+                <p style={{ fontSize: '28px', fontWeight: 800, fontFamily: 'JetBrains Mono, monospace', color: stage.color, margin: '0 0 4px', lineHeight: 1 }}>
+                  {stage.count.toLocaleString()}
+                </p>
+                <p style={{ fontSize: '11px', color: 'var(--muted)', margin: 0, fontWeight: 500 }}>{stage.label}</p>
+              </div>
+            </React.Fragment>
+          )
+        })}
       </div>
-
-      {/* Drill-down: Connections — what conversations produced */}
-      {drill === 'convs' && (
-        <div style={{ marginTop: '20px', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
-          <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 12px' }}>
-            What {meaningfulConvs.toLocaleString()} conversations produced
-          </p>
-          <p style={{ fontSize: '13px', color: 'var(--text-2)', lineHeight: 1.65, margin: '0 0 16px' }}>
-            {meaningfulConvs.toLocaleString()} calls became real conversations.
-            {' '}{bookingCount} of those led directly to a booked session — a {meaningfulConvs > 0 ? (bookingCount / meaningfulConvs * 100).toFixed(1) : '0.0'}% conversion from conversation to commitment.
-            {' '}The remaining {(meaningfulConvs - bookingCount).toLocaleString()} answered but didn't book: leads who weren't ready, had an existing membership, or need another touchpoint before they commit.
-            {' '}These are not lost — they're the next wave of the pipeline.
-          </p>
-          {[
-            { label: 'Committed to a session', count: bookingCount,                   color: '#1D9E75' },
-            { label: 'Still in outreach pool',  count: meaningfulConvs - bookingCount, color: '#378ADD' },
-          ].map(row => (
-            <div key={row.label} style={{ marginBottom: '12px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                <span style={{ fontSize: '12px', color: 'var(--text)', fontWeight: 500 }}>{row.label}</span>
-                <span style={{ fontSize: '12px', color: row.color, fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>
-                  {row.count.toLocaleString()} · {meaningfulConvs > 0 ? (row.count / meaningfulConvs * 100).toFixed(1) : '0.0'}%
-                </span>
-              </div>
-              <div style={{ height: '6px', background: 'var(--border)', borderRadius: '4px', overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${meaningfulConvs > 0 ? row.count / meaningfulConvs * 100 : 0}%`, background: row.color, borderRadius: '4px', transition: 'width 0.4s ease' }} />
-              </div>
-            </div>
-          ))}
-          <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '10px 0 0', lineHeight: 1.5 }}>
-            Conversations are calls where the lead stayed on for at least 30 seconds — enough for Phiwe to make the case for coming back.
-          </p>
-        </div>
-      )}
-
-      {/* Drill-down: Bookings — individual leads */}
-      {drill === 'bookings' && (
-        <div style={{ marginTop: '20px', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
-          <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 12px' }}>
-            {bookingCount} Booked Leads
-          </p>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
-            <thead>
-              <tr>
-                {['Name', 'Studio', 'Date', 'Status'].map(h => (
-                  <th key={h} style={{ textAlign: 'left', padding: '6px 10px', color: 'var(--muted)', fontWeight: 600, borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {bookingsDrill.map((b, i) => {
-                const name   = [b.first_name, b.last_name].filter(Boolean).join(' ') || '—'
-                const studio = (b.booking_location || '').replace('StretchLab ', '')
-                const date   = b.booking_date ? new Date(b.booking_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'
-                const cs = String(b.current_status || b['Current Status'] || '')
-                const isAttended    = +b.has_show === 1
-                const isUpcoming    = cs.includes('Open Booking')
-                const isCancelled   = cs.includes('Cancelled')
-                const isNoShow      = cs.includes('No Show')
-                const isRescheduled = cs.includes('Rescheduled')
-                const status      = isAttended ? 'Attended' : isUpcoming ? 'Upcoming' : isRescheduled ? 'Rescheduled' : isNoShow ? 'No Show' : isCancelled ? 'Cancelled' : '—'
-                const statusColor = isAttended ? '#22c55e' : isUpcoming ? '#f59e0b' : isCancelled || isNoShow ? 'var(--danger)' : 'var(--muted)'
-                return (
-                  <tr key={i} style={{ background: i % 2 === 0 ? 'transparent' : 'var(--bg)' }}>
-                    <td style={{ padding: '8px 10px', color: 'var(--text)', fontWeight: 500 }}>{name}</td>
-                    <td style={{ padding: '8px 10px', color: 'var(--muted)' }}>{studio}</td>
-                    <td style={{ padding: '8px 10px', color: 'var(--muted)', fontFamily: 'JetBrains Mono, monospace' }}>{date}</td>
-                    <td style={{ padding: '8px 10px', color: statusColor, fontWeight: 600, fontFamily: 'JetBrains Mono, monospace', fontSize: '11px' }}>{status}</td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* Drill-down: Shows — attended sessions */}
-      {drill === 'shows' && (
-        <div style={{ marginTop: '20px', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
-          <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 12px' }}>
-            {confirmedShows} Sessions Attended
-          </p>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
-            <thead>
-              <tr>
-                {['Name', 'Studio', 'Session Date'].map(h => (
-                  <th key={h} style={{ textAlign: 'left', padding: '6px 10px', color: 'var(--muted)', fontWeight: 600, borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {showsDrill.map((b, i) => {
-                const name   = [b.first_name, b.last_name].filter(Boolean).join(' ') || '—'
-                const studio = (b.booking_location || '').replace('StretchLab ', '')
-                const date   = b.booking_date ? new Date(b.booking_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'
-                return (
-                  <tr key={i} style={{ background: i % 2 === 0 ? 'transparent' : 'var(--bg)' }}>
-                    <td style={{ padding: '8px 10px', color: 'var(--text)', fontWeight: 500 }}>{name}</td>
-                    <td style={{ padding: '8px 10px', color: 'var(--muted)' }}>{studio}</td>
-                    <td style={{ padding: '8px 10px', color: '#22c55e', fontFamily: 'JetBrains Mono, monospace' }}>{date}</td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
     </Card>
   )
 }
@@ -944,12 +868,14 @@ export default function CampaignPulse() {
     cohortData:       loadCohortAnalysis,
     velocity:         loadVelocityTrend,
     insights:         loadInsights,
+    validationLeads:  loadValidationLeadDetails,
   })
 
-  const calls          = data.calls        ?? []
-  const bookings       = data.bookings     ?? []
-  const ramp           = data.rampVsTarget ?? []
-  const vr             = data.validationReport
+  const calls            = data.calls              ?? []
+  const bookings         = data.bookings           ?? []
+  const ramp             = data.rampVsTarget       ?? []
+  const validationLeads  = data.validationLeads    ?? []
+  const vr               = data.validationReport
 
   const cancellations  = data.cancellations ?? []
   const rootCause      = data.rootCause    ?? {}
@@ -1003,6 +929,10 @@ export default function CampaignPulse() {
   const cancelRateCustomer = buckets.cancelRateCustomer * 100
   const cancelRateAdmin    = buckets.cancelRateAdmin * 100
   const upcoming           = buckets.upcoming.length
+
+  // ── Validation lead counts (paid / held) across all months ──────────────────
+  const valPaidCount = validationLeads.filter(l => String(l.paid || '').trim().toLowerCase() === 'yes').length
+  const valHeldCount = validationLeads.filter(l => String(l.held || '').trim().toLowerCase() === 'yes').length
 
   // ── SOW target (derived from ramp CSV; fallback 77) ─────────────────────────
   const sowTarget = useMemo(
@@ -1252,7 +1182,7 @@ export default function CampaignPulse() {
       <InsightBlock insight={pageInsight} style={{ marginTop: 0 }} />
 
       {/* Timeline */}
-      <CampaignTimeline ramp={ramp} forecast={forecast} sowTarget={sowTarget} />
+      <CampaignTimeline ramp={ramp} forecast={forecast} sowTarget={sowTarget} validationLeads={validationLeads} />
 
       {/* 4 KPI cards */}
       <div style={{ display: 'flex', gap: '12px', marginBottom: '0', flexWrap: 'wrap' }}>
@@ -1782,12 +1712,9 @@ export default function CampaignPulse() {
         totalCalls={totalCalls}
         meaningfulConvs={meaningfulConvs}
         bookingCount={bookings.length}
-        confirmedShows={confirmedShows}
-        convRate={convRate}
-        bookingConvRate={bookingConvRate}
-        showRate={showRate}
-        resolved={resolved}
-        bookings={bookings}
+        paidCount={valPaidCount}
+        heldCount={valHeldCount}
+        upcomingCount={upcoming}
       />
 
       {/* Narrative card */}
