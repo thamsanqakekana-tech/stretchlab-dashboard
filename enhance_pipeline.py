@@ -224,7 +224,26 @@ def generate_campaign_health(calls, bookings, output_dir):
     rows.append({'metric': 'engagement_max', 'value': health_data['breakdown']['engagement']['max']})
     rows.append({'metric': 'goal_alignment_score', 'value': health_data['breakdown']['goal_alignment']['score']})
     rows.append({'metric': 'goal_alignment_max', 'value': health_data['breakdown']['goal_alignment']['max']})
-    
+
+    # Operational metrics — pre-computed so the dashboard never needs to aggregate
+    # large raw tables (avoids Supabase PostgREST per-page row cap)
+    total_calls = len(calls)
+    meaningful  = int((calls['live_talk_min'].astype(float) >= 0.5).sum()) if 'live_talk_min' in calls.columns else 0
+    total_bks   = len(bookings)
+    has_show_col = next((c for c in bookings.columns if c.lower() in ('has_show',)), None)
+    shows = int(bookings[has_show_col].astype(str).str.strip().isin(['1','True','true']).sum()) if has_show_col else 0
+    cancelled   = int(bookings['current_status'].str.contains('Cancelled', na=False).sum()) if 'current_status' in bookings.columns else 0
+    noshows     = int(bookings['current_status'].str.contains('No Show',   na=False).sum()) if 'current_status' in bookings.columns else 0
+    resolved    = shows + noshows + cancelled
+
+    rows.append({'metric': 'total_calls',       'value': total_calls})
+    rows.append({'metric': 'meaningful_convs',  'value': meaningful})
+    rows.append({'metric': 'connect_rate_pct',  'value': round(meaningful / total_calls * 100, 1) if total_calls else 0})
+    rows.append({'metric': 'total_bookings',    'value': total_bks})
+    rows.append({'metric': 'shows',             'value': shows})
+    rows.append({'metric': 'show_rate_pct',     'value': round(shows / resolved * 100, 1) if resolved else 0})
+    rows.append({'metric': 'booking_rate_pct',  'value': round(total_bks / meaningful * 100, 1) if meaningful else 0})
+
     df = pd.DataFrame(rows)
     output_file = output_dir / 'phiwe_campaign_health.csv'
     df.to_csv(output_file, index=False)

@@ -12,14 +12,24 @@ import { supabase } from '../lib/supabaseClient.js'
 
 const BASE = '/data'
 
-// ─── Supabase table fetch ─────────────────────────────────────────────────────
+// ─── Supabase table fetch (paginated) ────────────────────────────────────────
+// PostgREST enforces a server-side max-rows cap (typically 1,000) regardless of
+// the JS .limit() call. We use .range() to paginate and collect all pages.
 async function loadFromSupabase(tableName) {
   if (!supabase) throw new Error('Supabase client not initialised')
-  // PostgREST default cap is 1,000 rows — override to 50,000 to cover all tables
-  const { data, error } = await supabase.from(tableName).select('*').limit(50000)
-  if (error) throw new Error(error.message)
-  if (!data || data.length === 0) throw new Error('empty result')
-  return data
+  const PAGE    = 1000
+  const allData = []
+  let   from    = 0
+  for (let page = 0; page < 200; page++) {
+    const { data, error } = await supabase.from(tableName).select('*').range(from, from + PAGE - 1)
+    if (error) throw new Error(error.message)
+    if (!data || data.length === 0) break
+    allData.push(...data)
+    if (data.length < PAGE) break  // last page — no more rows
+    from += PAGE
+  }
+  if (allData.length === 0) throw new Error('empty result')
+  return allData
 }
 
 // ─── Local CSV fallback ───────────────────────────────────────────────────────

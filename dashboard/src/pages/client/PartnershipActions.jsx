@@ -6,6 +6,8 @@ import {
   loadCancellationAnalysis,
   loadValidationLeadDetails,
   loadCalls,
+  loadCampaignHealth,
+  pivotToObject,
 } from '../../utils/dataLoader.js'
 import { useRole } from '../../context/RoleContext.jsx'
 import Card from '../../components/Card.jsx'
@@ -349,9 +351,10 @@ function LeadBucketCard({ calls }) {
 }
 
 // ─── Partnership Accountability Matrix ────────────────────────────────────────
-function PartnershipMatrix({ bookings, calls }) {
-  const meaningfulConvs = calls.filter(c => parseFloat(c.live_talk_min || 0) >= 0.5).length
-  const totalCalls      = calls.length
+function PartnershipMatrix({ bookings, calls, healthObj = {} }) {
+  const rawMeaningful   = calls.filter(c => parseFloat(c.live_talk_min || 0) >= 0.5).length
+  const meaningfulConvs = healthObj.meaningful_convs != null ? +healthObj.meaningful_convs : rawMeaningful
+  const totalCalls      = healthObj.total_calls      != null ? +healthObj.total_calls      : calls.length
   const connectRate     = (meaningfulConvs > 0 && totalCalls > 0) ? ((meaningfulConvs / totalCalls) * 100).toFixed(1) : '0.0'
   const bookingConvRate = meaningfulConvs > 0 ? ((bookings.length / meaningfulConvs) * 100).toFixed(1) : '0.0'
 
@@ -390,12 +393,14 @@ export default function PartnershipActions() {
     cancellations: loadCancellationAnalysis,
     leadDetails:   loadValidationLeadDetails,
     calls:         loadCalls,
+    health:        loadCampaignHealth,
   })
 
   const bookings      = data.bookings      ?? []
   const cancellations = data.cancellations ?? []
   const leadDetails   = data.leadDetails   ?? []
   const calls         = data.calls         ?? []
+  const healthObj     = useMemo(() => pivotToObject(data.health ?? []), [data.health])
 
   if (loading) {
     return (
@@ -425,7 +430,7 @@ export default function PartnershipActions() {
       <ProgressBar bookings={bookings} />
 
       {/* EXECO / StretchLab accountability matrix */}
-      <PartnershipMatrix bookings={bookings} calls={calls} />
+      <PartnershipMatrix bookings={bookings} calls={calls} healthObj={healthObj} />
 
       {/* Studio disruptions */}
       <AdminDisruptionsCard cancellations={cancellations} bookings={bookings} />

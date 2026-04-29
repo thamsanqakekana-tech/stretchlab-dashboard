@@ -14,6 +14,8 @@ import {
   loadCohortAnalysis,
   loadVelocityTrend,
   loadInsights,
+  loadCampaignHealth,
+  pivotToObject,
 } from '../../utils/dataLoader.js'
 import {
   benchmarkStatus,
@@ -931,6 +933,7 @@ export default function CampaignPulse() {
     bookings:         loadBookings,
     rampVsTarget:     loadRampVsTarget,
     validationReport: loadValidationReport,
+    health:           loadCampaignHealth,
 
     cancellations:    loadCancellationAnalysis,
     rootCause:        loadRootCauseAnalysis,
@@ -974,11 +977,19 @@ export default function CampaignPulse() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bookings.length, pipeline.length])
 
-  // ── Core metrics ────────────────────────────────────────────────────────────
-  const meaningfulConvs  = useMemo(() => calls.filter(c => parseFloat(c.live_talk_min || 0) >= 0.5).length, [calls])
-  const totalCalls       = calls.length
-  const convRate         = totalCalls > 0 ? (meaningfulConvs / totalCalls) * 100 : 0
-  const bookingConvRate  = totalCalls > 0 ? (bookings.length / totalCalls) * 100 : 0
+  // ── Core metrics — prefer pipeline-precomputed values from campaign_health ──
+  // phiwe_campaign_health is a small table (always fully loaded from Supabase).
+  // Raw phiwe_calls has 6,000+ rows; pagination handles it but campaign_health is authoritative.
+  const healthObj = useMemo(() => pivotToObject(data.health ?? []), [data.health])
+
+  const meaningfulConvs = useMemo(() => {
+    if (healthObj.meaningful_convs != null) return +healthObj.meaningful_convs
+    return calls.filter(c => parseFloat(c.live_talk_min || 0) >= 0.5).length
+  }, [calls, healthObj.meaningful_convs])
+
+  const totalCalls      = healthObj.total_calls != null ? +healthObj.total_calls : calls.length
+  const convRate        = totalCalls > 0 ? (meaningfulConvs / totalCalls) * 100 : 0
+  const bookingConvRate = totalCalls > 0 ? (bookings.length / totalCalls) * 100 : 0
   const lastUpdated      = vr?.generated_at ?? null
 
   // ── Booking buckets — uses buildBookingBuckets() defined at module scope ──────
