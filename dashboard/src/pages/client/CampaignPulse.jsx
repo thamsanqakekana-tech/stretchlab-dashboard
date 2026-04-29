@@ -1027,7 +1027,7 @@ export default function CampaignPulse() {
   const cancelAnnotation = `Lead-initiated cancel rate is ${cancelRateCustomer.toFixed(1)}% — studio-initiated cancellations account for the balance`
 
   // ── KPI tooltips ─────────────────────────────────────────────────────────────
-  const convTooltip    = `${convRate.toFixed(1)}% of all calls resulted in a real two-way conversation — someone picked up and talked with Phiwe for at least 30 seconds. Cold re-engagement benchmark: ${crBm.min}–${crBm.max}%.`
+  const convTooltip    = `${convRate.toFixed(1)}% of all calls resulted in a real two-way conversation — someone spoke with Phiwe for at least 30 seconds. Cold re-engagement benchmark: ${crBm.min}–${crBm.max}%.`
   const bookingTooltip = `Of all ${totalCalls.toLocaleString()} calls made, ${bookingConvRate.toFixed(1)}% resulted in a booked appointment. Cold re-engagement benchmark: ${brBm.min}–${brBm.max}%.`
   const showTooltip    = `Of the ${resolved} appointments with a confirmed outcome (past sessions where the result is known — rescheduled and upcoming excluded), ${confirmedShows} were attended — ${showRate.toFixed(1)}%. Cold re-engagement benchmark: ${COLD_OUTREACH_BENCHMARKS.show_rate.min}–${COLD_OUTREACH_BENCHMARKS.show_rate.max}%.`
   const cancelTooltip  = `Of the ${resolved} resolved appointments, ${cancels} carry a cancelled status — a ${cancelRate.toFixed(1)}% cancel rate. Lead-initiated: ${cancelRateCustomer.toFixed(1)}%, studio-initiated: ${cancelRateAdmin.toFixed(1)}%. Expected range for re-engagement outreach: ${COLD_OUTREACH_BENCHMARKS.cancel_rate.min}–${COLD_OUTREACH_BENCHMARKS.cancel_rate.max}%.`
@@ -1178,8 +1178,8 @@ export default function CampaignPulse() {
       {/* Delta — what changed since last visit */}
       <DeltaBanner delta={delta} />
 
-      {/* AI Insight — action frame after seeing pipeline context */}
-      <InsightBlock insight={pageInsight} style={{ marginTop: 0 }} />
+      {/* AI Insight — Manager / Admin only */}
+      {!isClientView && <InsightBlock insight={pageInsight} style={{ marginTop: 0 }} />}
 
       {/* Timeline */}
       <CampaignTimeline ramp={ramp} forecast={forecast} sowTarget={sowTarget} validationLeads={validationLeads} />
@@ -1250,38 +1250,13 @@ export default function CampaignPulse() {
           <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 10px' }}>
             Connect Rate by Day &amp; Hour
           </p>
-          {(() => {
-            const highRiskPipeline = pipeline.filter(r => r.risk_level === 'High')
-            const highRiskLeadsList = highRiskPipeline
-              .sort((a, b) => +a.days_until - +b.days_until)
-              .slice(0, 4)
-              .map(r => {
-                const studio = String(r.booking_location || '').replace('StretchLab ', '')
-                const d = r.booking_date ? new Date(r.booking_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''
-                const days = +r.days_until
-                return `${r.first_name} at ${studio}${d ? ` (${days === 0 ? 'today' : d})` : ''}`
-              })
-              .join(', ')
-            const fridayDayData = dayData.find(d => String(d.day_of_week).toLowerCase().startsWith('fri'))
-            const fridayCancels = fridayDayData ? +fridayDayData.cancellations : 0
-            const allCancels    = dayData.reduce((s, d) => s + (+d.cancellations || 0), 0)
-            const fridayCancelPct = allCancels > 0 ? Math.round(fridayCancels / allCancels * 100) : 0
-            return (
-              <p style={{ fontSize: '13px', color: 'var(--text-2)', lineHeight: 1.65, margin: '0 0 20px' }}>
-                {top2ConnectSlots.length >= 2
-                  ? <>{top2ConnectSlots[0].day} {formatHour(top2ConnectSlots[0].hour)} and {top2ConnectSlots[1].day} {formatHour(top2ConnectSlots[1].hour)} are where real conversations happen — {Math.round(top2ConnectSlots[0].connectRate * 100)}% and {Math.round(top2ConnectSlots[1].connectRate * 100)}% connect rate respectively.</>
-                  : <>The heatmap shows when real conversations concentrate.</>
-                }
-                {bestConnectDay && <>{' '}{bestConnectDay.day}s are the most consistent day across the week at {(bestConnectDay.rate * 100).toFixed(1)}% — that consistency matters when working the pipeline.</>}
-                {highRiskPipeline.length > 0 && (
-                  <>{' '}{highRiskPipeline.length} of the {pipeline.length} upcoming appointments need confirmation contact this week — prioritise{highRiskLeadsList ? `: ${highRiskLeadsList}` : ' these first'}.</>
-                )}
-                {fridayCancelPct > 0 && (
-                  <>{' '}Friday books well but accounts for {fridayCancelPct}% of cancellations — if a lead can only do Friday, confirm twice.</>
-                )}
-              </p>
-            )
-          })()}
+          <p style={{ fontSize: '13px', color: 'var(--text-2)', lineHeight: 1.65, margin: '0 0 20px' }}>
+            {top2ConnectSlots.length >= 2
+              ? <>{top2ConnectSlots[0].day} {formatHour(top2ConnectSlots[0].hour)} and {top2ConnectSlots[1].day} {formatHour(top2ConnectSlots[1].hour)} are where real conversations happen — {Math.round(top2ConnectSlots[0].connectRate * 100)}% and {Math.round(top2ConnectSlots[1].connectRate * 100)}% connect rate respectively.</>
+              : <>The heatmap shows when real conversations concentrate.</>
+            }
+            {bestConnectDay && <>{' '}{bestConnectDay.day}s are the most consistent day across the week at {(bestConnectDay.rate * 100).toFixed(1)}%.</>}
+          </p>
 
           {/* Connect rate heatmap */}
           {calls.length > 0 && (
@@ -1347,84 +1322,33 @@ export default function CampaignPulse() {
         </div>
       )}
 
-      {/* ── Drill: Booking Conversion — Commitment Quality ── */}
-      {activeKpi === 'booking' && (() => {
-        const fastCohort    = cohortData.find(r => String(r.cohort || '').startsWith('Fast'))
-        const fastPct       = fastCohort && totalBookings > 0 ? Math.round(+fastCohort.total_bookings / totalBookings * 100) : null
-        const fastCancelPct = fastCohort ? Math.round(+fastCohort.cancel_rate * 100) : null
-        const pending     = totalBookings - confirmedShows - cancels - buckets.noShow.length
-        const pendingPct  = Math.round(pending / totalBookings * 100)
-        const attendedPct = Math.round(confirmedShows / totalBookings * 100)
-        const cancelPct   = Math.round(cancels / totalBookings * 100)
-        const noShowPct   = Math.round(buckets.noShow.length / totalBookings * 100)
-        const outcomes = [
-          { label: 'Attended',        count: confirmedShows,        pct: attendedPct, color: '#1D9E75' },
-          { label: 'Pending outcome', count: pending,               pct: pendingPct,  color: '#EF9F27' },
-          { label: 'Cancelled',       count: cancels,               pct: cancelPct,   color: '#E24B4A' },
-          { label: 'No-show',         count: buckets.noShow.length, pct: noShowPct,   color: 'var(--muted)' },
-        ].filter(o => o.count > 0)
-        return (
-          <div style={{ marginBottom: '24px', marginTop: '16px', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
-            <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 12px' }}>
-              What happened to every booking
-            </p>
-
-            <div style={{ display: 'flex', gap: '12px', marginBottom: '16px', flexWrap: 'wrap' }}>
-              {[
-                { label: 'Total booked',    value: totalBookings },
-                { label: 'Attended',        value: confirmedShows },
-                { label: 'Active pipeline', value: `${upcoming} upcoming${buckets.rescheduled.length > 0 ? ` · ${buckets.rescheduled.length} rescheduled` : ''}` },
-              ].map(box => (
-                <div key={box.label} style={{ flex: '1 1 120px', background: 'var(--bg)', borderRadius: '6px', padding: '10px 14px' }}>
-                  <p style={{ fontSize: '22px', fontWeight: 800, fontFamily: 'JetBrains Mono, monospace', color: 'var(--text)', margin: '0 0 4px', lineHeight: 1 }}>{box.value}</p>
+      {/* ── Drill: Booking Conversion — Call-to-Booking Funnel ── */}
+      {activeKpi === 'booking' && (
+        <div style={{ marginBottom: '24px', marginTop: '16px', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+          <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 16px' }}>
+            Call-to-Booking Funnel
+          </p>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            {[
+              { label: 'Calls made',   value: totalCalls,      color: 'var(--muted)' },
+              { label: 'Connections',  value: meaningfulConvs, color: 'var(--accent)' },
+              { label: 'Bookings',     value: totalBookings,   color: 'var(--text)' },
+            ].map((box, i, arr) => (
+              <React.Fragment key={box.label}>
+                <div style={{ flex: '1 1 100px', background: 'var(--bg)', borderRadius: '6px', padding: '10px 14px' }}>
+                  <p style={{ fontSize: '22px', fontWeight: 800, fontFamily: 'JetBrains Mono, monospace', color: box.color, margin: '0 0 4px', lineHeight: 1 }}>{box.value.toLocaleString()}</p>
                   <p style={{ fontSize: '11px', color: 'var(--muted)', margin: 0 }}>{box.label}</p>
-                </div>
-              ))}
-            </div>
-
-            <p style={{ fontSize: '13px', color: 'var(--text-2)', lineHeight: 1.65, margin: '0 0 16px' }}>
-              Getting to a booking is the first commitment. What matters more is what happens after.
-              {' '}Of {totalBookings} appointments booked, {confirmedShows} were attended — a {showRate.toFixed(1)}% show rate on {resolved} appointments with a confirmed outcome.
-              {fastPct !== null && fastCancelPct !== null && (
-                <>{' '}{fastPct}% of bookings came together within the first few days of contact — and those fast commitments carry the highest cancel risk at {fastCancelPct}%. A quick yes is only as good as what follows it.</>
-              )}
-              {velocitySignal && (
-                <>{' '}Leads are taking {velocitySignal.increased ? 'longer' : 'less time'} to commit — median days from first call to booking has shifted from {velocitySignal.earlyDays} to {velocitySignal.latestDays} days, which means {velocitySignal.increased ? 'the confirmation rhythm for recent bookings needs to be stronger' : 'outreach is landing faster as the campaign matures'}.</>
-              )}
-              {' '}Phiwe confirms every open booking before the session date — that is how a fast yes becomes a held session.
-            </p>
-
-            <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 10px' }}>
-              Where every booking stands
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
-              {outcomes.map(o => (
-                <div key={o.label}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <span style={{ fontSize: '12px', color: 'var(--text)', fontWeight: 500 }}>{o.label}</span>
-                    <span style={{ fontSize: '12px', color: o.color, fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>{o.count} · {o.pct}%</span>
-                  </div>
-                  <div style={{ height: '6px', background: 'var(--border)', borderRadius: '4px', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${o.pct}%`, background: o.color, borderRadius: '4px', transition: 'width 0.4s ease' }} />
-                  </div>
-                  {o.label === 'Attended' && (
-                    <p style={{ fontSize: '10px', color: 'var(--muted)', margin: '3px 0 0', textAlign: 'right' }}>
-                      = {showRate.toFixed(1)}% show rate on {resolved} appointments with a confirmed outcome
+                  {i > 0 && arr[i - 1].value > 0 && (
+                    <p style={{ fontSize: '10px', color: 'var(--muted)', margin: '3px 0 0' }}>
+                      {((box.value / arr[i - 1].value) * 100).toFixed(1)}% of {arr[i - 1].label.toLowerCase()}
                     </p>
                   )}
                 </div>
-              ))}
-            </div>
-
-            <p style={{ fontSize: '10px', color: 'var(--muted)', margin: '0 0 10px', fontStyle: 'italic' }}>
-              All percentages are of {totalBookings} total bookings. Show rate ({showRate.toFixed(1)}%) is calculated on {resolved} appointments with a confirmed outcome.
-            </p>
-            <p style={{ fontSize: '12px', color: 'var(--muted)', fontStyle: 'italic', margin: 0 }}>
-              Phiwe confirms every booked lead before their session — the primary protection for the {upcoming} active appointments.
-            </p>
+              </React.Fragment>
+            ))}
           </div>
-        )
-      })()}
+        </div>
+      )}
 
       {/* ── Drill: Show Rate — Session Outcomes ── */}
       {activeKpi === 'show' && (
@@ -1432,13 +1356,28 @@ export default function CampaignPulse() {
           <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 10px' }}>
             Session Outcomes
           </p>
+
+          {/* Outcome counts */}
+          <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap' }}>
+            {[
+              { label: 'Attended',        count: confirmedShows,        color: '#1D9E75' },
+              { label: 'Pending outcome', count: upcoming + buckets.rescheduled.length, color: '#EF9F27' },
+              { label: 'Cancelled',       count: cancels,               color: '#E24B4A' },
+              { label: 'No-show',         count: buckets.noShow.length, color: 'var(--muted)' },
+            ].filter(o => o.count > 0).map(o => (
+              <div key={o.label} style={{ flex: '1 1 90px', background: 'var(--bg)', borderRadius: '6px', padding: '10px 14px' }}>
+                <p style={{ fontSize: '22px', fontWeight: 800, fontFamily: 'JetBrains Mono, monospace', color: o.color, margin: '0 0 4px', lineHeight: 1 }}>{o.count}</p>
+                <p style={{ fontSize: '11px', color: 'var(--muted)', margin: 0 }}>{o.label}</p>
+              </div>
+            ))}
+          </div>
+
           <p style={{ fontSize: '13px', color: 'var(--text-2)', lineHeight: 1.65, margin: '0 0 20px' }}>
             Of {resolved} appointments with a confirmed outcome, {confirmedShows} were attended — a {showRate.toFixed(1)}% show rate that sits {showStatus === 'above' ? 'above' : showStatus === 'within' ? 'within' : 'below'} the outreach benchmark of {COLD_OUTREACH_BENCHMARKS.show_rate.min}–{COLD_OUTREACH_BENCHMARKS.show_rate.max}%.
             {bestDay && worstActiveDay && worstActiveDay.day_of_week !== bestDay.day_of_week && (
               <>{' '}{worstActiveDay.day_of_week} books the most sessions — {worstActiveDay.total_bookings} booked — but holds at just {Math.round(worstActiveDay.resolvedShowPct)}%.
               {' '}{bestDay.day_of_week} and the sessions around it hold at {Math.round(bestDay.resolvedShowPct)}% — the clearest signal on what works.</>
             )}
-            {' '}Every appointment in the pipeline receives a confirmation follow-up from Phiwe before the session date — that is the primary protection for the {upcoming} still to come.
           </p>
 
           {/* Day-of-week bars — total bookings denominator so pending is visible */}
@@ -1534,8 +1473,8 @@ export default function CampaignPulse() {
               </div>
             )
           })()}
-          <p style={{ fontSize: '12px', color: 'var(--muted)', fontStyle: 'italic', margin: 0 }}>
-            Show rate is of appointments with a confirmed outcome — {buckets.rescheduled.length} rescheduled and {upcoming} upcoming appointments are excluded because their outcome is not yet known.
+          <p style={{ fontSize: '11px', color: 'var(--muted)', fontStyle: 'italic', margin: '12px 0 0' }}>
+            Show rate is calculated on appointments with a confirmed outcome only. Upcoming appointments are excluded.
           </p>
         </div>
       )}
