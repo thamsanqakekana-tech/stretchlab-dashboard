@@ -457,7 +457,7 @@ function ConversionFunnel({ totalCalls, meaningfulConvs, bookingCount, paidCount
       <div style={{ display: 'flex', alignItems: 'center', overflowX: 'auto', paddingBottom: '4px' }}>
         {stages.map((stage, i) => {
           const prev = stages[i - 1]
-          const rate = prev && prev.count > 0 ? (stage.count / prev.count) * 100 : null
+          const rate = prev && prev.count > 0 && stage.key !== 'upcoming' ? (stage.count / prev.count) * 100 : null
           const isExpanded = stage.drillable && openStage === stage.key
           return (
             <React.Fragment key={stage.key}>
@@ -1022,18 +1022,21 @@ export default function CampaignPulse() {
   // ── Booking buckets — uses buildBookingBuckets() defined at module scope ──────
   const buckets = useMemo(() => buildBookingBuckets(bookings), [bookings])
 
-  const confirmedShows     = buckets.attended.length
+  // ── Validation lead counts (paid / held) across all months ──────────────────
+  // valHeldCount is the authoritative "kept" count (manual tracker, held=Yes).
+  // Used for confirmedShows and showRate so SOW bar, scorecard, and Lead Journey
+  // all show the same number.
+  const valPaidCount = validationLeads.filter(l => isYesVal(l.paid)).length
+  const valHeldCount = validationLeads.filter(l => isYesVal(l.held)).length
+
   const resolved           = buckets.resolved
-  const showRate           = buckets.showRate * 100
+  const confirmedShows     = valHeldCount
+  const showRate           = resolved > 0 ? valHeldCount / resolved * 100 : 0
   const cancels            = buckets.cancelledAll.length
   const cancelRate         = buckets.cancelRateAll * 100
   const cancelRateCustomer = buckets.cancelRateCustomer * 100
   const cancelRateAdmin    = buckets.cancelRateAdmin * 100
   const upcoming           = buckets.upcoming.length
-
-  // ── Validation lead counts (paid / held) across all months ──────────────────
-  const valPaidCount = validationLeads.filter(l => isYesVal(l.paid)).length
-  const valHeldCount = validationLeads.filter(l => isYesVal(l.held)).length
 
   // ── SOW target (derived from ramp CSV; fallback 77) ─────────────────────────
   const sowTarget = useMemo(
@@ -1094,14 +1097,20 @@ export default function CampaignPulse() {
 
   // ── Benchmark detail strings (show actual vs. standard in badge sub-line) ────
   const bmRowLookup = (key) => benchmarks.find(r => r.metric === key) ?? {}
+  const stripPct = (val) => String(val || '').replace(/%$/, '').trim()
   const bm = {
-    show:   bmRowLookup('show_rate'),
-    cancel: bmRowLookup('cancel_rate'),
+    show:    bmRowLookup('show_rate'),
+    cancel:  bmRowLookup('cancel_rate'),
+    connect: bmRowLookup('connect_rate'),     // no CSV row → {}; falls back to crBm.max
+    booking: bmRowLookup('conversion_rate'),  // CSV row: benchmark_pct = '0.5%'
   }
   const { connect_rate: crBm, booking_rate: brBm } = COLD_OUTREACH_BENCHMARKS
-  const connectBmDetail = `benchmark: ${crBm.min}–${crBm.max}% · cold re-engagement`
-  const bookingBmDetail = `benchmark: ${brBm.min}–${brBm.max}% · cold re-engagement`
-  const stripPct = (val) => String(val || '').replace(/%$/, '').trim()
+  const connectBmDetail = bm.connect.benchmark_pct
+    ? `benchmark: ${stripPct(bm.connect.benchmark_pct)}% · cold re-engagement`
+    : `benchmark: ${crBm.max}% · cold re-engagement`
+  const bookingBmDetail = bm.booking.benchmark_pct
+    ? `benchmark: ${stripPct(bm.booking.benchmark_pct)}% · cold re-engagement`
+    : `benchmark: ${brBm.max}% · cold re-engagement`
   const showBmDetail    = bm.show.benchmark_pct
     ? `benchmark: ${stripPct(bm.show.benchmark_pct)}% · cold re-engagement`
     : `benchmark: ${COLD_OUTREACH_BENCHMARKS.show_rate.min}–${COLD_OUTREACH_BENCHMARKS.show_rate.max}%`
@@ -1127,8 +1136,8 @@ export default function CampaignPulse() {
   const cancelAnnotation = `Lead-initiated cancel rate is ${cancelRateCustomer.toFixed(1)}% — studio-initiated cancellations account for the balance`
 
   // ── KPI tooltips ─────────────────────────────────────────────────────────────
-  const convTooltip    = `${convRate.toFixed(1)}% of all calls resulted in a real two-way conversation — someone spoke with Phiwe for at least 30 seconds. Cold re-engagement benchmark: ${crBm.min}–${crBm.max}%.`
-  const bookingTooltip = `Of all ${totalCalls.toLocaleString()} calls made, ${bookingConvRate.toFixed(1)}% resulted in a booked appointment. Cold re-engagement benchmark: ${brBm.min}–${brBm.max}%.`
+  const convTooltip    = `${convRate.toFixed(1)}% of all calls resulted in a real two-way conversation — someone spoke with Phiwe for at least 30 seconds. Cold re-engagement benchmark: ${bm.connect.benchmark_pct ? stripPct(bm.connect.benchmark_pct) + '%' : crBm.max + '%'}.`
+  const bookingTooltip = `Of all ${totalCalls.toLocaleString()} calls made, ${bookingConvRate.toFixed(1)}% resulted in a booked appointment. Cold re-engagement benchmark: ${bm.booking.benchmark_pct ? stripPct(bm.booking.benchmark_pct) + '%' : brBm.max + '%'}.`
   const showTooltip    = `Of the ${resolved} appointments with a confirmed outcome (past sessions where the result is known — rescheduled and upcoming excluded), ${confirmedShows} were attended — ${showRate.toFixed(1)}%. Cold re-engagement benchmark: ${bm.show.benchmark_pct ? stripPct(bm.show.benchmark_pct) + '%' : `${COLD_OUTREACH_BENCHMARKS.show_rate.min}–${COLD_OUTREACH_BENCHMARKS.show_rate.max}%`}.`
   const cancelTooltip  = `Of the ${resolved} resolved appointments, ${cancels} carry a cancelled status — a ${cancelRate.toFixed(1)}% cancel rate. Lead-initiated: ${cancelRateCustomer.toFixed(1)}%, studio-initiated: ${cancelRateAdmin.toFixed(1)}%. Expected range for re-engagement outreach: ${COLD_OUTREACH_BENCHMARKS.cancel_rate.min}–${COLD_OUTREACH_BENCHMARKS.cancel_rate.max}%.`
 
