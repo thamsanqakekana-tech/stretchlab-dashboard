@@ -32,6 +32,13 @@ import DeltaBanner from '../../components/DeltaBanner.jsx'
 import ManagerCancellationInsight from '../../components/ManagerCancellationInsight.jsx'
 import { recordVisit, calculateDelta } from '../../utils/deltaTracking.js'
 
+// ─── Shared date formatter (used in CampaignTimeline and ConversionFunnel) ─────
+const fmtDate = d => {
+  if (!d) return '—'
+  const parsed = new Date(d)
+  return isNaN(parsed.getTime()) ? String(d) : parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
 // ─── Month 1 context line (hardcoded fallback — phiwe_insights.json has no month_1_context field) ──
 const MONTH1_CONTEXT = 'Month 1 established baseline contact patterns and refined the active lead list across studios.'
 
@@ -149,7 +156,10 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, validation
     const isComplete = today > m.end
     const rampRow    = ramp.find(r => +r.month === m.num)
 
-    const monthLeads  = validationLeads.filter(l => +l.month === m.num)
+    const monthLeads  = validationLeads.filter(l => {
+      const d = new Date(l.date_of_appointment)
+      return !isNaN(d.getTime()) && d >= m.start && d <= m.end
+    })
     const paidCount   = monthLeads.filter(l => isYesVal(l.paid)).length
     const heldCount   = monthLeads.filter(l => isYesVal(l.held)).length
     const futureLeads = monthLeads.filter(l => isBlankVal(l.held))
@@ -231,19 +241,6 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, validation
                 </button>
               )}
 
-              {/* Forecast text for active month */}
-              {seg.isActive && pessRow && likelyRow && optRow && (
-                <div style={{ marginTop: '4px' }}>
-                  <p style={{ fontSize: '10px', color: 'var(--muted)', margin: '1px 0', fontStyle: 'italic' }}>
-                    30-day range: {pessRow.shows} shows (pessimistic) · {likelyRow.shows} likely · {optRow.shows} optimistic
-                  </p>
-                  <p style={{ fontSize: '10px', color: 'var(--muted)', margin: '1px 0', fontStyle: 'italic' }}>
-                    {Number(likelyRow.shows) + totalKept < sowTarget
-                      ? 'At the likely pace, the May 24 target requires a conversation about Month 3 scope.'
-                      : 'On track at the likely pace.'}
-                  </p>
-                </div>
-              )}
             </div>
           )
         })}
@@ -277,7 +274,7 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, validation
                     return (
                       <tr key={i} style={{ background: i % 2 === 0 ? 'transparent' : 'var(--bg)' }}>
                         <td style={{ padding: '7px 10px', color: 'var(--text)', fontWeight: 500, whiteSpace: 'nowrap' }}>{lead.name || '—'}</td>
-                        <td style={{ padding: '7px 10px', color: 'var(--muted)', whiteSpace: 'nowrap', fontSize: '11px' }}>{lead.date_of_appointment || '—'}</td>
+                        <td style={{ padding: '7px 10px', color: 'var(--muted)', whiteSpace: 'nowrap', fontSize: '11px' }}>{fmtDate(lead.date_of_appointment)}</td>
                         <td style={{ padding: '7px 10px', color: 'var(--muted)', whiteSpace: 'nowrap' }}>{(lead.location || '').replace('StretchLab ', '')}</td>
                         <td style={{ padding: '7px 10px', color: isPaid ? 'var(--status-above)' : 'var(--muted)', fontWeight: 600 }}>{isPaid ? 'Yes' : 'No'}</td>
                         <td style={{ padding: '7px 10px', color: heldColor, fontWeight: 600 }}>{heldLabel}</td>
@@ -405,8 +402,6 @@ function ConversionFunnel({ totalCalls, meaningfulConvs, bookingCount, paidCount
     { key: 'upcoming', label: 'Upcoming',    count: upcomingCount,   color: 'var(--status-within)', drillable: true },
   ]
 
-  const fmtDate = d => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'
-
   const paidLeads     = validationLeads.filter(l => isYesVal(l.paid))
   const keptLeads     = validationLeads.filter(l => isYesVal(l.held))
   const highRiskCount = pipeline.filter(r => r.risk_level === 'High').length
@@ -507,6 +502,11 @@ function ConversionFunnel({ totalCalls, meaningfulConvs, bookingCount, paidCount
             <p style={{ fontSize: '13px', color: 'var(--muted)', fontStyle: 'italic' }}>{emptyMessages[openStage]}</p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', paddingBottom: '8px', borderBottom: '1px solid var(--border)', marginBottom: '4px' }}>
+                <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.07em', minWidth: '160px' }}>Name</span>
+                <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.07em', minWidth: '100px' }}>Studio</span>
+                <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Date</span>
+              </div>
               {rows.map((row, i) => (
                 <div key={i} style={{
                   display: 'flex', alignItems: 'center', gap: '20px',
@@ -1344,11 +1344,24 @@ export default function CampaignPulse() {
             Connect Rate by Day &amp; Hour
           </p>
           <p style={{ fontSize: '13px', color: 'var(--text-2)', lineHeight: 1.65, margin: '0 0 20px' }}>
-            {top2ConnectSlots.length >= 2
-              ? <>{top2ConnectSlots[0].day} {formatHour(top2ConnectSlots[0].hour)} and {top2ConnectSlots[1].day} {formatHour(top2ConnectSlots[1].hour)} are where real conversations happen — {Math.round(top2ConnectSlots[0].connectRate * 100)}% and {Math.round(top2ConnectSlots[1].connectRate * 100)}% connect rate respectively.</>
-              : <>The heatmap shows when real conversations concentrate.</>
-            }
-            {bestConnectDay && <>{' '}{bestConnectDay.day}s are the most consistent day across the week at {(bestConnectDay.rate * 100).toFixed(1)}%.</>}
+            {(() => {
+              if (top2ConnectSlots.length < 2) return 'The heatmap shows when real conversations concentrate.'
+              const [s1, s2] = top2ConnectSlots
+              const r1 = Math.round(s1.connectRate * 100)
+              const r2 = Math.round(s2.connectRate * 100)
+              const sameRate = r1 === r2
+              const slotDesc = sameRate
+                ? `${s1.day} ${formatHour(s1.hour)} and ${s2.day} ${formatHour(s2.hour)} are the two strongest connect windows — both at ${r1}%`
+                : `${s1.day} ${formatHour(s1.hour)} (${r1}%) and ${s2.day} ${formatHour(s2.hour)} (${r2}%) are where real conversations concentrate`
+              const campaignAvg = totalCalls > 0 ? Math.round((meaningfulConvs / totalCalls) * 100) : null
+              const vsAvg = campaignAvg !== null && r1 > campaignAvg
+                ? `, well above the campaign average of ${campaignAvg}%`
+                : ''
+              const dayLine = bestConnectDay
+                ? ` ${bestConnectDay.day}s produce the most consistent connect rate across the week at ${(bestConnectDay.rate * 100).toFixed(1)}%.`
+                : ''
+              return `${slotDesc}${vsAvg}.${dayLine}`
+            })()}
           </p>
 
           {/* Connect rate heatmap */}
@@ -1420,6 +1433,14 @@ export default function CampaignPulse() {
         <div style={{ marginBottom: '24px', marginTop: '16px', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
           <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 16px' }}>
             Call-to-Booking Funnel
+          </p>
+          <p style={{ fontSize: '13px', color: 'var(--text-2)', lineHeight: 1.65, margin: '0 0 16px' }}>
+            {(() => {
+              const connectPct        = totalCalls > 0 ? ((meaningfulConvs / totalCalls) * 100).toFixed(1) : '0.0'
+              const bookingFromConvPct = meaningfulConvs > 0 ? ((totalBookings / meaningfulConvs) * 100).toFixed(1) : '0.0'
+              const bookingFromCallPct = totalCalls > 0 ? ((totalBookings / totalCalls) * 100).toFixed(1) : '0.0'
+              return `Of ${totalCalls.toLocaleString()} calls, ${connectPct}% reached someone for a real conversation. Of those conversations, ${bookingFromConvPct}% resulted in a booked appointment — a ${bookingFromCallPct}% call-to-booking rate overall. For cold re-engagement outreach on dormant leads, a booking rate in this range is expected given the nature of the lead type.`
+            })()}
           </p>
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             {[

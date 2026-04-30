@@ -427,27 +427,25 @@ function StudioSignalCard({ s, isManagerView, pipeline = [] }) {
                 </thead>
                 <tbody>
                   {sortedBks.map((bk, i) => {
-                    const hasShow       = (() => { const v = bk['has_show'] ?? bk.has_show; return v === true || v === 1 || String(v).trim() === '1' })()
-                    const status        = String(bk.current_status || '').trim()
-                    const isFuture      = status.includes('Open Booking')
-                    const isCancCust    = status.includes('Cancelled Within Policy') || status.includes('Cancelled Outside Policy')
-                    const isCancAdmin   = status.includes('Cancelled By Admin')
-                    const isNoShow      = status.includes('No Show')
-                    const isRescheduled = status.includes('Rescheduled')
+                    const uo          = String(bk.unified_outcome || '').trim().toLowerCase()
+                    const status      = String(bk.current_status || '').trim()
+                    const isCancAdmin = uo === 'cancelled' && status.includes('Cancelled By Admin')
 
-                    const outcomeColor = hasShow ? '#22c55e'
-                      : isFuture     ? '#6366f1'
-                      : isCancAdmin  ? '#f59e0b'
-                      : isCancCust   ? '#ef4444'
-                      : isNoShow     ? '#64748b'
+                    const outcomeColor = uo === 'attended'    ? '#22c55e'
+                      : uo === 'upcoming'    ? '#6366f1'
+                      : uo === 'no_show'     ? '#64748b'
+                      : uo === 'rescheduled' ? '#38bdf8'
+                      : isCancAdmin          ? '#f59e0b'
+                      : uo === 'cancelled'   ? '#ef4444'
                       : 'var(--muted)'
-                    const outcomeLabel = hasShow ? 'Attended'
-                      : isFuture     ? 'Upcoming'
-                      : isCancAdmin  ? 'Studio-cancelled'
-                      : isCancCust   ? 'Lead-cancelled'
-                      : isNoShow     ? 'No-show'
-                      : isRescheduled ? 'Rescheduled'
-                      : status || 'Unknown'
+                    const outcomeLabel = uo === 'attended'    ? 'Attended'
+                      : uo === 'upcoming'    ? 'Upcoming'
+                      : uo === 'no_show'     ? 'No-show'
+                      : uo === 'rescheduled' ? 'Rescheduled'
+                      : isCancAdmin && isManagerView ? 'Studio-cancelled'
+                      : uo === 'cancelled' && isManagerView ? 'Lead-cancelled'
+                      : uo === 'cancelled'   ? 'Cancelled'
+                      : 'Unknown'
 
                     const fname       = bk.first_name ?? ''
                     const lname       = bk.last_name  ?? ''
