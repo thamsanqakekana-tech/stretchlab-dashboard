@@ -19,7 +19,8 @@ export default function TopBar() {
 
   const allowed       = ALLOWED_VIEWS[userRole] ?? ['client']
   // Clients see no switcher; managers see client+manager only; admins see all their allowed views
-  const switcherViews = userRole === 'admin'   ? allowed
+  const switcherViews = viewRole === 'client'  ? []
+    : userRole === 'admin'   ? allowed
     : userRole === 'manager' ? allowed.filter(v => v !== 'admin')
     : []
   const activeColor = ROLE_COLORS[viewRole] ?? '#6366f1'
