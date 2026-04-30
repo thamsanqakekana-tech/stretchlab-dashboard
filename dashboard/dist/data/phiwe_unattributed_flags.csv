@@ -1,4 +1,5 @@
 user_id,first_name,last_name,location,first_visit_date,cellphone,flag_reason,confidence
+128723095,Deambra,Williams,StretchLab Pearland,2026-03-28,3183414202,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 121663572,Nolen,Thomas,StretchLab Pearland,2026-04-25,8326923064,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 124136097,Chip,Cherry,StretchLab Heights,2026-02-25,(832) 729-7879,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 106028799,Khadija,Washington,StretchLab Heights,2026-02-27,12819129468,Phiwe called this number; lead completed first visit under different booking attribution,Medium
@@ -49,7 +50,9 @@ user_id,first_name,last_name,location,first_visit_date,cellphone,flag_reason,con
 111503279,Quincy,Bogany,StretchLab Bunker Hill,2026-03-30,8322729477,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 128947291,Lezlie,Maltz,StretchLab Bunker Hill,2026-03-30,(214) 300-5299,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 119144082,Joseph,Minotti,StretchLab Bunker Hill,2026-04-08,2816879991,Phiwe called this number; lead completed first visit under different booking attribution,Medium
+118584488,Robert,Scarpati,StretchLab Bunker Hill,2026-04-29,7137244078,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 120048240,Timothy,Cooper,StretchLab Shreveport,2026-03-21,(318) 465-3609,Phiwe called this number; lead completed first visit under different booking attribution,High - also in manual tracker (Paid=Yes)
+128507315,Maribeth,Exley,StretchLab Shreveport,2026-03-24,2142886915,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 118381181,Anna beth,Crowson,StretchLab Shreveport,2026-04-16,(318) 518-5329,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 125858254,David,Meyn,StretchLab Brighton,2026-02-27,(248) 329-8575,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 111943835,Stephanie,Ostrowski,StretchLab Brighton,2026-03-17,7274159353,Phiwe called this number; lead completed first visit under different booking attribution,Medium

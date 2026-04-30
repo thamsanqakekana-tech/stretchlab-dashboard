@@ -148,6 +148,8 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, validation
   const optRow    = forecast.find(f => f.scenario === 'optimistic')
   const totalKept = ramp.reduce((s, r) => s + (+r.actual_kept_appts || 0), 0)
 
+  const allFutureLeads = validationLeads.filter(l => isBlankVal(l.held))
+
   const segments = MONTHS.map((m) => {
     const totalDays = Math.round((m.end - m.start) / 86400000) + 1
     let fillPct = 0
@@ -161,15 +163,21 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, validation
     const isComplete = today > m.end
     const rampRow    = ramp.find(r => +r.month === m.num)
 
-    const monthLeads  = validationLeads.filter(l => {
+    const monthLeads         = validationLeads.filter(l => {
       const lMonth = parseInt(l.month, 10)
       return !isNaN(lMonth) && lMonth === m.num
     })
-    const paidCount   = monthLeads.filter(l => isYesVal(l.paid)).length
-    const heldCount   = monthLeads.filter(l => isYesVal(l.held)).length
-    const futureLeads = monthLeads.filter(l => isBlankVal(l.held))
+    const resolvedMonthLeads = monthLeads.filter(l => !isBlankVal(l.held))
+    const paidCount   = isActive
+      ? allFutureLeads.filter(l => isYesVal(l.paid)).length
+      : resolvedMonthLeads.filter(l => isYesVal(l.paid)).length
+    const heldCount   = resolvedMonthLeads.filter(l => isYesVal(l.held)).length
+    const futureLeads = isActive ? allFutureLeads : []
+    const drillLeads  = isActive
+      ? [...resolvedMonthLeads, ...allFutureLeads]
+      : resolvedMonthLeads
 
-    return { ...m, fillPct, isActive, isComplete, monthLeads, paidCount, heldCount, futureLeads }
+    return { ...m, fillPct, isActive, isComplete, monthLeads, resolvedMonthLeads, paidCount, heldCount, futureLeads, drillLeads }
   })
 
   return (
@@ -186,7 +194,7 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, validation
       <div style={{ display: 'flex', gap: '6px' }}>
         {segments.map((seg) => {
           const isOpen = expanded === seg.num
-          const hasLeads = seg.monthLeads.length > 0
+          const hasLeads = seg.drillLeads.length > 0
           return (
             <div key={seg.num} style={{ flex: 1 }}>
               <div style={{
@@ -258,7 +266,7 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, validation
         return (
           <div style={{ marginTop: '16px', borderTop: '1px solid var(--border)', paddingTop: '14px' }}>
             <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 10px' }}>
-              {seg.label} leads — {seg.monthLeads.length} total
+              {seg.label} leads — {seg.drillLeads.length} total
             </p>
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
@@ -270,7 +278,7 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, validation
                   </tr>
                 </thead>
                 <tbody>
-                  {seg.monthLeads.map((lead, i) => {
+                  {seg.drillLeads.map((lead, i) => {
                     const isPaid     = isYesVal(lead.paid)
                     const isHeld     = isYesVal(lead.held)
                     const isUpcoming = isBlankVal(lead.held)
@@ -1030,8 +1038,8 @@ export default function CampaignPulse() {
   const valHeldCount = validationLeads.filter(l => isYesVal(l.held)).length
 
   const resolved           = buckets.resolved
-  const confirmedShows     = valHeldCount
-  const showRate           = resolved > 0 ? valHeldCount / resolved * 100 : 0
+  const confirmedShows     = buckets.attended.length   // ClubReady has_show=1 (local CSV, 16)
+  const showRate           = resolved > 0 ? buckets.attended.length / resolved * 100 : 0
   const cancels            = buckets.cancelledAll.length
   const cancelRate         = buckets.cancelRateAll * 100
   const cancelRateCustomer = buckets.cancelRateCustomer * 100
@@ -1097,7 +1105,17 @@ export default function CampaignPulse() {
 
   // ── Benchmark detail strings (show actual vs. standard in badge sub-line) ────
   const bmRowLookup = (key) => benchmarks.find(r => r.metric === key) ?? {}
-  const stripPct = (val) => String(val || '').replace(/%$/, '').trim()
+  const stripPct = (val) => {
+    const s = String(val || '').replace(/%$/, '').trim()
+    const n = parseFloat(s)
+    if (isNaN(n)) return s
+    return n % 1 === 0 ? String(Math.round(n)) : n.toFixed(1)
+  }
+  const fmtPct = (n) => {
+    const v = typeof n === 'number' ? n : parseFloat(String(n || ''))
+    if (isNaN(v)) return '—'
+    return v % 1 === 0 ? String(Math.round(v)) : v.toFixed(1)
+  }
   const bm = {
     show:    bmRowLookup('show_rate'),
     cancel:  bmRowLookup('cancel_rate'),
@@ -1124,7 +1142,7 @@ export default function CampaignPulse() {
     convStatus === 'within' ? "Connect rate is within the expected range for dormant lead reactivation" :
                               "Connect rate is below the benchmark for this lead type — call timing is the priority lever"
 
-  const bookingAnnotation = `${(bookings.length / totalCalls * 100).toFixed(1)}% of all calls resulted in a booked session`
+  const bookingAnnotation = `${fmtPct(bookings.length / totalCalls * 100)}% of all calls resulted in a booked session`
 
   const showVsBm      = showRate >= 20 ? 'excellent' : showRate >= 15 ? 'good' : showRate >= 10 ? 'average' : 'poor'
   const showAnnotation =
@@ -1133,7 +1151,7 @@ export default function CampaignPulse() {
     showVsBm === 'average'   ? "Show rate is approaching the expected benchmark — protecting the show rate on upcoming appointments is the priority" :
                                "Show rate is below the benchmark — booking timing and pre-visit confirmation are the focus"
 
-  const cancelAnnotation = `Lead-initiated cancel rate is ${cancelRateCustomer.toFixed(1)}% — studio-initiated cancellations account for the balance`
+  const cancelAnnotation = `Lead-initiated cancel rate is ${fmtPct(cancelRateCustomer)}% — studio-initiated cancellations account for the balance`
 
   // ── KPI tooltips ─────────────────────────────────────────────────────────────
   const convTooltip    = `${convRate.toFixed(1)}% of all calls resulted in a real two-way conversation — someone spoke with Phiwe for at least 30 seconds. Cold re-engagement benchmark: ${bm.connect.benchmark_pct ? stripPct(bm.connect.benchmark_pct) + '%' : crBm.max + '%'}.`
@@ -1374,7 +1392,7 @@ export default function CampaignPulse() {
                 ? `, well above the campaign average of ${campaignAvg}%`
                 : ''
               const dayLine = bestConnectDay
-                ? ` ${bestConnectDay.day}s produce the most consistent connect rate across the week at ${(bestConnectDay.rate * 100).toFixed(1)}%.`
+                ? ` ${bestConnectDay.day}s produce the most consistent connect rate across the week at ${fmtPct(bestConnectDay.rate * 100)}%.`
                 : ''
               return `${slotDesc}${vsAvg}.${dayLine}`
             })()}
@@ -1503,7 +1521,7 @@ export default function CampaignPulse() {
           </div>
 
           <p style={{ fontSize: '13px', color: 'var(--text-2)', lineHeight: 1.65, margin: '0 0 20px' }}>
-            Of {resolved} appointments with a confirmed outcome, {confirmedShows} were attended — a {showRate.toFixed(1)}% show rate that sits {showStatus === 'above' ? 'above' : showStatus === 'within' ? 'within' : 'below'} the outreach benchmark of {bm.show.benchmark_pct ? stripPct(bm.show.benchmark_pct) + '%' : `${COLD_OUTREACH_BENCHMARKS.show_rate.min}–${COLD_OUTREACH_BENCHMARKS.show_rate.max}%`}.
+            Of {resolved} appointments with a confirmed outcome, {confirmedShows} were attended — a {fmtPct(showRate)}% show rate that sits {showStatus === 'above' ? 'above' : showStatus === 'within' ? 'within' : 'below'} the outreach benchmark of {bm.show.benchmark_pct ? stripPct(bm.show.benchmark_pct) + '%' : `${COLD_OUTREACH_BENCHMARKS.show_rate.min}–${COLD_OUTREACH_BENCHMARKS.show_rate.max}%`}.
             {bestDay && worstActiveDay && worstActiveDay.day_of_week !== bestDay.day_of_week && (
               <>{' '}{worstActiveDay.day_of_week} books the most sessions — {worstActiveDay.total_bookings} booked — but holds at just {Math.round(worstActiveDay.resolvedShowPct)}%.
               {' '}{bestDay.day_of_week} and the sessions around it hold at {Math.round(bestDay.resolvedShowPct)}% — the clearest signal on what works.</>

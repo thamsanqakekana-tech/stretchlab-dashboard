@@ -89,7 +89,8 @@ export function parsePct(v) {
 
 // ─── BASE (transform.py) ────────────────────────────────────────────────────
 export const loadCalls                = () => loadCSV('phiwe_calls.csv')
-export const loadBookings             = () => loadCSV('phiwe_bookings.csv')
+// Local-only: Supabase phiwe_bookings table is stale — bypass to ensure has_show accuracy.
+export const loadBookings             = () => loadCSVLocal('phiwe_bookings.csv')
 export const loadDailyPerformance     = () => loadCSV('phiwe_daily_performance.csv')
 export const loadByStudio             = () => loadCSV('phiwe_by_studio.csv')
 export const loadByAreaCode           = () => loadCSV('phiwe_by_area_code.csv')

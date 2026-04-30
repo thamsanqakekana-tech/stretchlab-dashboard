@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useMultiData } from '../../hooks/useData.js'
 import {
-  loadUnifiedLeads,
+  loadBookings,
   loadInsights,
   loadCancellationAnalysis,
   loadPipeline,
@@ -32,8 +32,8 @@ const DAYS_OF_WEEK = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturd
 
 // ─── Studio stats builder ─────────────────────────────────────────────────────
 function buildStudioStats(leads, cancellations = []) {
-  const outcome    = b => String(b.unified_outcome || '').toLowerCase()
-  const getStatus  = b => String(b.current_status || '').trim()
+  const hasShow   = b => +b.has_show === 1
+  const getStatus = b => String(b.current_status || b['Current Status'] || '').trim()
 
   const grouped = {}
   leads.forEach(b => {
@@ -44,30 +44,37 @@ function buildStudioStats(leads, cancellations = []) {
   })
 
   return Object.entries(grouped).map(([studio, bks]) => {
-    const attended    = bks.filter(b => outcome(b) === 'attended').length
-    const upcoming    = bks.filter(b => outcome(b) === 'upcoming').length
-    const noShows     = bks.filter(b => outcome(b) === 'no_show').length
-    const totalCancels = bks.filter(b => outcome(b) === 'cancelled' || outcome(b) === 'paid_no_show').length
-    const rescheduled = bks.filter(b => outcome(b) === 'rescheduled').length
-    const total       = bks.length
-    const resolved    = attended + totalCancels + noShows
-    const showRate    = resolved > 0 ? attended / resolved : 0
-
-    // Admin vs customer cancel — current_status available only for ClubReady rows
-    const adminCancels  = bks.filter(b => outcome(b) === 'cancelled' && getStatus(b).includes('Cancelled By Admin')).length
-    const custCancels   = totalCancels - adminCancels
+    const attended     = bks.filter(b => hasShow(b)).length
+    const upcoming     = bks.filter(b => getStatus(b).includes('Open Booking')).length
+    const noShows      = bks.filter(b => getStatus(b).includes('No Show')).length
+    const adminCancels = bks.filter(b => getStatus(b).includes('Cancelled By Admin')).length
+    const custCancels  = bks.filter(b =>
+      getStatus(b).includes('Cancelled Within Policy') ||
+      getStatus(b).includes('Cancelled Outside Policy')
+    ).length
+    const totalCancels = adminCancels + custCancels
+    const rescheduled  = bks.filter(b => getStatus(b).includes('Rescheduled')).length
+    const total        = bks.length
+    const resolved     = attended + totalCancels + noShows
+    const showRate     = resolved > 0 ? attended / resolved : 0
     const adminCancelPct = resolved >= 2 ? adminCancels / resolved : 0
 
-    // Cancel by day of week — available on ClubReady rows only
     const cancelByDay = {}
     DAYS_OF_WEEK.forEach(d => { cancelByDay[d] = 0 })
-    bks.filter(b => outcome(b) === 'cancelled').forEach(b => {
+    bks.filter(b =>
+      getStatus(b).includes('Cancelled Within Policy') ||
+      getStatus(b).includes('Cancelled Outside Policy') ||
+      getStatus(b).includes('Cancelled By Admin')
+    ).forEach(b => {
       const d = String(b.booking_day_of_week ?? '').trim()
       if (cancelByDay[d] !== undefined) cancelByDay[d]++
     })
 
-    // Cancel timing — cross-reference cancellations CSV by booking_id
-    const cancelIds = new Set(bks.filter(b => outcome(b) === 'cancelled').map(b => String(b.booking_id)))
+    const cancelIds = new Set(bks.filter(b =>
+      getStatus(b).includes('Cancelled Within Policy') ||
+      getStatus(b).includes('Cancelled Outside Policy') ||
+      getStatus(b).includes('Cancelled By Admin')
+    ).map(b => String(b.booking_id)))
     const matched = cancellations.filter(c => cancelIds.has(String(c.booking_id)))
     const cancelByTiming = { lastMinute: 0, shortNotice: 0, advance: 0 }
     matched.forEach(c => {
@@ -78,11 +85,11 @@ function buildStudioStats(leads, cancellations = []) {
     })
 
     const segment =
-      total === 0                                                  ? 'inactive'
-      : attended >= 1 && showRate >= 0.25                          ? 'working'
-      : attended === 0 && upcoming >= 1                            ? 'activating'
-      : attended >= 1 || (upcoming === 0 && totalCancels > 0)     ? 'needs-attention'
-      :                                                              'activating'
+      total === 0                                              ? 'inactive'
+      : attended >= 1 && showRate >= 0.25                     ? 'working'
+      : attended === 0 && upcoming >= 1                       ? 'activating'
+      : attended >= 1 || (upcoming === 0 && totalCancels > 0) ? 'needs-attention'
+      :                                                          'activating'
 
     if (import.meta.env.DEV) {
       console.log(`[Studio] ${studio}: total=${total} attended=${attended} upcoming=${upcoming} cancelled=${totalCancels} showRate=${(showRate * 100).toFixed(1)}% segment=${segment}`)
@@ -658,7 +665,7 @@ export default function Results() {
   const isManagerView = role === 'manager' || role === 'admin'
 
   const { data, loading } = useMultiData({
-    bookings:      loadUnifiedLeads,
+    bookings:      loadBookings,
     insights:      loadInsights,
     cancellations: loadCancellationAnalysis,
     pipeline:      loadPipeline,
@@ -671,7 +678,19 @@ export default function Results() {
 
   const studioStats = useMemo(() => {
     if (!bookings.length) return []
-    return buildStudioStats(bookings, cancellations)
+    const computed = buildStudioStats(bookings, cancellations)
+    const existing = new Set(computed.map(s => s.studio))
+    const inactive = ['StretchLab South Tulsa']
+      .filter(name => !existing.has(name))
+      .map(name => ({
+        studio: name, total: 0, shows: 0, noShows: 0,
+        custCancels: 0, adminCancels: 0, totalCancels: 0,
+        rescheduled: 0, upcoming: 0, resolved: 0, showRate: 0,
+        adminCancelPct: 0, segment: 'inactive', smallSample: false,
+        bookings: [], cancelByDay: {}, cancelByTiming: { lastMinute: 0, shortNotice: 0, advance: 0 },
+        fastBookings: 0, fastBookingCancels: 0,
+      }))
+    return [...computed, ...inactive]
   }, [bookings, cancellations])
 
   const studioOpsStudios = useMemo(

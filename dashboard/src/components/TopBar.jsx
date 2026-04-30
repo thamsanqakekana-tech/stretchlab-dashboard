@@ -1,11 +1,21 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
 
 const VIEW_LABELS  = { client: 'Client View', manager: 'Manager View', admin: 'Admin View' }
 const ROLE_COLORS  = { client: '#6366f1', manager: '#f59e0b', admin: '#a855f7' }
 
+function useTheme() {
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') ?? 'dark')
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem('theme', theme)
+  }, [theme])
+  return [theme, setTheme]
+}
+
 export default function TopBar() {
   const { user, userRole, viewRole, setViewRole, signOut, ALLOWED_VIEWS } = useAuth()
+  const [theme, setTheme] = useTheme()
 
   const allowed     = ALLOWED_VIEWS[userRole] ?? ['client']
   const activeColor = ROLE_COLORS[viewRole] ?? '#6366f1'
@@ -61,6 +71,22 @@ export default function TopBar() {
             })}
           </div>
         )}
+
+        {/* Theme toggle */}
+        <button
+          onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
+          title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          style={{
+            padding: '5px 10px', borderRadius: '7px',
+            border: '1px solid var(--border)',
+            background: 'transparent', color: 'var(--muted)',
+            fontSize: '13px', cursor: 'pointer',
+            transition: 'all 0.15s', lineHeight: 1,
+            fontFamily: 'DM Sans, sans-serif',
+          }}
+        >
+          {theme === 'dark' ? '☀' : '☽'}
+        </button>
 
         {/* User chip */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
