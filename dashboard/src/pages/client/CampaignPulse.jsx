@@ -162,8 +162,8 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, validation
     const rampRow    = ramp.find(r => +r.month === m.num)
 
     const monthLeads  = validationLeads.filter(l => {
-      const d = new Date(l.date_of_appointment)
-      return !isNaN(d.getTime()) && d >= m.start && d <= m.end
+      const lMonth = parseInt(l.month, 10)
+      return !isNaN(lMonth) && lMonth === m.num
     })
     const paidCount   = monthLeads.filter(l => isYesVal(l.paid)).length
     const heldCount   = monthLeads.filter(l => isYesVal(l.held)).length

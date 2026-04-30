@@ -121,7 +121,8 @@ export const loadVelocityTrend         = () => loadCSV('phiwe_velocity_trend.csv
 
 // ─── DATA INTEGRITY ──────────────────────────────────────────────────────────
 export const loadUnattributedFlags     = () => loadCSV('phiwe_unattributed_flags.csv')
-export const loadValidationLeadDetails = () => loadCSV('phiwe_validation_lead_details.csv')
+// Local-only: Supabase copy may lag behind pipeline date normalization fixes.
+export const loadValidationLeadDetails = () => loadCSVLocal('phiwe_validation_lead_details.csv')
 
 // ─── NARRATIVE (Groq-generated insights written by pipeline) ─────────────────
 export const loadInsights              = () => loadJSON('phiwe_insights.json')
