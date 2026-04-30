@@ -1009,6 +1009,11 @@ class DataTransformer:
         ].copy()
         funnel['_norm']           = funnel['full_name_lower'].apply(_norm_name)
         funnel['unified_outcome'] = funnel['current_status'].apply(map_outcome)
+        # has_show=1 is the authoritative attended flag — override current_status-derived
+        # outcome for leads like Joe Fanto whose status was later set to 'Cancelled By Admin'
+        # even though they actually attended the session.
+        if 'has_show' in funnel.columns:
+            funnel.loc[funnel['has_show'] == 1, 'unified_outcome'] = 'attended'
         funnel['source']          = 'clubready'
         funnel['held']            = ''
         funnel['paid']            = ''
@@ -1200,13 +1205,24 @@ class DataTransformer:
         """Day of week performance"""
         logger.info("\nBuilding day of week analysis...")
         
-        dow_analysis = bookings.groupby('booking_day_of_week').agg({
-            'booking_id': 'count',
-            'has_show': 'sum',
-            'is_cancelled': 'sum',
-            'is_no_show': 'sum'
+        # Attended leads sometimes carry is_cancelled=1 (status updated after the fact).
+        # Use has_show=1 as authoritative for shows; exclude those from cancellations/no-shows.
+        # Use current_status string match for no-shows (is_no_show flag unreliable due to
+        # trailing spaces in status values like 'No Show Booking ').
+        bk = bookings.copy()
+        bk['_adj_cancelled'] = ((bk['is_cancelled'] == 1) & (bk['has_show'] != 1)).astype(int)
+        bk['_adj_no_show']   = (
+            bk['current_status'].str.strip().str.contains('No Show', case=False, na=False) &
+            (bk['has_show'] != 1)
+        ).astype(int)
+
+        dow_analysis = bk.groupby('booking_day_of_week').agg({
+            'booking_id':    'count',
+            'has_show':      'sum',
+            '_adj_cancelled':'sum',
+            '_adj_no_show':  'sum'
         }).reset_index()
-        
+
         dow_analysis.columns = ['day_of_week', 'total_bookings', 'shows', 'cancellations', 'no_shows']
         
         dow_analysis['show_rate_pct'] = np.where(
@@ -1634,9 +1650,31 @@ class DataTransformer:
         combined = pd.concat([m1, m2], ignore_index=True)
         system_names = set(bookings['full_name_lower'].dropna())
         combined['_norm'] = combined['Name'].apply(_norm_name)
+        def _clean_appt_date(val):
+            """Parse messy manual-tracker date cells to ISO format; return None if blank."""
+            if val is None or (isinstance(val, float) and pd.isna(val)):
+                return None
+            s = str(val).strip()
+            if not s or s.lower() in ('nan', 'none', 'nat'):
+                return None
+            # Try standard pandas parse first
+            parsed = pd.to_datetime(s, errors='coerce')
+            if parsed is not pd.NaT and not pd.isna(parsed) and 2024 <= parsed.year <= 2030:
+                return parsed.strftime('%Y-%m-%d %H:%M:%S')
+            # Fall back to dateutil fuzzy parse (handles "Friday, April 17," and extra text).
+            # dateutil fills missing year from today — correct for current campaign dates.
+            try:
+                from dateutil import parser as du_parser
+                parsed2 = du_parser.parse(s, fuzzy=True)
+                if 2024 <= parsed2.year <= 2030:
+                    return parsed2.strftime('%Y-%m-%d %H:%M:%S')
+            except Exception:
+                pass
+            return None
+
         gap_details = pd.DataFrame({
             'name':                combined['Name'],
-            'date_of_appointment': combined['Date of appointment'],
+            'date_of_appointment': combined['Date of appointment'].apply(_clean_appt_date),
             'location':            combined['Location'],
             'paid':                combined['Paid?'],
             'in_system':           combined['_norm'].isin(system_names),

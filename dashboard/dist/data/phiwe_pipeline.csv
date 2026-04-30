@@ -1,14 +1,14 @@
 booking_id,first_name,last_name,phone_clean,email,booking_date,days_until,booking_location,session_mins,total_calls_made,risk_level,attribution_method
-741179331,David,Kocsis Jr,8328698193,lildin713@gmail.com,2026-05-03,4,StretchLab Pearland,50,1.0,High,Direct
-749286748,Justin,Cassell,8329702623,justin.s.cassell@gmail.com,2026-05-03,4,StretchLab Heights,50,1.0,High,Direct
-749294280,Melvinia,McClain,7869426637,melvinia_mcclain@yahoo.com,2026-05-01,2,StretchLab Heights,25,1.0,High,Direct
-750800026,Abdul,Khan,7867128616,lalamajeed@yahoo.com,2026-05-04,5,StretchLab River Oaks ,50,1.0,High,Direct
-748618426,Debbie,Webb,8176918389,mypromus@yahoo.com,2026-05-11,12,StretchLab Bunker Hill,50,6.0,Medium,Direct
-750889551,Roan,Luben,7139138615,roanc71@gmail.com,2026-05-02,3,StretchLab Bunker Hill,50,4.0,Medium,Direct
-735191604,Ross,Williams,2147342242,mitglobalenterprises@gmail.com,2026-05-01,2,StretchLab Shreveport,50,6.0,Low,Direct
-747936313,Fame,Gilliam,3187545294,gilli3@aol.com,2026-05-11,12,StretchLab Shreveport,50,4.0,Medium,Direct
-749417966,David,Dole,3135106286,daviddole7@gmail.com,2026-05-09,10,StretchLab Brighton,50,1.0,High,Direct
-749421469,Kelly,Dole,7345020273,kelly.dole@att.net,2026-05-09,10,StretchLab Brighton,50,0.0,High,Direct
-743254076,Samuel,Amos,2817050587,pipefitter2@sbcglobal.net,2026-05-04,5,StretchLab Bellaire,50,3.0,Medium,Direct
-748157239,Christopher,Ejike-Ukah,8325261930,cejikeukah@gmail.fom,2026-05-05,6,StretchLab Bellaire,50,1.0,High,Direct
-750718486,Kenacia,Hunter,9033300674,skyehunter000@gmail.com,2026-05-04,5,StretchLab Bellaire,25,2.0,High,Direct
+741179331,David,Kocsis Jr,8328698193,lildin713@gmail.com,2026-05-03,3,StretchLab Pearland,50,1.0,High,Direct
+749286748,Justin,Cassell,8329702623,justin.s.cassell@gmail.com,2026-05-03,3,StretchLab Heights,50,1.0,High,Direct
+749294280,Melvinia,McClain,7869426637,melvinia_mcclain@yahoo.com,2026-05-01,1,StretchLab Heights,25,1.0,High,Direct
+750800026,Abdul,Khan,7867128616,lalamajeed@yahoo.com,2026-05-04,4,StretchLab River Oaks ,50,1.0,High,Direct
+748618426,Debbie,Webb,8176918389,mypromus@yahoo.com,2026-05-11,11,StretchLab Bunker Hill,50,6.0,Medium,Direct
+750889551,Roan,Luben,7139138615,roanc71@gmail.com,2026-05-02,2,StretchLab Bunker Hill,50,4.0,Medium,Direct
+735191604,Ross,Williams,2147342242,mitglobalenterprises@gmail.com,2026-05-01,1,StretchLab Shreveport,50,6.0,Low,Direct
+747936313,Fame,Gilliam,3187545294,gilli3@aol.com,2026-05-11,11,StretchLab Shreveport,50,4.0,Medium,Direct
+749417966,David,Dole,3135106286,daviddole7@gmail.com,2026-05-09,9,StretchLab Brighton,50,1.0,High,Direct
+749421469,Kelly,Dole,7345020273,kelly.dole@att.net,2026-05-09,9,StretchLab Brighton,50,0.0,High,Direct
+743254076,Samuel,Amos,2817050587,pipefitter2@sbcglobal.net,2026-05-04,4,StretchLab Bellaire,50,3.0,Medium,Direct
+748157239,Christopher,Ejike-Ukah,8325261930,cejikeukah@gmail.fom,2026-05-05,5,StretchLab Bellaire,50,1.0,High,Direct
+750718486,Kenacia,Hunter,9033300674,skyehunter000@gmail.com,2026-05-04,4,StretchLab Bellaire,25,2.0,High,Direct

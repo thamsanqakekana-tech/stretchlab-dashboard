@@ -71,10 +71,12 @@ def generate_benchmarks_comparison(calls, bookings, output_dir):
     total_calls = len(calls)
     total_bookings = len(bookings)
     total_shows = bookings['has_show'].sum()
-    total_cancellations = bookings['is_cancelled'].sum()
+    # Pure cancellations: exclude rows where has_show=1 (attended leads whose
+    # current_status was later set to Cancelled — has_show is authoritative).
+    pure_cancellations = int(((bookings['is_cancelled'] == 1) & (bookings['has_show'] != 1)).sum())
     total_no_shows = bookings['is_no_show'].sum()
     connected_calls = calls['is_connected'].sum()
-    
+
     # Rates — resolved = past appointments with final outcomes (excludes rescheduled)
     if 'is_resolved' in bookings.columns:
         resolved = bookings[bookings['is_resolved'] == 1]
@@ -88,7 +90,8 @@ def generate_benchmarks_comparison(calls, bookings, output_dir):
     resolved_count = len(resolved)
     conversion_rate = total_bookings / total_calls if total_calls > 0 else 0
     show_rate = total_shows / resolved_count if resolved_count > 0 else 0
-    cancel_rate = total_cancellations / resolved_count if resolved_count > 0 else 0
+    # Cancel rate denominator = total bookings (not resolved) per campaign methodology.
+    cancel_rate = pure_cancellations / total_bookings if total_bookings > 0 else 0
     no_show_rate = total_no_shows / resolved_count if resolved_count > 0 else 0
     engagement_rate = connected_calls / total_calls if total_calls > 0 else 0
     

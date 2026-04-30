@@ -111,10 +111,12 @@ function buildBookingBuckets(bookings) {
   const resolved             = isPastCount - rescheduledPastCount
   console.log('[Buckets] isPast:', isPastCount, 'rescheduledPast:', rescheduledPastCount, 'resolved:', resolved)
 
-  const showRate            = resolved > 0 ? attended.length      / resolved : 0
-  const cancelRateAll       = resolved > 0 ? cancelledAll.length  / resolved : 0
-  const cancelRateCustomer  = resolved > 0 ? cancelledCustomer.length / resolved : 0
-  const cancelRateAdmin     = resolved > 0 ? cancelledAdmin.length / resolved : 0
+  const showRate            = resolved > 0 ? attended.length          / resolved : 0
+  // Cancel rate denominator = total bookings (not resolved) per campaign methodology.
+  // Using resolved inflates the rate by excluding pending appointments.
+  const cancelRateAll       = total > 0 ? cancelledAll.length         / total : 0
+  const cancelRateCustomer  = total > 0 ? cancelledCustomer.length    / total : 0
+  const cancelRateAdmin     = total > 0 ? cancelledAdmin.length       / total : 0
 
   console.log('[Buckets]', {
     total, sum, attended: attended.length, resolved,
