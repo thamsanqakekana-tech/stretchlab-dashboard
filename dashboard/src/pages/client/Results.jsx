@@ -45,15 +45,15 @@ function buildStudioStats(leads, cancellations = []) {
 
   return Object.entries(grouped).map(([studio, bks]) => {
     const attended     = bks.filter(b => hasShow(b)).length
-    const upcoming     = bks.filter(b => getStatus(b).includes('Open Booking')).length
-    const noShows      = bks.filter(b => getStatus(b).includes('No Show')).length
-    const adminCancels = bks.filter(b => getStatus(b).includes('Cancelled By Admin')).length
-    const custCancels  = bks.filter(b =>
+    const upcoming     = bks.filter(b => !hasShow(b) && getStatus(b).includes('Open Booking')).length
+    const noShows      = bks.filter(b => !hasShow(b) && getStatus(b).includes('No Show')).length
+    const adminCancels = bks.filter(b => !hasShow(b) && getStatus(b).includes('Cancelled By Admin')).length
+    const custCancels  = bks.filter(b => !hasShow(b) && (
       getStatus(b).includes('Cancelled Within Policy') ||
       getStatus(b).includes('Cancelled Outside Policy')
-    ).length
+    )).length
     const totalCancels = adminCancels + custCancels
-    const rescheduled  = bks.filter(b => getStatus(b).includes('Rescheduled')).length
+    const rescheduled  = bks.filter(b => !hasShow(b) && getStatus(b).includes('Rescheduled')).length
     const total        = bks.length
     const resolved     = attended + totalCancels + noShows
     const showRate     = resolved > 0 ? attended / resolved : 0
@@ -434,8 +434,15 @@ function StudioSignalCard({ s, isManagerView, pipeline = [] }) {
                 </thead>
                 <tbody>
                   {sortedBks.map((bk, i) => {
-                    const uo          = String(bk.unified_outcome || '').trim().toLowerCase()
-                    const status      = String(bk.current_status || '').trim()
+                    const status = String(bk.current_status || bk['Current Status'] || '').trim()
+                    const uo     = +bk.has_show === 1                                       ? 'attended'
+                      : status.includes('Open Booking')                                     ? 'upcoming'
+                      : status.includes('No Show')                                          ? 'no_show'
+                      : status.includes('Rescheduled')                                      ? 'rescheduled'
+                      : status.includes('Cancelled Within Policy') ||
+                        status.includes('Cancelled Outside Policy') ||
+                        status.includes('Cancelled By Admin')                               ? 'cancelled'
+                      : 'unknown'
                     const isCancAdmin = uo === 'cancelled' && status.includes('Cancelled By Admin')
 
                     const outcomeColor = uo === 'attended'    ? '#22c55e'

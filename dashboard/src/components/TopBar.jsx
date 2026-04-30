@@ -17,7 +17,11 @@ export default function TopBar() {
   const { user, userRole, viewRole, setViewRole, signOut, ALLOWED_VIEWS } = useAuth()
   const [theme, setTheme] = useTheme()
 
-  const allowed     = ALLOWED_VIEWS[userRole] ?? ['client']
+  const allowed       = ALLOWED_VIEWS[userRole] ?? ['client']
+  // Clients see no switcher; managers see client+manager only; admins see all their allowed views
+  const switcherViews = userRole === 'admin'   ? allowed
+    : userRole === 'manager' ? allowed.filter(v => v !== 'admin')
+    : []
   const activeColor = ROLE_COLORS[viewRole] ?? '#6366f1'
   const fullName    = user?.user_metadata?.full_name ?? user?.email ?? ''
   const initials    = fullName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
@@ -42,8 +46,8 @@ export default function TopBar() {
       {/* Right: user info + view switcher + logout */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
 
-        {/* View switcher — hidden for clients, 2-toggle for managers, 3-toggle for admin */}
-        {allowed.length > 1 && (
+        {/* View switcher — hidden for clients, client+manager for managers, all for admins */}
+        {switcherViews.length > 1 && (
           <div style={{
             display: 'flex',
             background: 'var(--surface-2)',
@@ -51,7 +55,7 @@ export default function TopBar() {
             borderRadius: '8px',
             padding: '2px', gap: '2px',
           }}>
-            {allowed.map(v => {
+            {switcherViews.map(v => {
               const active = viewRole === v
               const color  = ROLE_COLORS[v]
               return (

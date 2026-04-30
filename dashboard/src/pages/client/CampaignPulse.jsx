@@ -139,7 +139,7 @@ const MONTHS = [
 ]
 
 // ─── Timeline Bar ─────────────────────────────────────────────────────────────
-function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, validationLeads = [] }) {
+function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, validationLeads = [], upcomingCount = 0 }) {
   const today = new Date()
   const [expanded, setExpanded] = useState(null)
 
@@ -226,8 +226,8 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, validation
                     <span style={{ color: 'var(--status-above)', fontWeight: 700 }}>{seg.paidCount} paid</span>
                     {' · '}
                     <span style={{ color: 'var(--status-within)', fontWeight: 700 }}>{seg.heldCount} held</span>
-                    {seg.futureLeads.length > 0 && (
-                      <span style={{ color: 'var(--muted)' }}> · {seg.futureLeads.length} upcoming</span>
+                    {(seg.isActive ? upcomingCount : 0) > 0 && (
+                      <span style={{ color: 'var(--muted)' }}> · {seg.isActive ? upcomingCount : 0} upcoming</span>
                     )}
                   </span>
                 )}
@@ -1309,7 +1309,7 @@ export default function CampaignPulse() {
       {!isClientView && <InsightBlock insight={pageInsight} style={{ marginTop: 0 }} />}
 
       {/* Timeline */}
-      <CampaignTimeline ramp={ramp} forecast={forecast} sowTarget={sowTarget} validationLeads={validationLeads} />
+      <CampaignTimeline ramp={ramp} forecast={forecast} sowTarget={sowTarget} validationLeads={validationLeads} upcomingCount={upcoming} />
 
       {/* 4 KPI cards */}
       <div style={{ display: 'flex', gap: '12px', marginBottom: '0', flexWrap: 'wrap' }}>
