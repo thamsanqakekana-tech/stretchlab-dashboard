@@ -33,10 +33,10 @@ Steve Bynum,2026-04-06 00:00:00,Pearland,Yes,True,2,Booked on Tamryn's account/ 
 Cathy Barazi,2026-04-11 00:00:00,Bellaire ,Yes,False,2,Booked by an internal team member. ,,,Yes
 Ronald Maxwell ,2026-03-26 00:00:00,Cherry Street ,Yes,True,2,"Paid, no show",,,No
 JD. Davis,2026-03-30 00:00:00,Pearland,Yes,False,2,Second stretch booked already ,,,Yes
-Maryam Taghadosi,"Friday, April 17,",River Oaks ,Yes,True,2,Held ,,,Yes
-David Kocsis Jr,"Sunday, May 3,",Pearland,No,True,2,Future dated,,,
+Maryam Taghadosi,2026-04-17 00:00:00,River Oaks ,Yes,True,2,Held ,,,Yes
+David Kocsis Jr,2026-05-03 00:00:00,Pearland,No,True,2,Future dated,,,
 Candy Smith,2026-04-20 13:00:00,Bunker Hill,No,True,2,"No payment, no show",,,No
-Gina Gray,"Wednesday, April 15, 2026 2:00 PM with Kenisha Likely",Bunker Hill,Yes,True,2,Held,,,Yes
+Gina Gray,2026-04-15 00:00:00,Bunker Hill,Yes,True,2,Held,,,Yes
 Samuel Amos,2026-05-04 10:00:00,Bellaire ,No,True,2,Future dated,,,
 Terry Davis,2026-04-10 02:00:00,Pearland,No,True,2,"No payment, no show",,,No
 Crystal Chukwu,2026-04-09 17:00:00,Shreveport,Yes,True,2,Held,,,Yes

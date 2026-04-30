@@ -36,7 +36,10 @@ import { recordVisit, calculateDelta } from '../../utils/deltaTracking.js'
 const fmtDate = d => {
   if (!d) return '—'
   const parsed = new Date(d)
-  return isNaN(parsed.getTime()) ? String(d) : parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  if (isNaN(parsed.getTime())) return '—'
+  const yr = parsed.getFullYear()
+  if (yr < 2024 || yr > 2030) return '—'
+  return parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 // ─── Month 1 context line (hardcoded fallback — phiwe_insights.json has no month_1_context field) ──
@@ -373,14 +376,16 @@ function SowProgressMini({ confirmedShows, upcoming, sowTarget = 77 }) {
         <span style={{ fontSize: '12px', color: 'var(--status-above)', fontWeight: 600 }}>
           {confirmedShows} sessions attended
         </span>
-        <span style={{ fontSize: '12px', color: 'var(--status-within)', fontWeight: 600 }}>
-          {upcoming} appointments booked
-        </span>
         <span style={{ fontSize: '12px', color: 'var(--muted)' }}>
           {remaining > 0
             ? `${remaining} more sessions needed to hit the May 24 target`
             : `On track for the ${sowTarget}-session target`}
         </span>
+        {upcoming > 0 && (
+          <span style={{ fontSize: '12px', color: 'var(--muted)' }}>
+            · {upcoming} in the pipeline
+          </span>
+        )}
         <span style={{ fontSize: '11px', color: 'var(--muted)', marginLeft: 'auto', fontFamily: 'JetBrains Mono, monospace' }}>
           {confirmedShows} / {sowTarget}
         </span>
@@ -1122,7 +1127,7 @@ export default function CampaignPulse() {
   // ── KPI tooltips ─────────────────────────────────────────────────────────────
   const convTooltip    = `${convRate.toFixed(1)}% of all calls resulted in a real two-way conversation — someone spoke with Phiwe for at least 30 seconds. Cold re-engagement benchmark: ${crBm.min}–${crBm.max}%.`
   const bookingTooltip = `Of all ${totalCalls.toLocaleString()} calls made, ${bookingConvRate.toFixed(1)}% resulted in a booked appointment. Cold re-engagement benchmark: ${brBm.min}–${brBm.max}%.`
-  const showTooltip    = `Of the ${resolved} appointments with a confirmed outcome (past sessions where the result is known — rescheduled and upcoming excluded), ${confirmedShows} were attended — ${showRate.toFixed(1)}%. Cold re-engagement benchmark: ${COLD_OUTREACH_BENCHMARKS.show_rate.min}–${COLD_OUTREACH_BENCHMARKS.show_rate.max}%.`
+  const showTooltip    = `Of the ${resolved} appointments with a confirmed outcome (past sessions where the result is known — rescheduled and upcoming excluded), ${confirmedShows} were attended — ${showRate.toFixed(1)}%. Cold re-engagement benchmark: ${bm.show.benchmark_pct ? stripPct(bm.show.benchmark_pct) + '%' : `${COLD_OUTREACH_BENCHMARKS.show_rate.min}–${COLD_OUTREACH_BENCHMARKS.show_rate.max}%`}.`
   const cancelTooltip  = `Of the ${resolved} resolved appointments, ${cancels} carry a cancelled status — a ${cancelRate.toFixed(1)}% cancel rate. Lead-initiated: ${cancelRateCustomer.toFixed(1)}%, studio-initiated: ${cancelRateAdmin.toFixed(1)}%. Expected range for re-engagement outreach: ${COLD_OUTREACH_BENCHMARKS.cancel_rate.min}–${COLD_OUTREACH_BENCHMARKS.cancel_rate.max}%.`
 
 
@@ -1487,7 +1492,7 @@ export default function CampaignPulse() {
           </div>
 
           <p style={{ fontSize: '13px', color: 'var(--text-2)', lineHeight: 1.65, margin: '0 0 20px' }}>
-            Of {resolved} appointments with a confirmed outcome, {confirmedShows} were attended — a {showRate.toFixed(1)}% show rate that sits {showStatus === 'above' ? 'above' : showStatus === 'within' ? 'within' : 'below'} the outreach benchmark of {COLD_OUTREACH_BENCHMARKS.show_rate.min}–{COLD_OUTREACH_BENCHMARKS.show_rate.max}%.
+            Of {resolved} appointments with a confirmed outcome, {confirmedShows} were attended — a {showRate.toFixed(1)}% show rate that sits {showStatus === 'above' ? 'above' : showStatus === 'within' ? 'within' : 'below'} the outreach benchmark of {bm.show.benchmark_pct ? stripPct(bm.show.benchmark_pct) + '%' : `${COLD_OUTREACH_BENCHMARKS.show_rate.min}–${COLD_OUTREACH_BENCHMARKS.show_rate.max}%`}.
             {bestDay && worstActiveDay && worstActiveDay.day_of_week !== bestDay.day_of_week && (
               <>{' '}{worstActiveDay.day_of_week} books the most sessions — {worstActiveDay.total_bookings} booked — but holds at just {Math.round(worstActiveDay.resolvedShowPct)}%.
               {' '}{bestDay.day_of_week} and the sessions around it hold at {Math.round(bestDay.resolvedShowPct)}% — the clearest signal on what works.</>
@@ -1554,7 +1559,7 @@ export default function CampaignPulse() {
                   ))}
                 </div>
                 <p style={{ fontSize: '10px', color: 'var(--muted)', margin: '4px 0 0', fontStyle: 'italic' }}>
-                  Bars show all {totalBookings} bookings. Rate labels are of resolved appointments only — {totalBookings - resolved} bookings are still pending an outcome.
+                  Bars show all {totalBookings} bookings. Rate labels are of resolved appointments only — {upcoming + buckets.rescheduled.length} bookings are still pending an outcome.
                 </p>
               </div>
             </div>
