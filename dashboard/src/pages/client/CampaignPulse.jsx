@@ -106,10 +106,12 @@ function buildBookingBuckets(bookings) {
     console.warn('[Buckets] mismatch after catch-all:', sum, '!==', total)
   }
 
-  const isPastCount          = bookings.filter(getIsPast).length
-  const rescheduledPastCount = bookings.filter(r => getStatus(r).includes('Rescheduled') && getIsPast(r)).length
-  const resolved             = isPastCount - rescheduledPastCount
-  console.log('[Buckets] isPast:', isPastCount, 'rescheduledPast:', rescheduledPastCount, 'resolved:', resolved)
+  // Resolved = all bookings except those still pending (Open Booking status).
+  // Future-dated cancelled bookings ARE resolved — they have a definitive outcome
+  // regardless of whether the booking date has passed. isPast-based counting
+  // was wrong because the pipeline sets is_future on the run date, not today.
+  const resolved = bookings.filter(r => !getStatus(r).includes('Open Booking')).length
+  console.log('[Buckets] resolved (non-open-booking):', resolved)
 
   const showRate            = resolved > 0 ? attended.length          / resolved : 0
   // Cancel rate denominator = total bookings (not resolved) per campaign methodology.
@@ -594,10 +596,7 @@ function StudioStrip({ studios = [], bookings = [], isClientView = false }) {
       if (isPast)                      st.isPast++
     })
     Object.values(map).forEach(st => {
-      // Cap rescheduledPast at isPast to prevent resolved going negative when
-      // rescheduled count includes future rows
-      const rescheduledPast = Math.min(st.rescheduled, st.isPast)
-      st.resolved   = st.isPast - rescheduledPast
+      st.resolved   = st.bookings - st.upcoming
       st.showRate   = st.resolved > 0 ? st.shows / st.resolved : null
       st.cancelRate = st.resolved > 0 ? st.cancelledAll / st.resolved : null
       st.state      = st.bookings === 0 ? 'inactive'
