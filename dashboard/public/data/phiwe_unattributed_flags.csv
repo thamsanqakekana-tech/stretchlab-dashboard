@@ -1,6 +1,7 @@
 user_id,first_name,last_name,location,first_visit_date,cellphone,flag_reason,confidence
 128723095,Deambra,Williams,StretchLab Pearland,2026-03-28,3183414202,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 121663572,Nolen,Thomas,StretchLab Pearland,2026-04-25,8326923064,Phiwe called this number; lead completed first visit under different booking attribution,Medium
+128575775,Emma,Bickel,StretchLab South Tulsa,2026-03-19,(918) 706-4232,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 124136097,Chip,Cherry,StretchLab Heights,2026-02-25,(832) 729-7879,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 106028799,Khadija,Washington,StretchLab Heights,2026-02-27,12819129468,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 128238472,Brandon,Reeves,StretchLab Heights,2026-03-04,(832) 647-1227,Phiwe called this number; lead completed first visit under different booking attribution,Medium
@@ -34,6 +35,7 @@ user_id,first_name,last_name,location,first_visit_date,cellphone,flag_reason,con
 129240285,Kathy,Crumpler,StretchLab Heights,2026-04-07,8322677138,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 129527549,Gina,Gray,StretchLab Heights,2026-04-15,(713) 829-3998,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 123057772,Isabel,Lopez,StretchLab Heights,2026-04-25,(281) 932-2726,Phiwe called this number; lead completed first visit under different booking attribution,Medium
+128651611,Maria,Regalado,StretchLab Cherry Street,2026-03-20,5317721692,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 128414434,Marian,McGee,StretchLab River Oaks ,2026-03-11,(281) 678-1314,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 128443956,Irfan,Bhaidani,StretchLab River Oaks ,2026-03-11,(210)274-4214,Phiwe called this number; lead completed first visit under different booking attribution,Medium
 128685913,Marquis,Wallace,StretchLab River Oaks ,2026-03-23,(214) 415-0525,Phiwe called this number; lead completed first visit under different booking attribution,Medium

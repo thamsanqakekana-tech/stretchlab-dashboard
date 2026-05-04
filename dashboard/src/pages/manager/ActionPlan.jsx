@@ -707,6 +707,22 @@ export default function ActionPlan() {
         </Card>
       )}
 
+      {/* ── LoyalSnap Data Flag ───────────────────────────────────────────── */}
+      <Card style={{ marginTop: '8px', borderLeft: '3px solid #f59e0b', padding: '16px' }}>
+        <p style={{ fontSize: '11px', fontWeight: 700, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 6px' }}>
+          LoyalSnap Disposition Data — Available, Not Yet Integrated
+        </p>
+        <p style={{ fontSize: '12px', color: 'var(--text-2)', lineHeight: 1.7, margin: '0 0 8px' }}>
+          The LoyalSnap History export contains 1,151 structured phone call entries with snake_case disposition tags. These can identify objection patterns and prioritise re-engagement sequences, but <strong>cannot replace the RingCentral connect rate</strong> — LoyalSnap tracks one entry per contact/lead while RingCentral logs every call attempt (7,367 calls vs 1,151 contacts). Different denominators make them incomparable as the same metric.
+        </p>
+        <p style={{ fontSize: '12px', color: 'var(--text-2)', lineHeight: 1.7, margin: '0 0 8px' }}>
+          Disposition breakdown from current workbook: <strong>no_answer</strong> 750 · <strong>voicemail</strong> 167 · <strong>not_reached</strong> 76 · <strong>other</strong> 94 · <strong>reached/connected</strong> 64 (reached 14, visit 13, not_interested 23, health 4, too_expensive 4, out_of_town 4, moved 1, bad_experience 1).
+        </p>
+        <p style={{ fontSize: '12px', color: 'var(--text-2)', lineHeight: 1.7, margin: 0 }}>
+          <strong>Action for Tamryn:</strong> Flag to Brian that LoyalSnap structured disposition data is available and could be added to the pipeline as a separate contact-disposition output — useful for understanding why leads aren't converting, not for calculating connect rate.
+        </p>
+      </Card>
+
       {/* ── How this works ────────────────────────────────────────────────── */}
       <Card style={{ marginTop: '8px', borderLeft: '3px solid var(--border)', padding: '16px' }}>
         <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 8px' }}>

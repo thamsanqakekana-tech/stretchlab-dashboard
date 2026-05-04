@@ -1278,6 +1278,7 @@ export default function CampaignPulse() {
             <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'var(--accent)', display: 'inline-block' }} />
             {role === 'client' ? 'Client View' : role === 'manager' ? 'Manager View' : 'Admin View'}
           </span>
+          {!isClientView && (
           <div style={{
             display: 'flex', background: 'var(--surface)',
             border: '1px solid var(--border)', borderRadius: '8px',
@@ -1299,6 +1300,7 @@ export default function CampaignPulse() {
               </button>
             ))}
           </div>
+          )}
         </div>
       </div>
 
