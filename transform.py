@@ -534,16 +534,8 @@ class DataTransformer:
         logger.info(f"  From {initial_count:,} total events in database")
         logger.info(f"  Direct: {len(phiwe_bookings)} + Tamryn: {len(tamryn_bookings)}")
         
-        # Set attribution
-        all_bookings['attribution_method'] = 'Unknown'
-        all_bookings.loc[
-            all_bookings['Booking Made By'] == 'Phiwe Khasa',
-            'attribution_method'
-        ] = 'Direct'
-        all_bookings.loc[
-            all_bookings['Booking Made By'] == 'Tamryn Montgomery',
-            'attribution_method'
-        ] = 'Tamryn Override'
+        # Set attribution — Tamryn books on Phiwe's behalf, attribute all as Direct
+        all_bookings['attribution_method'] = 'Direct'
         
         # Transform fields (now with first_visits and full events log for cross-ref)
         bookings_transformed = self._transform_booking_fields(
@@ -575,8 +567,11 @@ class DataTransformer:
         bookings['booking_location'] = bookings['Booking Location']
         bookings['session_mins'] = pd.to_numeric(bookings['Session Mins'], errors='coerce')
         bookings['booking_event'] = bookings['Booking Event']
-        bookings['current_status'] = bookings['Current Status']
-        bookings['booking_made_by'] = bookings['Booking Made By']
+        bookings['current_status'] = bookings['Current Status'].astype(str).str.strip()
+        # Tamryn books on Phiwe's behalf — normalise booking_made_by to Phiwe for all records
+        bookings['booking_made_by'] = bookings['Booking Made By'].replace(
+            'Tamryn Montgomery', 'Phiwe Khasa'
+        )
         
         # Clean phone
         bookings['phone_clean'] = bookings.apply(lambda row: 
