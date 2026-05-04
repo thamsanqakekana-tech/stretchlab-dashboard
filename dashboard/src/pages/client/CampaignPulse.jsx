@@ -139,47 +139,62 @@ const MONTHS = [
 ]
 
 // ─── Timeline Bar ─────────────────────────────────────────────────────────────
-function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, validationLeads = [], upcomingCount = 0 }) {
+function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, bookings = [], validationLeads = [], upcomingCount = 0 }) {
   const today = new Date()
   const [expanded, setExpanded] = useState(null)
 
-  const pessRow   = forecast.find(f => f.scenario === 'pessimistic')
-  const likelyRow = forecast.find(f => f.scenario === 'likely')
-  const optRow    = forecast.find(f => f.scenario === 'optimistic')
   const totalKept = ramp.reduce((s, r) => s + (+r.actual_kept_appts || 0), 0)
 
-  const allFutureLeads = validationLeads.filter(l => isBlankVal(l.held))
+  // Build name-keyed lookup from internal tracker for `paid` enrichment only
+  const valByName = useMemo(() => {
+    const m = {}
+    validationLeads.forEach(l => {
+      if (l.name) m[String(l.name).toLowerCase().trim()] = l
+    })
+    return m
+  }, [validationLeads])
+
+  const getHasShowB = b => b.has_show === true || b.has_show === 1 || String(b.has_show ?? '').trim() === '1'
 
   const segments = MONTHS.map((m) => {
+    // Compute rampRow + attendedCount first (needed for fillPct on past months)
+    const rampRow       = ramp.find(r => +r.month === m.num)
+    const attendedCount = +(rampRow?.actual_kept_appts ?? 0)
+
+    // fillPct: past months show target-achievement %; active month shows time elapsed %
     const totalDays = Math.round((m.end - m.start) / 86400000) + 1
     let fillPct = 0
-    if (today > m.end) {
-      fillPct = 100
-    } else if (today >= m.start) {
+    const isActive   = today >= m.start && today <= m.end
+    const isComplete = today > m.end
+    if (isComplete) {
+      fillPct = Math.min(100, Math.round((attendedCount / m.target) * 100))
+    } else if (isActive) {
       const elapsed = Math.floor((today - m.start) / 86400000) + 1
       fillPct = Math.min(100, Math.round((elapsed / totalDays) * 100))
     }
-    const isActive   = today >= m.start && today <= m.end
-    const isComplete = today > m.end
-    const rampRow    = ramp.find(r => +r.month === m.num)
 
-    const monthLeads         = validationLeads.filter(l => {
-      const lMonth = parseInt(l.month, 10)
-      return !isNaN(lMonth) && lMonth === m.num
+    // Source monthly leads from ClubReady bookings by booking_date within month range
+    const monthBookings = bookings.filter(b => {
+      const bd = b.booking_date
+      if (!bd) return false
+      const d = new Date(String(bd).substring(0, 10))
+      return d >= m.start && d <= m.end
     })
-    const resolvedMonthLeads = monthLeads.filter(l => !isBlankVal(l.held))
-    const attendedCount = +(rampRow?.actual_kept_appts ?? 0)
-    // For the active month: show future leads assigned to this month or the immediately
-    // preceding month (m.num - 1). This prevents very old month=1 future leads from
-    // bleeding into the Month 3 drill when their appointment has since moved forward.
-    const futureLeadsForSeg = isActive
-      ? allFutureLeads.filter(l => parseInt(l.month, 10) >= m.num - 1)
-      : []
-    const drillLeads = isActive
-      ? [...resolvedMonthLeads, ...futureLeadsForSeg]
-      : monthLeads  // past months: show all leads in that month, including blank-held
 
-    return { ...m, fillPct, isActive, isComplete, monthLeads, resolvedMonthLeads, attendedCount, futureLeads: futureLeadsForSeg, drillLeads }
+    const drillLeads = monthBookings.map(b => {
+      const nameKey  = String(b.full_name_lower || [b.first_name, b.last_name].filter(Boolean).join(' ')).toLowerCase().trim()
+      const valMatch = valByName[nameKey]
+      const statusStr = String(b.current_status || '')
+      return {
+        name:                [b.first_name, b.last_name].filter(Boolean).join(' ') || '—',
+        date_of_appointment: b.booking_date,
+        location:            String(b.booking_location || '').replace('StretchLab ', ''),
+        paid:                valMatch?.paid ?? null,
+        held:                getHasShowB(b) ? 'yes' : statusStr.includes('Open Booking') ? null : 'no',
+      }
+    })
+
+    return { ...m, fillPct, isActive, isComplete, attendedCount, drillLeads }
   })
 
   return (
@@ -206,21 +221,29 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, validation
               }}>
                 <div style={{
                   height: '100%', width: `${seg.fillPct}%`,
-                  background: seg.isComplete ? 'var(--status-above)' : seg.isActive ? 'var(--accent)' : 'var(--border)',
+                  background: seg.isComplete
+                    ? (seg.attendedCount >= seg.target ? 'var(--status-above)'
+                       : seg.attendedCount >= seg.target * 0.5 ? '#eab308'
+                       : 'var(--status-below)')
+                    : seg.isActive ? 'var(--accent)' : 'var(--border)',
                   borderRadius: '4px', transition: 'width 0.4s ease',
                 }} />
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px', flexWrap: 'nowrap' }}>
                 <span style={{
                   fontSize: '11px', fontWeight: seg.isActive ? 700 : 500, flexShrink: 0,
-                  color: seg.isActive ? 'var(--text)' : seg.isComplete ? 'var(--status-above)' : 'var(--muted)',
+                  color: seg.isActive ? 'var(--text)'
+                       : seg.isComplete ? (seg.attendedCount >= seg.target ? 'var(--status-above)' : 'var(--status-below)')
+                       : 'var(--muted)',
                 }}>
                   {seg.label}
                   {seg.isActive && (
                     <span style={{ fontSize: '9px', marginLeft: '5px', color: 'var(--accent)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em' }}>Active</span>
                   )}
                   {seg.isComplete && (
-                    <span style={{ fontSize: '9px', marginLeft: '5px', color: 'var(--status-above)', fontWeight: 700 }}>✓</span>
+                    <span style={{ fontSize: '9px', marginLeft: '5px', color: seg.attendedCount >= seg.target ? 'var(--status-above)' : 'var(--status-below)', fontWeight: 700 }}>
+                      {seg.attendedCount >= seg.target ? '✓' : '✗'}
+                    </span>
                   )}
                 </span>
                 {(hasLeads || seg.attendedCount > 0) && (
@@ -279,7 +302,7 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, validation
                 </thead>
                 <tbody>
                   {seg.drillLeads.map((lead, i) => {
-                    const isPaid     = isYesVal(lead.paid)
+                    const isPaid     = lead.paid != null && isYesVal(lead.paid)
                     const isHeld     = isYesVal(lead.held)
                     const isUpcoming = isBlankVal(lead.held)
                     const heldLabel  = isUpcoming ? 'Upcoming' : isHeld ? 'Yes' : 'No'
@@ -288,8 +311,10 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, validation
                       <tr key={i} style={{ background: i % 2 === 0 ? 'transparent' : 'var(--bg)' }}>
                         <td style={{ padding: '7px 10px', color: 'var(--text)', fontWeight: 500, whiteSpace: 'nowrap' }}>{lead.name || '—'}</td>
                         <td style={{ padding: '7px 10px', color: 'var(--muted)', whiteSpace: 'nowrap', fontSize: '11px' }}>{fmtDate(lead.date_of_appointment)}</td>
-                        <td style={{ padding: '7px 10px', color: 'var(--muted)', whiteSpace: 'nowrap' }}>{(lead.location || '').replace('StretchLab ', '')}</td>
-                        <td style={{ padding: '7px 10px', color: isPaid ? 'var(--status-above)' : 'var(--muted)', fontWeight: 600 }}>{isPaid ? 'Yes' : 'No'}</td>
+                        <td style={{ padding: '7px 10px', color: 'var(--muted)', whiteSpace: 'nowrap' }}>{lead.location || '—'}</td>
+                        <td style={{ padding: '7px 10px', color: lead.paid == null ? 'var(--muted)' : isPaid ? 'var(--status-above)' : 'var(--muted)', fontWeight: lead.paid == null ? 400 : 600 }}>
+                          {lead.paid == null ? '—' : isPaid ? 'Yes' : 'No'}
+                        </td>
                         <td style={{ padding: '7px 10px', color: heldColor, fontWeight: 600 }}>{heldLabel}</td>
                       </tr>
                     )
@@ -1032,6 +1057,11 @@ export default function CampaignPulse() {
   const cancelRateAdmin    = buckets.cancelRateAdmin * 100
   const upcoming           = buckets.upcoming.length
 
+  // Filter pipeline against attended booking IDs: phiwe_pipeline.csv can include leads
+  // whose has_show=1 is already confirmed but whose ClubReady status is still 'Open Booking'.
+  const attendedBookingIds = new Set(buckets.attended.map(b => String(b.booking_id ?? '')).filter(Boolean))
+  const filteredPipeline   = pipeline.filter(r => !attendedBookingIds.has(String(r.booking_id ?? '')))
+
   // ── SOW target (derived from ramp CSV; fallback 77) ─────────────────────────
   const sowTarget = useMemo(
     () => ramp.length > 0 ? Math.max(...ramp.map(r => +r.target_kept_appts || 0)) : 77,
@@ -1297,7 +1327,7 @@ export default function CampaignPulse() {
       {!isClientView && <InsightBlock insight={pageInsight} style={{ marginTop: 0 }} />}
 
       {/* Timeline */}
-      <CampaignTimeline ramp={ramp} forecast={forecast} sowTarget={sowTarget} validationLeads={validationLeads} upcomingCount={upcoming} />
+      <CampaignTimeline ramp={ramp} forecast={forecast} sowTarget={sowTarget} bookings={bookings} validationLeads={validationLeads} upcomingCount={upcoming} />
 
       {/* 4 KPI cards */}
       <div style={{ display: 'flex', gap: '12px', marginBottom: '0', flexWrap: 'wrap' }}>
@@ -1497,7 +1527,7 @@ export default function CampaignPulse() {
           <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap' }}>
             {[
               { label: 'Attended',        count: confirmedShows,        color: 'var(--status-above)' },
-              { label: 'Pending outcome', count: upcoming + buckets.rescheduled.length, color: '#94a3b8' },
+              { label: 'Pending outcome', count: upcoming + buckets.rescheduled.length + buckets.other.length, color: '#94a3b8' },
               { label: 'Cancelled',       count: cancels,               color: '#64748b' },
               { label: 'No-show',         count: buckets.noShow.length, color: 'var(--muted)' },
             ].filter(o => o.count > 0).map(o => (
@@ -1576,7 +1606,7 @@ export default function CampaignPulse() {
                   ))}
                 </div>
                 <p style={{ fontSize: '10px', color: 'var(--muted)', margin: '4px 0 0', fontStyle: 'italic' }}>
-                  Bars show all {totalBookings} bookings. Rate labels are of resolved appointments only — {upcoming + buckets.rescheduled.length} bookings are still pending an outcome.
+                  Bars show all {totalBookings} bookings. Rate labels are of resolved appointments only — {upcoming + buckets.rescheduled.length + buckets.other.length} bookings are still pending an outcome.
                 </p>
               </div>
             </div>
@@ -1786,7 +1816,7 @@ export default function CampaignPulse() {
         bookingCount={bookings.length}
         attendedCount={confirmedShows}
         upcomingCount={upcoming}
-        pipeline={pipeline}
+        pipeline={filteredPipeline}
         bookings={bookings}
         isClientView={isClientView}
       />
@@ -1805,7 +1835,7 @@ export default function CampaignPulse() {
         cancelRateCustomer={cancelRateCustomer}
         attended={confirmedShows}
         isClientView={isClientView}
-        pipeline={pipeline}
+        pipeline={filteredPipeline}
         benchmarksData={benchmarks}
         lastMinuteCancelPct={lastMinuteCancelPct}
       />}
@@ -1820,7 +1850,7 @@ export default function CampaignPulse() {
               Unconfirmed Sessions — Tracker Gap
             </p>
             <p style={{ fontSize: '12px', color: 'var(--text-2)', lineHeight: 1.6, margin: '0 0 6px' }}>
-              {sg.gap_count} session{sg.gap_count !== 1 ? 's' : ''} recorded as held in the manual tracker {sg.gap_count !== 1 ? 'are' : 'is'} not yet confirmed in ClubReady.
+              {sg.gap_count} session{sg.gap_count !== 1 ? 's' : ''} recorded as held in the internal tracker {sg.gap_count !== 1 ? 'are' : 'is'} not yet confirmed in ClubReady.
               {' '}{sg.note}
               {' '}Once updated, {sg.gap_count !== 1 ? 'these' : 'this'} will be reflected in the show rate.
             </p>

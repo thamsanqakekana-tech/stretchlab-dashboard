@@ -128,9 +128,9 @@ function generateActions({ pipeline, bookings, cancellations, validationLeads, c
     actions.push({
       id:       'update-crm',
       priority: notInSystem.length >= 5 ? 'critical' : 'important',
-      title:    `Sync ${notInSystem.length} manual tracker record${notInSystem.length !== 1 ? 's' : ''} into ClubReady`,
+      title:    `Sync ${notInSystem.length} internal tracker record${notInSystem.length !== 1 ? 's' : ''} into ClubReady`,
       owner:    'tamryn',
-      why:      `The manual tracker (updated live on the floor) has ${notInSystem.length} record${notInSystem.length !== 1 ? 's' : ''} not yet in ClubReady. ${heldUnlogged.length > 0 ? `${heldUnlogged.length} were held sessions — missing from the official show count. ` : ''}ClubReady is the source of truth for reporting; any gap suppresses the measured show rate and mis-signals campaign performance to StretchLab. Tamryn to review each drift on every pipeline run.\n\nDrift detail:\n${driftLines.join('\n')}${overflowNote}`,
+      why:      `The internal tracker (updated live on the floor) has ${notInSystem.length} record${notInSystem.length !== 1 ? 's' : ''} not yet in ClubReady. ${heldUnlogged.length > 0 ? `${heldUnlogged.length} were held sessions — missing from the official show count. ` : ''}ClubReady is the source of truth for reporting; any gap suppresses the measured show rate and mis-signals campaign performance to StretchLab. Tamryn to review each drift on every pipeline run.\n\nDrift detail:\n${driftLines.join('\n')}${overflowNote}`,
       impact:   {
         revenue:     revenueImpact,
         description: heldUnlogged.length > 0
@@ -151,7 +151,7 @@ function generateActions({ pipeline, bookings, cancellations, validationLeads, c
       priority: 'critical',
       title:    `Log ${unloggedAttended.length} attended session${unloggedAttended.length !== 1 ? 's' : ''} into ClubReady — not yet in the system`,
       owner:    'tamryn',
-      why:      `The manual tracker records ${unloggedAttended.length} session${unloggedAttended.length !== 1 ? 's' : ''} as attended (held=Yes) with no matching ClubReady booking record. These sessions are confirmed on the studio floor but are invisible to the pipeline — they suppress the measured show rate and undercount revenue. Tamryn to create or update the ClubReady record for each:\n\n${names}`,
+      why:      `The internal tracker records ${unloggedAttended.length} session${unloggedAttended.length !== 1 ? 's' : ''} as attended (held=Yes) with no matching ClubReady booking record. These sessions are confirmed on the studio floor but are invisible to the pipeline — they suppress the measured show rate and undercount revenue. Tamryn to create or update the ClubReady record for each:\n\n${names}`,
       impact:   {
         revenue:     unloggedAttended.length * INTRO_PRICE,
         description: `${unloggedAttended.length} confirmed session${unloggedAttended.length !== 1 ? 's' : ''} × $${INTRO_PRICE} intro = $${unloggedAttended.length * INTRO_PRICE} in unrecorded session revenue`,
@@ -161,16 +161,16 @@ function generateActions({ pipeline, bookings, cancellations, validationLeads, c
     })
   }
 
-  // ── IMPORTANT: Possible duplicate leads — manual tracker vs ClubReady ────────
+  // ── IMPORTANT: Possible duplicate leads — internal tracker vs ClubReady ────────
   const possibleDups = validationReport?.possible_duplicates ?? []
   if (possibleDups.length > 0) {
     const lines = possibleDups.map(r => `${r.name} (${r.location}) — ${r.note}`).join('\n')
     actions.push({
       id:       'possible-duplicates',
       priority: 'important',
-      title:    `Verify ${possibleDups.length} manual tracker lead${possibleDups.length !== 1 ? 's' : ''} — possible duplicate of a ClubReady record`,
+      title:    `Verify ${possibleDups.length} internal tracker lead${possibleDups.length !== 1 ? 's' : ''} — possible duplicate of a ClubReady record`,
       owner:    'tamryn',
-      why:      `The pipeline found ${possibleDups.length} manual tracker lead${possibleDups.length !== 1 ? 's' : ''} whose first name matches a ClubReady lead but whose full name did not match (possible spelling variant or different family member). If these are the same people, they are being double-counted. Tamryn to confirm identity and merge or remove the duplicate:\n\n${lines}`,
+      why:      `The pipeline found ${possibleDups.length} internal tracker lead${possibleDups.length !== 1 ? 's' : ''} whose first name matches a ClubReady lead but whose full name did not match (possible spelling variant or different family member). If these are the same people, they are being double-counted. Tamryn to confirm identity and merge or remove the duplicate:\n\n${lines}`,
       impact:   {
         revenue:     0,
         description: 'Data integrity — prevents double-counting in show rate and pipeline totals',
