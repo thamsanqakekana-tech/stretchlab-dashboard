@@ -99,11 +99,11 @@ function buildBookingBuckets(bookings) {
   const upcoming         = bookings.filter(r => notAttended(r) && getStatus(r).includes('Open Booking'))
   const total            = bookings.length
 
-  const sum = attended.length + noShow.length + cancelledAll.length + rescheduled.length + upcoming.length
+  const classifiedIds = new Set([...attended, ...noShow, ...cancelledAll, ...rescheduled, ...upcoming].map(getId))
+  const other = bookings.filter(r => !classifiedIds.has(getId(r)))
+  const sum = attended.length + noShow.length + cancelledAll.length + rescheduled.length + upcoming.length + other.length
   if (sum !== total) {
-    const allIds = new Set([...attended, ...noShow, ...cancelledAll, ...rescheduled, ...upcoming].map(getId))
-    const unmatched = bookings.filter(r => !allIds.has(getId(r)))
-    console.warn('[Buckets] mismatch:', sum, '!==', total, '| unmatched statuses:', unmatched.map(getStatus))
+    console.warn('[Buckets] mismatch after catch-all:', sum, '!==', total)
   }
 
   const isPastCount          = bookings.filter(getIsPast).length
@@ -126,7 +126,7 @@ function buildBookingBuckets(bookings) {
 
   return {
     attended, noShow, cancelledAll, cancelledCustomer, cancelledAdmin,
-    rescheduled, upcoming, total,
+    rescheduled, upcoming, other, total,
     resolved, showRate, cancelRateAll, cancelRateCustomer, cancelRateAdmin,
   }
 }
@@ -169,12 +169,17 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, validation
     })
     const resolvedMonthLeads = monthLeads.filter(l => !isBlankVal(l.held))
     const attendedCount = +(rampRow?.actual_kept_appts ?? 0)
-    const futureLeads = isActive ? allFutureLeads : []
-    const drillLeads  = isActive
-      ? [...resolvedMonthLeads, ...allFutureLeads]
-      : resolvedMonthLeads
+    // For the active month: show future leads assigned to this month or the immediately
+    // preceding month (m.num - 1). This prevents very old month=1 future leads from
+    // bleeding into the Month 3 drill when their appointment has since moved forward.
+    const futureLeadsForSeg = isActive
+      ? allFutureLeads.filter(l => parseInt(l.month, 10) >= m.num - 1)
+      : []
+    const drillLeads = isActive
+      ? [...resolvedMonthLeads, ...futureLeadsForSeg]
+      : monthLeads  // past months: show all leads in that month, including blank-held
 
-    return { ...m, fillPct, isActive, isComplete, monthLeads, resolvedMonthLeads, attendedCount, futureLeads, drillLeads }
+    return { ...m, fillPct, isActive, isComplete, monthLeads, resolvedMonthLeads, attendedCount, futureLeads: futureLeadsForSeg, drillLeads }
   })
 
   return (
@@ -1348,8 +1353,8 @@ export default function CampaignPulse() {
       {/* Booking accountability — answers "what happened to the other X%?" */}
       <p style={{ fontSize: '12px', color: 'var(--muted)', margin: '8px 0 20px', lineHeight: 1.5 }}>
         {isClientView
-          ? `Of ${bookings.length} appointments booked: ${confirmedShows} attended · ${upcoming} upcoming · ${cancels} did not proceed · ${buckets.noShow.length} no-show · ${buckets.rescheduled.length} rescheduled`
-          : `Of ${bookings.length} appointments booked: ${confirmedShows} attended · ${upcoming} upcoming · ${buckets.cancelledCustomer.length} lead-cancelled · ${buckets.cancelledAdmin.length} studio-cancelled · ${buckets.noShow.length} no-show · ${buckets.rescheduled.length} rescheduled`
+          ? `Of ${bookings.length} appointments booked: ${confirmedShows} attended · ${upcoming} upcoming · ${cancels} did not proceed · ${buckets.noShow.length} no-show · ${buckets.rescheduled.length} rescheduled${buckets.other.length > 0 ? ` · ${buckets.other.length} pending confirmation` : ''}`
+          : `Of ${bookings.length} appointments booked: ${confirmedShows} attended · ${upcoming} upcoming · ${buckets.cancelledCustomer.length} lead-cancelled · ${buckets.cancelledAdmin.length} studio-cancelled · ${buckets.noShow.length} no-show · ${buckets.rescheduled.length} rescheduled${buckets.other.length > 0 ? ` · ${buckets.other.length} pending confirmation` : ''}`
         }
       </p>
 

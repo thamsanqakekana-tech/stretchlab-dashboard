@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-04-30T10:01:10.970594",
+  "generated_at": "2026-05-04T10:16:53.976823",
   "system_metrics": {
-    "total_bookings": 68,
+    "total_bookings": 70,
     "shows": 17,
-    "cancellations": 39,
-    "no_shows": 0
+    "cancellations": 44,
+    "no_shows": 1
   },
   "manual_metrics": {
     "total_bookings": 57,
@@ -12,8 +12,8 @@
     "month_2": 27
   },
   "drift": {
-    "booking_drift_pct": 19.3,
-    "gap_bookings": -11,
+    "booking_drift_pct": 22.8,
+    "gap_bookings": -13,
     "gap_direction": "system_has_more"
   },
   "status": "investigate",
@@ -42,11 +42,6 @@
       "name": "Timothy Cooper",
       "location": "StretchLab Shreveport",
       "date": "2026-03-21 09:00:00"
-    },
-    {
-      "name": "Steve Bynum",
-      "location": "StretchLab Pearland",
-      "date": "2026-04-06 00:00:00"
     },
     {
       "name": "Cathy Barazi",
