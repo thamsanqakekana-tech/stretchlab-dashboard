@@ -405,22 +405,20 @@ function SowProgressMini({ confirmedShows, upcoming, sowTarget = 77 }) {
 }
 
 // ─── Conversion Funnel — 6-stage sequential with per-stage drill-downs ────────
-function ConversionFunnel({ totalCalls, meaningfulConvs, bookingCount, paidCount, heldCount, upcomingCount, pipeline = [], bookings = [], validationLeads = [], isClientView = false }) {
+function ConversionFunnel({ totalCalls, meaningfulConvs, bookingCount, attendedCount, upcomingCount, pipeline = [], bookings = [], isClientView = false }) {
   const [openStage, setOpenStage] = useState(null)
 
   const stages = [
     { key: 'calls',    label: 'Calls Made',  count: totalCalls,      color: 'var(--text-2)' },
     { key: 'convs',    label: 'Connections', count: meaningfulConvs, color: 'var(--accent)' },
     { key: 'bookings', label: 'Bookings',    count: bookingCount,    color: 'var(--text)',          drillable: true },
-    { key: 'paid',     label: 'Paid',        count: paidCount,       color: 'var(--status-above)',  drillable: true },
-    { key: 'kept',     label: 'Kept',        count: heldCount,       color: 'var(--status-above)',  drillable: true },
+    { key: 'attended', label: 'Attended',    count: attendedCount,   color: 'var(--status-above)',  drillable: true },
     { key: 'upcoming', label: 'Upcoming',    count: upcomingCount,   color: 'var(--status-within)', drillable: true },
   ]
 
-  const paidLeads     = validationLeads.filter(l => isYesVal(l.paid))
-  const keptLeads     = validationLeads.filter(l => isYesVal(l.held))
-  const highRiskCount = pipeline.filter(r => r.risk_level === 'High').length
-  const sortedPipe    = [...pipeline].sort((a, b) => new Date(a.booking_date) - new Date(b.booking_date))
+  const attendedBookings = bookings.filter(b => +b.has_show === 1 || b.has_show === true || String(b.has_show ?? '').trim() === '1')
+  const highRiskCount    = pipeline.filter(r => r.risk_level === 'High').length
+  const sortedPipe       = [...pipeline].sort((a, b) => new Date(a.booking_date) - new Date(b.booking_date))
 
   const drillRows = {
     bookings: [...bookings]
@@ -430,16 +428,13 @@ function ConversionFunnel({ totalCalls, meaningfulConvs, bookingCount, paidCount
         studio: String(b.booking_location || '').replace('StretchLab ', ''),
         date:   fmtDate(b.booking_date),
       })),
-    paid: paidLeads.map(l => ({
-      name:   l.name || '—',
-      studio: l.location || '—',
-      date:   fmtDate(l.date_of_appointment),
-    })),
-    kept: keptLeads.map(l => ({
-      name:   l.name || '—',
-      studio: l.location || '—',
-      date:   fmtDate(l.date_of_appointment),
-    })),
+    attended: [...attendedBookings]
+      .sort((a, b) => new Date(a.booking_date) - new Date(b.booking_date))
+      .map(b => ({
+        name:   [b.first_name, b.last_name].filter(Boolean).join(' ') || '—',
+        studio: String(b.booking_location || '').replace('StretchLab ', ''),
+        date:   fmtDate(b.booking_date),
+      })),
     upcoming: sortedPipe.map(r => ({
       name:   [r.first_name, r.last_name].filter(Boolean).join(' ') || '—',
       studio: String(r.booking_location || '').replace('StretchLab ', ''),
@@ -449,8 +444,7 @@ function ConversionFunnel({ totalCalls, meaningfulConvs, bookingCount, paidCount
 
   const emptyMessages = {
     bookings: 'No bookings on record.',
-    paid:     'No paid sessions recorded.',
-    kept:     'No kept sessions recorded.',
+    attended: 'No attended sessions recorded.',
     upcoming: 'No upcoming sessions in the pipeline.',
   }
 
@@ -1030,15 +1024,8 @@ export default function CampaignPulse() {
   // ── Booking buckets — uses buildBookingBuckets() defined at module scope ──────
   const buckets = useMemo(() => buildBookingBuckets(bookings), [bookings])
 
-  // ── Validation lead counts (paid / held) across all months ──────────────────
-  // valHeldCount is the authoritative "kept" count (manual tracker, held=Yes).
-  // Used for confirmedShows and showRate so SOW bar, scorecard, and Lead Journey
-  // all show the same number.
-  const valPaidCount = validationLeads.filter(l => isYesVal(l.paid)).length
-  const valHeldCount = validationLeads.filter(l => isYesVal(l.held)).length
-
   const resolved           = buckets.resolved
-  const confirmedShows     = buckets.attended.length   // ClubReady has_show=1 (local CSV, 16)
+  const confirmedShows     = buckets.attended.length   // pipeline-authoritative: has_show=1
   const showRate           = resolved > 0 ? buckets.attended.length / resolved * 100 : 0
   const cancels            = buckets.cancelledAll.length
   const cancelRate         = buckets.cancelRateAll * 100
@@ -1798,12 +1785,10 @@ export default function CampaignPulse() {
         totalCalls={totalCalls}
         meaningfulConvs={meaningfulConvs}
         bookingCount={bookings.length}
-        paidCount={valPaidCount}
-        heldCount={valHeldCount}
+        attendedCount={confirmedShows}
         upcomingCount={upcoming}
         pipeline={pipeline}
         bookings={bookings}
-        validationLeads={validationLeads}
         isClientView={isClientView}
       />
 
