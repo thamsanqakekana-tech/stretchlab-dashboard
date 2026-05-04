@@ -168,16 +168,13 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, validation
       return !isNaN(lMonth) && lMonth === m.num
     })
     const resolvedMonthLeads = monthLeads.filter(l => !isBlankVal(l.held))
-    const paidCount   = isActive
-      ? allFutureLeads.filter(l => isYesVal(l.paid)).length
-      : resolvedMonthLeads.filter(l => isYesVal(l.paid)).length
-    const heldCount   = resolvedMonthLeads.filter(l => isYesVal(l.held)).length
+    const attendedCount = +(rampRow?.actual_kept_appts ?? 0)
     const futureLeads = isActive ? allFutureLeads : []
     const drillLeads  = isActive
       ? [...resolvedMonthLeads, ...allFutureLeads]
       : resolvedMonthLeads
 
-    return { ...m, fillPct, isActive, isComplete, monthLeads, resolvedMonthLeads, paidCount, heldCount, futureLeads, drillLeads }
+    return { ...m, fillPct, isActive, isComplete, monthLeads, resolvedMonthLeads, attendedCount, futureLeads, drillLeads }
   })
 
   return (
@@ -221,11 +218,9 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, validation
                     <span style={{ fontSize: '9px', marginLeft: '5px', color: 'var(--status-above)', fontWeight: 700 }}>✓</span>
                   )}
                 </span>
-                {hasLeads && (
+                {(hasLeads || seg.attendedCount > 0) && (
                   <span style={{ fontSize: '10px', color: 'var(--text-2)', flex: 1, textAlign: 'center', whiteSpace: 'nowrap' }}>
-                    <span style={{ color: 'var(--status-above)', fontWeight: 700 }}>{seg.paidCount} paid</span>
-                    {' · '}
-                    <span style={{ color: 'var(--status-within)', fontWeight: 700 }}>{seg.heldCount} held</span>
+                    <span style={{ color: 'var(--status-above)', fontWeight: 700 }}>{seg.attendedCount} attended</span>
                     {(seg.isActive ? upcomingCount : 0) > 0 && (
                       <span style={{ color: 'var(--muted)' }}> · {seg.isActive ? upcomingCount : 0} upcoming</span>
                     )}
@@ -272,7 +267,7 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, validation
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                 <thead>
                   <tr>
-                    {['Name', 'Appointment Date', 'Studio', 'Paid', 'Held', 'Notes'].map(h => (
+                    {['Name', 'Appointment Date', 'Studio', 'Paid', 'Held'].map(h => (
                       <th key={h} style={{ textAlign: 'left', padding: '6px 10px', color: 'var(--muted)', fontWeight: 600, borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap', fontSize: '11px' }}>{h}</th>
                     ))}
                   </tr>
@@ -291,7 +286,6 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, validation
                         <td style={{ padding: '7px 10px', color: 'var(--muted)', whiteSpace: 'nowrap' }}>{(lead.location || '').replace('StretchLab ', '')}</td>
                         <td style={{ padding: '7px 10px', color: isPaid ? 'var(--status-above)' : 'var(--muted)', fontWeight: 600 }}>{isPaid ? 'Yes' : 'No'}</td>
                         <td style={{ padding: '7px 10px', color: heldColor, fontWeight: 600 }}>{heldLabel}</td>
-                        <td style={{ padding: '7px 10px', color: 'var(--muted)', fontSize: '11px', maxWidth: '260px' }}>{lead.notes || '—'}</td>
                       </tr>
                     )
                   })}
