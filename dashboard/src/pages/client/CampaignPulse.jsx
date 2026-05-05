@@ -157,15 +157,6 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, bookings =
 
   const totalKept = ramp.reduce((s, r) => s + (+r.actual_kept_appts || 0), 0)
 
-  // Build name-keyed lookup from internal tracker for `paid` enrichment only
-  const valByName = useMemo(() => {
-    const m = {}
-    validationLeads.forEach(l => {
-      if (l.name) m[String(l.name).toLowerCase().trim()] = l
-    })
-    return m
-  }, [validationLeads])
-
   const getHasShowB = b => b.has_show === true || b.has_show === 1 || String(b.has_show ?? '').trim() === '1'
 
   const segments = MONTHS.map((m) => {
@@ -200,18 +191,37 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, bookings =
       fillPct = Math.min(100, Math.round((elapsed / totalDays) * 100))
     }
 
-    const drillLeads = monthBookings.map(b => {
-      const nameKey  = String(b.full_name_lower || [b.first_name, b.last_name].filter(Boolean).join(' ')).toLowerCase().trim()
-      const valMatch = valByName[nameKey]
+    const todayMidnight = new Date(); todayMidnight.setHours(0, 0, 0, 0)
+    const getBookingStatus = (b) => {
       const statusStr = String(b.current_status || '')
-      return {
-        name:                [b.first_name, b.last_name].filter(Boolean).join(' ') || '—',
-        date_of_appointment: b.booking_date,
-        location:            String(b.booking_location || '').replace('StretchLab ', ''),
-        paid:                valMatch?.paid ?? null,
-        held:                getHasShowB(b) ? 'yes' : statusStr.includes('Open Booking') ? null : 'no',
+      const bd = b.booking_date
+      const bookingDate = bd ? new Date(String(bd).substring(0, 10)) : null
+      if (bookingDate && bookingDate > todayMidnight) return 'Upcoming'
+      if (getHasShowB(b)) return 'Attended'
+      if (statusStr.includes('Open Booking') || statusStr.includes('Completed Booking')) return statusStr.includes('Completed') ? 'Attended' : 'Upcoming'
+      if (statusStr.includes('No Show')) return 'No Show'
+      if (statusStr.includes('Rescheduled')) return 'Rescheduled'
+      if (statusStr.toLowerCase().includes('cancelled by admin')) return 'Cancelled by admin'
+      if (statusStr.includes('Outside Policy')) return 'Cancelled (outside policy)'
+      if (statusStr.includes('Within Policy') || statusStr.includes('Cancelled')) return 'Cancelled (within policy)'
+      return statusStr || '—'
+    }
+    const statusPriority = s => s === 'Attended' ? 5 : s === 'Rescheduled' ? 4 : s === 'No Show' ? 3 : s === 'Upcoming' ? 2 : s.startsWith('Cancelled') ? 1 : 0
+    const deduped = new Map()
+    monthBookings.forEach(b => {
+      const name   = [b.first_name, b.last_name].filter(Boolean).join(' ') || '—'
+      const status = getBookingStatus(b)
+      const prev   = deduped.get(name)
+      if (!prev || statusPriority(status) > statusPriority(prev.status)) {
+        deduped.set(name, {
+          name,
+          date_of_appointment: b.booking_date,
+          location: String(b.booking_location || '').replace('StretchLab ', ''),
+          status,
+        })
       }
     })
+    const drillLeads = Array.from(deduped.values())
 
     return { ...m, fillPct, isActive, isComplete, attendedCount, drillLeads }
   })
@@ -314,27 +324,33 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, bookings =
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                 <thead>
                   <tr>
-                    {['Name', 'Appointment Date', 'Studio', 'Paid', 'Held'].map(h => (
+                    {['Name', 'Appointment Date', 'Studio', 'Status'].map(h => (
                       <th key={h} style={{ textAlign: 'left', padding: '6px 10px', color: 'var(--muted)', fontWeight: 600, borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap', fontSize: '11px' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {seg.drillLeads.map((lead, i) => {
-                    const isPaid     = lead.paid != null && isYesVal(lead.paid)
-                    const isHeld     = isYesVal(lead.held)
-                    const isUpcoming = isBlankVal(lead.held)
-                    const heldLabel  = isUpcoming ? 'Upcoming' : isHeld ? 'Yes' : 'No'
-                    const heldColor  = isUpcoming ? 'var(--status-within)' : isHeld ? 'var(--status-above)' : 'var(--muted)'
+                    const s = lead.status
+                    const statusColor = s === 'Attended' ? 'var(--status-above)'
+                      : s === 'Upcoming'  ? 'var(--accent)'
+                      : s === 'Rescheduled' ? '#eab308'
+                      : s === 'No Show'  ? 'var(--muted)'
+                      : '#64748b'
+                    const statusBg = s === 'Attended' ? 'rgba(34,197,94,0.08)'
+                      : s === 'Upcoming'  ? 'rgba(99,102,241,0.08)'
+                      : s === 'Rescheduled' ? 'rgba(234,179,8,0.08)'
+                      : 'rgba(100,116,139,0.08)'
                     return (
                       <tr key={i} style={{ background: i % 2 === 0 ? 'transparent' : 'var(--bg)' }}>
                         <td style={{ padding: '7px 10px', color: 'var(--text)', fontWeight: 500, whiteSpace: 'nowrap' }}>{lead.name || '—'}</td>
                         <td style={{ padding: '7px 10px', color: 'var(--muted)', whiteSpace: 'nowrap', fontSize: '11px' }}>{fmtDate(lead.date_of_appointment)}</td>
                         <td style={{ padding: '7px 10px', color: 'var(--muted)', whiteSpace: 'nowrap' }}>{lead.location || '—'}</td>
-                        <td style={{ padding: '7px 10px', color: lead.paid == null ? 'var(--muted)' : isPaid ? 'var(--status-above)' : 'var(--muted)', fontWeight: lead.paid == null ? 400 : 600 }}>
-                          {lead.paid == null ? '—' : isPaid ? 'Yes' : 'No'}
+                        <td style={{ padding: '7px 10px' }}>
+                          <span style={{ fontSize: '11px', fontWeight: 600, color: statusColor, background: statusBg, padding: '2px 8px', borderRadius: '4px', whiteSpace: 'nowrap' }}>
+                            {s}
+                          </span>
                         </td>
-                        <td style={{ padding: '7px 10px', color: heldColor, fontWeight: 600 }}>{heldLabel}</td>
                       </tr>
                     )
                   })}
