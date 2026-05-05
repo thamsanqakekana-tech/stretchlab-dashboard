@@ -30,7 +30,8 @@ const SEGMENT_ACCENT = {
 }
 const DAYS_OF_WEEK = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
 const todayMidnight = new Date(); todayMidnight.setHours(0, 0, 0, 0)
-const isFutureBooking = b => { const bd = b.booking_date || b['booking_date']; return !!bd && new Date(String(bd).substring(0,10)) > todayMidnight }
+const todayStr = `${todayMidnight.getFullYear()}-${String(todayMidnight.getMonth()+1).padStart(2,'0')}-${String(todayMidnight.getDate()).padStart(2,'0')}`
+const isFutureBooking = b => { const bd = b.booking_date || b['booking_date']; return !!bd && String(bd).substring(0, 10) > todayStr }
 
 // ─── Studio stats builder ─────────────────────────────────────────────────────
 function buildStudioStats(leads, cancellations = []) {
@@ -47,7 +48,7 @@ function buildStudioStats(leads, cancellations = []) {
 
   return Object.entries(grouped).map(([studio, bks]) => {
     const attended     = bks.filter(b => hasShow(b) && !isFutureBooking(b)).length
-    const upcoming     = bks.filter(b => isFutureBooking(b) || (!hasShow(b) && getStatus(b).includes('Open Booking'))).length
+    const upcoming     = bks.filter(b => getStatus(b).includes('Open Booking') && (!hasShow(b) || isFutureBooking(b))).length
     const noShows      = bks.filter(b => !hasShow(b) && getStatus(b).includes('No Show')).length
     const adminCancels = bks.filter(b => !hasShow(b) && getStatus(b).includes('Cancelled By Admin')).length
     const custCancels  = bks.filter(b => !hasShow(b) && (
@@ -438,8 +439,7 @@ function StudioSignalCard({ s, isManagerView, pipeline = [] }) {
                   {sortedBks.map((bk, i) => {
                     const status = String(bk.current_status || bk['Current Status'] || '').trim()
                     const bkFuture = isFutureBooking(bk)
-                    const uo     = bkFuture                                                 ? 'upcoming'
-                      : +bk.has_show === 1                                                  ? 'attended'
+                    const uo     = +bk.has_show === 1 && !bkFuture                          ? 'attended'
                       : status.includes('Open Booking')                                     ? 'upcoming'
                       : status.includes('No Show')                                          ? 'no_show'
                       : status.includes('Rescheduled')                                      ? 'rescheduled'
