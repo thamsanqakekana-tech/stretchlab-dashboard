@@ -52,7 +52,10 @@ function generateActions({ pipeline, bookings, cancellations, validationLeads, c
     ? upcoming.slice().sort((a,b) => +a.days_until - +b.days_until)[0]
     : null
 
-  const shows         = bookings.filter(b => b.has_show === true || b.has_show === 1 || String(b.has_show ?? '').trim() === '1')
+  const todayAP = new Date(); todayAP.setHours(0,0,0,0)
+  const isFutureAP = b => { const bd = b.booking_date; return !!bd && new Date(String(bd).substring(0,10)) > todayAP }
+  const isShowAP = b => b.has_show === true || b.has_show === 1 || String(b.has_show ?? '').trim() === '1'
+  const shows         = bookings.filter(b => isShowAP(b) && !isFutureAP(b))
   const cancelledCust = bookings.filter(b => { const s = String(b.current_status || ''); return s.includes('Cancelled Within Policy') || s.includes('Cancelled Outside Policy') })
   const cancelledAdm  = bookings.filter(b => String(b.current_status || '').includes('Cancelled By Admin'))
   const noShows       = bookings.filter(b => String(b.current_status || '').includes('No Show'))
@@ -178,6 +181,69 @@ function generateActions({ pipeline, bookings, cancellations, validationLeads, c
       deadline: addDays(2),
       status:   'not_started',
     })
+  }
+
+  // ── IMPORTANT: Duplicate ClubReady attendance records (same name, same date, multiple has_show=1) ──
+  {
+    const attendedByKey = {}
+    bookings.filter(b => isShowAP(b) && !isFutureAP(b)).forEach(b => {
+      const name = [b.first_name, b.last_name].filter(Boolean).join(' ').toLowerCase().trim()
+      const date = String(b.booking_date || '').substring(0, 10)
+      const key  = `${name}||${date}`
+      if (!attendedByKey[key]) attendedByKey[key] = []
+      attendedByKey[key].push(b)
+    })
+    const dupEntries = Object.values(attendedByKey).filter(recs => recs.length > 1)
+    if (dupEntries.length > 0) {
+      const lines = dupEntries.map(recs => {
+        const b   = recs[0]
+        const loc = String(b.booking_location || '').replace('StretchLab ', '')
+        const ids = recs.map(r => r.booking_id).join(', ')
+        return `${b.first_name} ${b.last_name} (${loc}) — ${recs.length} records on ${String(b.booking_date||'').substring(0,10)} · booking IDs: ${ids}`
+      }).join('\n')
+      actions.push({
+        id:       'duplicate-attended',
+        priority: 'important',
+        title:    `Resolve ${dupEntries.length} duplicate ClubReady attendance record${dupEntries.length !== 1 ? 's' : ''} — same lead, same date, multiple has_show=1`,
+        owner:    'tamryn',
+        why:      `ClubReady shows ${dupEntries.length} lead${dupEntries.length !== 1 ? 's' : ''} with more than one booking record marked as attended on the same date. This is a data entry issue — likely caused by a reschedule that created a second booking before the original was closed, both ending up with attendance confirmed. The pipeline currently counts both, which overstates the attended total. Tamryn to review in ClubReady and remove or merge the duplicate record.\n\n${lines}`,
+        impact:   { revenue: 0, description: 'Data integrity — prevents attendance count being overstated in pipeline metrics' },
+        deadline: addDays(2),
+        status:   'not_started',
+      })
+    }
+  }
+
+  // ── IMPORTANT: ClubReady leads not in internal tracker ──────────────────────
+  {
+    const valNameSet = new Set(validationLeads.map(r => String(r.name || '').toLowerCase().trim()))
+    const crNotInTracker = bookings.filter(b => {
+      const name   = [b.first_name, b.last_name].filter(Boolean).join(' ').toLowerCase().trim()
+      if (valNameSet.has(name)) return false
+      if (isFutureAP(b)) return false
+      const status = String(b.current_status || '')
+      return isShowAP(b) || status.includes('Cancelled') || status.includes('No Show') || status.includes('Completed')
+    })
+    if (crNotInTracker.length > 0) {
+      const lines = crNotInTracker.slice(0, 12).map(b => {
+        const loc    = String(b.booking_location || '').replace('StretchLab ', '')
+        const status = String(b.current_status || '').split(' -')[0].trim()
+        const hs     = isShowAP(b) ? ' · attended (has_show=1)' : ''
+        return `${b.first_name} ${b.last_name} (${loc}) — ${status}${hs}`
+      }).join('\n')
+      const overflow = crNotInTracker.length > 12 ? `\n…and ${crNotInTracker.length - 12} more.` : ''
+      const attendedGap = crNotInTracker.filter(b => isShowAP(b)).length
+      actions.push({
+        id:       'cr-not-in-tracker',
+        priority: crNotInTracker.length >= 5 ? 'important' : 'optimization',
+        title:    `Verify ${crNotInTracker.length} ClubReady lead${crNotInTracker.length !== 1 ? 's' : ''} not in the internal tracker`,
+        owner:    'tamryn',
+        why:      `ClubReady has ${crNotInTracker.length} resolved booking${crNotInTracker.length !== 1 ? 's' : ''} with no matching record in the internal tracker. ClubReady is the source of truth — these leads and their outcomes are correct. The internal tracker needs to be updated to reflect them.${attendedGap > 0 ? ` ${attendedGap} of these are attended sessions (has_show=1) — their tracker records are missing entirely.` : ''} Tamryn to review each name and add or update the tracker entry, noting any name-entry discrepancies (e.g. lead booked under a slightly different name in ClubReady).\n\n${lines}${overflow}`,
+        impact:   { revenue: attendedGap * INTRO_PRICE, description: attendedGap > 0 ? `${attendedGap} untracked attended session${attendedGap !== 1 ? 's' : ''} × $${INTRO_PRICE} = $${attendedGap * INTRO_PRICE} unrecorded in tracker` : 'Internal tracker alignment — keeps floor records in sync with ClubReady' },
+        deadline: addDays(3),
+        status:   'not_started',
+      })
+    }
   }
 
   // ── CRITICAL: Studio with ≥3 admin cancellations ────────────────────────────

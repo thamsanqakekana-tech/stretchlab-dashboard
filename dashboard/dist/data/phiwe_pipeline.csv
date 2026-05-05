@@ -1,15 +1,13 @@
 booking_id,first_name,last_name,phone_clean,email,booking_date,days_until,booking_location,session_mins,total_calls_made,risk_level,attribution_method
-751496397,Óscar,Olasava,9182183062,montecristoaaaa@gmail.com,2026-05-09,5,StretchLab South Tulsa,50,1.0,High,Direct
-751517294,Rosario,Chico,3163003172,chico.media.tv@gmail.com,2026-06-06,33,StretchLab South Tulsa,50,1.0,High,Direct
-748618426,Debbie,Webb,8176918389,mypromus@yahoo.com,2026-05-11,7,StretchLab Bunker Hill,50,6.0,Low,Direct
-747936313,Fame,Gilliam,3187545294,gilli3@aol.com,2026-05-11,7,StretchLab Shreveport,50,4.0,Medium,Direct
-751114217,Reveizzio,Washington,3467640645,reveizzio@icloud.com,2026-05-07,3,StretchLab Shreveport,25,1.0,High,Direct
-751124945,Amyanna,Geramy,3184225724,iamamyannag@gmail.com,2026-05-16,12,StretchLab Shreveport,50,1.0,High,Direct
-751150490,Kateesha,Martinez,3187712540,martinez.wrk.org@gmail.com,2026-05-09,5,StretchLab Shreveport,50,2.0,High,Direct
-751169826,Darwin,Jones,3184234563,dlj491@yahoo.com,2026-05-05,1,StretchLab Shreveport,50,1.0,High,Direct
-751206428,Donald,King,3185729033,drking98@gmail.com,2026-05-09,5,StretchLab Shreveport,50,1.0,High,Direct
-751211001,Roslyn,Goodall,2142289068,roslyngoodall@gmail.com,2026-05-13,9,StretchLab Shreveport,50,2.0,High,Direct
-749417966,David,Dole,3135106286,daviddole7@gmail.com,2026-05-09,5,StretchLab Brighton,50,1.0,High,Direct
-749421469,Kelly,Dole,7345020273,kelly.dole@att.net,2026-05-09,5,StretchLab Brighton,50,0.0,High,Direct
-748157239,Christopher,Ejike-Ukah,8325261930,cejikeukah@gmail.fom,2026-05-05,1,StretchLab Bellaire,50,1.0,High,Direct
-750718486,Kenacia,Hunter,9033300674,skyehunter000@gmail.com,2026-05-04,0,StretchLab Bellaire,25,2.0,High,Direct
+751496397,Óscar,Olasava,9182183062,montecristoaaaa@gmail.com,2026-05-09,4,StretchLab South Tulsa,50,1.0,High,Direct
+751517294,Rosario,Chico,3163003172,chico.media.tv@gmail.com,2026-06-06,32,StretchLab South Tulsa,50,1.0,High,Direct
+753062080,David,Priddy,9185205550,david@davidsdiscounttire.com,2026-05-06,1,StretchLab South Tulsa,50,2.0,High,Direct
+748618426,Debbie,Webb,8176918389,mypromus@yahoo.com,2026-05-11,6,StretchLab Bunker Hill,50,6.0,Low,Direct
+747936313,Fame,Gilliam,3187545294,gilli3@aol.com,2026-05-11,6,StretchLab Shreveport,50,4.0,Medium,Direct
+751114217,Reveizzio,Washington,3467640645,reveizzio@icloud.com,2026-05-07,2,StretchLab Shreveport,25,1.0,High,Direct
+751124945,Amyanna,Geramy,3184225724,iamamyannag@gmail.com,2026-05-16,11,StretchLab Shreveport,50,1.0,High,Direct
+751150490,Kateesha,Martinez,3187712540,martinez.wrk.org@gmail.com,2026-05-09,4,StretchLab Shreveport,50,2.0,High,Direct
+751206428,Donald,King,3185729033,drking98@gmail.com,2026-05-09,4,StretchLab Shreveport,50,1.0,High,Direct
+751211001,Roslyn,Goodall,2142289068,roslyngoodall@gmail.com,2026-05-13,8,StretchLab Shreveport,50,2.0,High,Direct
+749417966,David,Dole,3135106286,daviddole7@gmail.com,2026-05-09,4,StretchLab Brighton,50,1.0,High,Direct
+749421469,Kelly,Dole,7345020273,kelly.dole@att.net,2026-05-09,4,StretchLab Brighton,50,0.0,High,Direct
