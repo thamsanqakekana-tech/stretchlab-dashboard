@@ -448,7 +448,7 @@ function SowProgressMini({ confirmedShows, upcoming, sowTarget = 77 }) {
 }
 
 // ─── Conversion Funnel — 6-stage sequential with per-stage drill-downs ────────
-function ConversionFunnel({ totalCalls, meaningfulConvs, bookingCount, attendedCount, upcomingCount, pipeline = [], bookings = [], isClientView = false }) {
+function ConversionFunnel({ totalCalls, meaningfulConvs, bookingCount, attendedCount, upcomingCount, pipeline = [], bookings = [], confirmedAttended = [], isClientView = false }) {
   const [openStage, setOpenStage] = useState(null)
 
   const stages = [
@@ -459,7 +459,10 @@ function ConversionFunnel({ totalCalls, meaningfulConvs, bookingCount, attendedC
     { key: 'upcoming', label: 'Upcoming',    count: upcomingCount,   color: 'var(--status-within)', drillable: true },
   ]
 
-  const attendedBookings = bookings.filter(b => +b.has_show === 1 || b.has_show === true || String(b.has_show ?? '').trim() === '1')
+  // Use the pre-filtered attended list from buildBookingBuckets (future-date guard applied there)
+  const attendedBookings = confirmedAttended.length > 0
+    ? confirmedAttended
+    : bookings.filter(b => +b.has_show === 1 || b.has_show === true || String(b.has_show ?? '').trim() === '1')
   const highRiskCount    = pipeline.filter(r => r.risk_level === 'High').length
   const sortedPipe       = [...pipeline].sort((a, b) => new Date(a.booking_date) - new Date(b.booking_date))
 
@@ -1835,6 +1838,7 @@ export default function CampaignPulse() {
         upcomingCount={upcoming}
         pipeline={filteredPipeline}
         bookings={bookings}
+        confirmedAttended={buckets.attended}
         isClientView={isClientView}
       />
 
