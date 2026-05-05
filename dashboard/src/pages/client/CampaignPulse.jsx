@@ -87,7 +87,17 @@ function buildBookingBuckets(bookings) {
   const getIsPast = r => { const v = r['is_past'] ?? r.is_past ?? ''; return v === '1' || v === 1 || v === true }
   const getHasShow = r => { const v = r['has_show'] ?? r.has_show; return v === true || v === 1 || String(v).trim() === '1' }
 
-  const attended      = bookings.filter(getHasShow)
+  // Guard: future-dated bookings (booking_date > today) must not be counted as attended
+  // even if has_show=1, because the session hasn't happened yet.
+  const todayMidnight = new Date(); todayMidnight.setHours(0, 0, 0, 0)
+  const isFutureDated = b => {
+    const bd = b.booking_date || b['booking_date']
+    if (!bd) return false
+    return new Date(String(bd).substring(0, 10)) > todayMidnight
+  }
+  const isConfirmedAttended = b => getHasShow(b) && !isFutureDated(b)
+
+  const attended      = bookings.filter(isConfirmedAttended)
   const attendedIds   = new Set(attended.map(getId))
   const notAttended   = r => !attendedIds.has(getId(r))
 
@@ -159,9 +169,24 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, bookings =
   const getHasShowB = b => b.has_show === true || b.has_show === 1 || String(b.has_show ?? '').trim() === '1'
 
   const segments = MONTHS.map((m) => {
-    // Compute rampRow + attendedCount first (needed for fillPct on past months)
-    const rampRow       = ramp.find(r => +r.month === m.num)
-    const attendedCount = +(rampRow?.actual_kept_appts ?? 0)
+    const rampRow = ramp.find(r => +r.month === m.num)
+
+    // Source monthly leads from ClubReady bookings by booking_date within month range
+    const monthBookings = bookings.filter(b => {
+      const bd = b.booking_date
+      if (!bd) return false
+      const d = new Date(String(bd).substring(0, 10))
+      return d >= m.start && d <= m.end
+    })
+
+    // Attended count from ClubReady date-range, excluding future-dated sessions
+    const todayTs = today.getTime()
+    const attendedCount = monthBookings.filter(b => {
+      if (!getHasShowB(b)) return false
+      const bd = b.booking_date
+      if (!bd) return true
+      return new Date(String(bd).substring(0, 10)).getTime() <= todayTs
+    }).length
 
     // fillPct: past months show target-achievement %; active month shows time elapsed %
     const totalDays = Math.round((m.end - m.start) / 86400000) + 1
@@ -174,14 +199,6 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, bookings =
       const elapsed = Math.floor((today - m.start) / 86400000) + 1
       fillPct = Math.min(100, Math.round((elapsed / totalDays) * 100))
     }
-
-    // Source monthly leads from ClubReady bookings by booking_date within month range
-    const monthBookings = bookings.filter(b => {
-      const bd = b.booking_date
-      if (!bd) return false
-      const d = new Date(String(bd).substring(0, 10))
-      return d >= m.start && d <= m.end
-    })
 
     const drillLeads = monthBookings.map(b => {
       const nameKey  = String(b.full_name_lower || [b.first_name, b.last_name].filter(Boolean).join(' ')).toLowerCase().trim()
@@ -1526,7 +1543,8 @@ export default function CampaignPulse() {
           <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap' }}>
             {[
               { label: 'Attended',        count: confirmedShows,        color: 'var(--status-above)' },
-              { label: 'Pending outcome', count: upcoming + buckets.rescheduled.length + buckets.other.length, color: '#94a3b8' },
+              { label: 'Pending outcome', count: upcoming + buckets.other.length, color: '#94a3b8' },
+              { label: 'Rescheduled',     count: buckets.rescheduled.length,      color: '#94a3b8' },
               { label: 'Cancelled',       count: cancels,               color: '#64748b' },
               { label: 'No-show',         count: buckets.noShow.length, color: 'var(--muted)' },
             ].filter(o => o.count > 0).map(o => (
@@ -1605,7 +1623,7 @@ export default function CampaignPulse() {
                   ))}
                 </div>
                 <p style={{ fontSize: '10px', color: 'var(--muted)', margin: '4px 0 0', fontStyle: 'italic' }}>
-                  Bars show all {totalBookings} bookings. Rate labels are of resolved appointments only — {upcoming + buckets.rescheduled.length + buckets.other.length} bookings are still pending an outcome.
+                  Bars show all {totalBookings} bookings. Rate labels are of resolved appointments only — {upcoming + buckets.other.length} bookings are still pending an outcome · {buckets.rescheduled.length} rescheduled.
                 </p>
               </div>
             </div>
