@@ -74,15 +74,20 @@ function buildStudioStats(leads, cancellations = []) {
       return true
     })
     const attended = attendedUnique.length
-    const upcoming     = bks.filter(b => getStatus(b).includes('Open Booking') && (!hasShow(b) || isFutureBooking(b))).length
-    const noShows      = bks.filter(b => !hasShow(b) && getStatus(b).includes('No Show')).length
-    const adminCancels = bks.filter(b => !hasShow(b) && getStatus(b).includes('Cancelled By Admin')).length
-    const custCancels  = bks.filter(b => !hasShow(b) && (
+    // Use attended booking IDs (not has_show flag) as the guard for all other buckets.
+    // This ensures deduped bookings (same person, multiple has_show=1 rows) still get
+    // classified by their status rather than falling through every bucket.
+    const attendedIds  = new Set(attendedUnique.map(b => String(b.booking_id)))
+    const notAttended  = b => !attendedIds.has(String(b.booking_id))
+    const upcoming     = bks.filter(b => notAttended(b) && getStatus(b).includes('Open Booking')).length
+    const noShows      = bks.filter(b => notAttended(b) && getStatus(b).includes('No Show')).length
+    const adminCancels = bks.filter(b => notAttended(b) && getStatus(b).includes('Cancelled By Admin')).length
+    const custCancels  = bks.filter(b => notAttended(b) && (
       getStatus(b).includes('Cancelled Within Policy') ||
       getStatus(b).includes('Cancelled Outside Policy')
     )).length
     const totalCancels = adminCancels + custCancels
-    const rescheduled  = bks.filter(b => !hasShow(b) && getStatus(b).includes('Rescheduled')).length
+    const rescheduled  = bks.filter(b => notAttended(b) && getStatus(b).includes('Rescheduled')).length
     const total        = bks.length
     const resolved     = attended + totalCancels + noShows
     const showRate     = resolved > 0 ? attended / resolved : 0
