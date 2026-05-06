@@ -47,7 +47,16 @@ function buildStudioStats(leads, cancellations = []) {
   })
 
   return Object.entries(grouped).map(([studio, bks]) => {
-    const attended     = bks.filter(b => hasShow(b) && !isFutureBooking(b)).length
+    const attendedBks = bks.filter(b => hasShow(b) && !isFutureBooking(b))
+    const _seenNames = new Set()
+    const attendedUnique = attendedBks.filter(b => {
+      const name = [b.first_name, b.last_name].filter(Boolean).join(' ').trim().toLowerCase()
+      if (!name) return true
+      if (_seenNames.has(name)) return false
+      _seenNames.add(name)
+      return true
+    })
+    const attended = attendedUnique.length
     const upcoming     = bks.filter(b => getStatus(b).includes('Open Booking') && (!hasShow(b) || isFutureBooking(b))).length
     const noShows      = bks.filter(b => !hasShow(b) && getStatus(b).includes('No Show')).length
     const adminCancels = bks.filter(b => !hasShow(b) && getStatus(b).includes('Cancelled By Admin')).length
