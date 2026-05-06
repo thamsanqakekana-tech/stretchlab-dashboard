@@ -8,6 +8,7 @@ import {
 } from '../../utils/dataLoader.js'
 import { useAuth } from '../../context/AuthContext.jsx'
 import Card from '../../components/Card.jsx'
+import Tooltip from '../../components/Tooltip.jsx'
 import InsightBlock from '../../components/InsightBlock.jsx'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -32,6 +33,22 @@ const DAYS_OF_WEEK = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturd
 const todayMidnight = new Date(); todayMidnight.setHours(0, 0, 0, 0)
 const todayStr = `${todayMidnight.getFullYear()}-${String(todayMidnight.getMonth()+1).padStart(2,'0')}-${String(todayMidnight.getDate()).padStart(2,'0')}`
 const isFutureBooking = b => { const bd = b.booking_date || b['booking_date']; return !!bd && String(bd).substring(0, 10) > todayStr }
+
+// ─── Count-up animation ───────────────────────────────────────────────────────
+function CountUp({ value, duration = 900 }) {
+  const [display, setDisplay] = useState(0)
+  useEffect(() => {
+    if (typeof value !== 'number') { setDisplay(value); return }
+    const start = performance.now()
+    const tick = (now) => {
+      const t = Math.min((now - start) / duration, 1)
+      setDisplay(Math.round((1 - Math.pow(1 - t, 3)) * value))
+      if (t < 1) requestAnimationFrame(tick)
+    }
+    requestAnimationFrame(tick)
+  }, [value, duration])
+  return display
+}
 
 // ─── Studio stats builder ─────────────────────────────────────────────────────
 function buildStudioStats(leads, cancellations = []) {
@@ -265,19 +282,26 @@ function SnapshotStrip({ stats }) {
   return (
     <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
       {tiles.map(({ label, value, color, tooltip }) => (
-        <Card key={label} style={{ flex: 1, padding: '14px 18px' }} title={tooltip}>
-          <p style={{ fontSize: '10px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 6px' }}>{label}</p>
-          <p style={{ fontSize: '24px', fontWeight: 800, fontFamily: 'JetBrains Mono, monospace', color, margin: 0 }}>{value}</p>
-        </Card>
+        <div key={label} style={{ flex: 1 }}>
+          <Tooltip content={tooltip} position="bottom">
+            <Card style={{ width: '100%', padding: '14px 18px', cursor: 'default', borderTop: `2px solid ${color}` }}>
+              <p style={{ fontSize: '10px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 6px' }}>{label}</p>
+              <p style={{ fontSize: '24px', fontWeight: 800, fontFamily: 'JetBrains Mono, monospace', color, margin: 0 }}>
+                {typeof value === 'number' ? <CountUp value={value} /> : value}
+              </p>
+            </Card>
+          </Tooltip>
+        </div>
       ))}
     </div>
   )
 }
 
 // ─── Studio signal card ───────────────────────────────────────────────────────
-function StudioSignalCard({ s, isManagerView, pipeline = [] }) {
-  const [open, setOpen] = useState(false)
-  const [tab, setTab]   = useState('breakdown')
+function StudioSignalCard({ s, isManagerView, pipeline = [], cardIndex = 0 }) {
+  const [open, setOpen]         = useState(false)
+  const [activeTab, setActiveTab] = useState('breakdown')
+  const [tabVisible, setTabVisible] = useState(true)
 
   const name     = s.studio.replace(/^StretchLab\s+/i, '')
   const inactive = s.segment === 'inactive'
@@ -307,15 +331,19 @@ function StudioSignalCard({ s, isManagerView, pipeline = [] }) {
   ]
 
   return (
-    <div style={{
-      background: 'var(--surface)',
-      border: `1px solid ${accent}28`,
-      borderLeft: `3px solid ${accent}`,
-      borderRadius: '10px',
-      marginBottom: '10px',
-      overflow: 'hidden',
-      opacity: inactive ? 0.6 : 1,
-    }}>
+    <div
+      className="results-studio-card"
+      style={{
+        background: 'var(--surface)',
+        border: `1px solid ${accent}28`,
+        borderLeft: `3px solid ${accent}`,
+        borderRadius: '10px',
+        marginBottom: '10px',
+        overflow: 'hidden',
+        opacity: inactive ? 0.6 : 1,
+        animationDelay: `${cardIndex * 55}ms`,
+      }}
+    >
       <button
         onClick={() => !inactive && setOpen(o => !o)}
         style={{
@@ -375,18 +403,24 @@ function StudioSignalCard({ s, isManagerView, pipeline = [] }) {
             {tabs.map(t => (
               <button
                 key={t.key}
-                onClick={() => setTab(t.key)}
+                onClick={() => {
+                  if (t.key === activeTab) return
+                  setTabVisible(false)
+                  setTimeout(() => { setActiveTab(t.key); setTabVisible(true) }, 130)
+                }}
                 style={{
                   fontSize: '11px', fontWeight: 600, padding: '4px 12px',
                   borderRadius: '6px', cursor: 'pointer', border: 'none',
-                  background: tab === t.key ? accent : 'var(--border)',
-                  color: tab === t.key ? '#fff' : 'var(--muted)',
+                  background: activeTab === t.key ? accent : 'var(--border)',
+                  color: activeTab === t.key ? '#fff' : 'var(--muted)',
                 }}
               >{t.label}</button>
             ))}
           </div>
 
-          {tab === 'breakdown' && (() => {
+          <div style={{ opacity: tabVisible ? 1 : 0, transition: 'opacity 0.13s ease' }}>
+
+          {activeTab === 'breakdown' && (() => {
             const breakdownItems = isManagerView
               ? [
                   { label: 'Attended',        value: s.shows,                        color: 'var(--status-above)' },
@@ -406,7 +440,7 @@ function StudioSignalCard({ s, isManagerView, pipeline = [] }) {
             return (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '10px' }}>
                 {breakdownItems.map(item => (
-                  <div key={item.label} style={{
+                  <div key={item.label} className="results-breakdown-tile" style={{
                     background: 'var(--bg)', borderRadius: '8px', padding: '10px 12px',
                     border: `1px solid ${item.color}22`,
                   }}>
@@ -418,7 +452,8 @@ function StudioSignalCard({ s, isManagerView, pipeline = [] }) {
             )
           })()}
 
-          {tab === 'appointments' && (
+          {activeTab === 'appointments' && (
+
             <>
               {/* Fast-booking stat — manager/admin only (Execo operational data) */}
               {isManagerView && s.total > 0 && (() => {
@@ -497,7 +532,7 @@ function StudioSignalCard({ s, isManagerView, pipeline = [] }) {
             </>
           )}
 
-          {tab === 'cancel-split' && isManagerView && (
+          {activeTab === 'cancel-split' && isManagerView && (
             s.totalCancels === 0 ? (
               <p style={{ fontSize: '12px', color: 'var(--muted)', margin: 0 }}>No cancellations at this studio.</p>
             ) : (
@@ -575,6 +610,8 @@ function StudioSignalCard({ s, isManagerView, pipeline = [] }) {
               </div>
             )
           )}
+
+          </div>{/* end tab fade wrapper */}
 
           {/* Pipeline urgency section — outside tabs */}
           {studioPipeline.length > 0 && (
@@ -747,6 +784,25 @@ export default function Results() {
           0%, 100% { opacity: 1; transform: scale(1); }
           50% { opacity: 0.4; transform: scale(0.85); }
         }
+        @keyframes results-fadeInUp {
+          from { opacity: 0; transform: translateY(10px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .results-studio-card {
+          animation: results-fadeInUp 0.4s ease both;
+          transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+        .results-studio-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 28px rgba(0,0,0,0.32);
+        }
+        .results-breakdown-tile {
+          transition: transform 0.14s ease, box-shadow 0.14s ease;
+        }
+        .results-breakdown-tile:hover {
+          transform: scale(1.03);
+          box-shadow: 0 4px 16px rgba(0,0,0,0.22);
+        }
       `}</style>
 
       <div style={{ marginBottom: '24px' }}>
@@ -763,25 +819,29 @@ export default function Results() {
 
       <SnapshotStrip stats={studioStats} />
 
-      {SEGMENT_ORDER.map(seg => {
-        const group = groupedStats[seg]
-        if (!group || group.length === 0) return null
-        return (
-          <div key={seg} style={{ marginBottom: '24px' }}>
-            <h2 style={{ fontSize: '12px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 10px' }}>
-              {SEGMENT_LABEL[seg]} · {group.length}
-            </h2>
-            {group.map(s => (
-              <StudioSignalCard
-                key={s.studio}
-                s={s}
-                isManagerView={isManagerView}
-                pipeline={pipeline}
-              />
-            ))}
-          </div>
-        )
-      })}
+      {(() => {
+        let idx = 0
+        return SEGMENT_ORDER.map(seg => {
+          const group = groupedStats[seg]
+          if (!group || group.length === 0) return null
+          return (
+            <div key={seg} style={{ marginBottom: '24px' }}>
+              <h2 style={{ fontSize: '12px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 10px' }}>
+                {SEGMENT_LABEL[seg]} · {group.length}
+              </h2>
+              {group.map(s => (
+                <StudioSignalCard
+                  key={s.studio}
+                  s={s}
+                  isManagerView={isManagerView}
+                  pipeline={pipeline}
+                  cardIndex={idx++}
+                />
+              ))}
+            </div>
+          )
+        })
+      })()}
 
       {isManagerView && <ResponsibilityModel studioOpsStudios={studioOpsStudios} isManagerView={isManagerView} />}
 
