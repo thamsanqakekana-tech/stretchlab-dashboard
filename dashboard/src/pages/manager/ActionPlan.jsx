@@ -117,7 +117,7 @@ function generateActions({ pipeline, bookings, cancellations, validationLeads, c
     })
   }
 
-  // ── CRITICAL: Manual tracker ↔ ClubReady drift — always surface when any drift exists ──
+  // ── CRITICAL: Internal tracker ↔ ClubReady drift — always surface when any drift exists ──
   if (notInSystem.length > 0) {
     const heldUnlogged   = notInSystem.filter(r => String(r.held ?? '').toLowerCase() === 'yes')
     const revenueImpact  = heldUnlogged.length * INTRO_PRICE

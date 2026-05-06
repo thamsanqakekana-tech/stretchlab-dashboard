@@ -81,7 +81,7 @@ Write admin-facing data quality insight. Surface attribution uncertainty and wha
   const { insight, loading: iL, error: iE, refresh } = useInsight('admin', promptText)
 
   if (loading) return <div style={{ color: 'var(--muted)', padding: '40px' }}>Loading validation data…</div>
-  if (!validation) return <div style={{ color: 'var(--muted)', padding: '40px' }}>No validation report found. Run pipeline with manual tracker to generate.</div>
+  if (!validation) return <div style={{ color: 'var(--muted)', padding: '40px' }}>No validation report found. Run pipeline with internal tracker to generate.</div>
 
   const driftPct = drift.booking_drift_pct ?? 0
   const absD = Math.abs(driftPct)
@@ -95,7 +95,7 @@ Write admin-facing data quality insight. Surface attribution uncertainty and wha
         <DriftBadge pct={driftPct} />
       </div>
       <p style={{ color: 'var(--muted)', fontSize: '13px', marginBottom: '28px' }}>
-        System vs manual tracker comparison — admin view
+        System vs internal tracker comparison — admin view
       </p>
 
       {/* Status banner */}
@@ -114,7 +114,7 @@ Write admin-facing data quality insight. Surface attribution uncertainty and wha
         </strong>
         {validation.status === 'expected' && (
           <span style={{ color: 'var(--muted)', marginLeft: '12px' }}>
-            Manual tracker counts appointments in both months. System counts unique booking IDs attributed to Phiwe.
+            Internal tracker counts appointments in both months. System counts unique booking IDs attributed to Phiwe.
             Gap is expected and accounts for rescheduled appointments counted in both months.
           </span>
         )}

@@ -800,16 +800,16 @@ function DataIntegrityCard({ bookings, validationReport, unattributed }) {
       <div style={{ display: 'grid', gridTemplateColumns: flagTotal > 0 ? '1fr 1fr' : '1fr', gap: '0', borderTop: '1px solid var(--border)', paddingTop: '14px' }}>
         <div style={{ paddingRight: flagTotal > 0 ? '20px' : '0', borderRight: flagTotal > 0 ? '1px solid var(--border)' : 'none' }}>
           <p style={{ fontSize: '10px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 6px' }}>
-            Manual Tracker Gap
+            Internal Tracker Gap
           </p>
           <p style={{ fontSize: '13px', margin: '0 0 4px', color: 'var(--text)', lineHeight: 1.5 }}>
             <strong style={{ fontFamily: 'JetBrains Mono', color: gapCount > 0 ? '#f59e0b' : 'var(--positive)', fontSize: '15px' }}>
               {gapCount}
             </strong>
-            {' '}booking{gapCount !== 1 ? 's' : ''} in manual tracker not yet recorded in ClubReady
+            {' '}booking{gapCount !== 1 ? 's' : ''} in internal tracker not yet recorded in ClubReady
           </p>
           <p style={{ fontSize: '11px', color: 'var(--muted)', margin: 0 }}>
-            Manual tracker: {manualCount} · ClubReady system: {systemCount}
+            Internal tracker: {manualCount} · ClubReady system: {systemCount}
           </p>
         </div>
         {flagTotal > 0 && (
@@ -825,7 +825,7 @@ function DataIntegrityCard({ bookings, validationReport, unattributed }) {
             </p>
             {highConfCount > 0 && (
               <p style={{ fontSize: '11px', color: 'var(--muted)', margin: 0 }}>
-                {highConfCount} high-confidence match (Timothy Cooper — Paid=Yes in manual tracker)
+                {highConfCount} high-confidence match (Timothy Cooper — Paid=Yes in internal tracker)
               </p>
             )}
           </div>
@@ -841,7 +841,7 @@ function DataIntegrityCard({ bookings, validationReport, unattributed }) {
               <>Ask StretchLab to confirm and re-log outcomes for <strong style={{ color: 'var(--text)' }}>{pastPending} past appointments</strong> — outcomes are visible in ClubReady status but not re-logged as booking events.{gapCount > 0 ? ' ' : ''}</>
             )}
             {gapCount > 0 && (
-              <>Log the <strong style={{ color: 'var(--text)' }}>{gapCount} bookings</strong> from the manual tracker that are missing from ClubReady.</>
+              <>Log the <strong style={{ color: 'var(--text)' }}>{gapCount} bookings</strong> from the internal tracker that are missing from ClubReady.</>
             )}
           </p>
         </div>

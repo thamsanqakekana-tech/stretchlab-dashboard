@@ -42,7 +42,7 @@ const SEED_ITEMS = [
   },
   {
     key: 'ex_3', owner: 'Execo',
-    label: 'Update StretchLab on any data drift between ClubReady and the manual tracker',
+    label: 'Update StretchLab on any data drift between ClubReady and the internal tracker',
     urgency: 'Medium', deadline: 'Weekly',
   },
 ]

@@ -262,7 +262,7 @@ Bookings: ${bookings.length}. Confirmed shows: ${confirmedShows}. Upcoming: ${up
 ${adminCancelled} admin-initiated cancellations (cancelled_by=Admin in ClubReady) and ${customerCancelled} customer-initiated cancellations. Admin disruptions are the primary show-rate suppressor.
 Without admin cancellations, hypothetical show rate = ~${bookings.length > 0 ? (((confirmedShows + adminCancelled) / bookings.length) * 100).toFixed(0) : 0}%.
 Churn risk: ${churnRisk}.
-Booking drift vs manual tracker: ${driftPct}%.
+Booking drift vs internal tracker: ${driftPct}%.
 Month 3 SOW target: ${RAMP_TARGETS[3]} kept appointments by May 24.
 Write the manager-facing campaign status insight. Be direct. Acknowledge what EXECO controls (conversation, booking, show rate — all above/within cold benchmark). Identify what StretchLab must fix (admin disruptions, ClubReady logging). State Month 3 path.`
   }, [loading, convRate, bookingConvRate, showRatePct, cancelRate, totalCalls, meaningfulConvs, bookings.length, confirmedShows, upcoming, churnRisk, driftPct, adminCancelled, customerCancelled, showRangeLabel, bookingRangeLabel, cancelRangeLabel])
@@ -317,12 +317,12 @@ Write the manager-facing campaign status insight. Be direct. Acknowledge what EX
           borderRadius: '8px', padding: '12px 16px', marginBottom: '16px',
         }}>
           <span style={{ fontSize: '13px', color: 'var(--warn)', fontWeight: 600 }}>
-            Data Drift: {driftPct > 0 ? '+' : ''}{driftPct}% vs manual tracker
+            Data Drift: {driftPct > 0 ? '+' : ''}{driftPct}% vs internal tracker
           </span>
           <span style={{ fontSize: '12px', color: 'var(--muted)', marginLeft: '12px' }}>
             {validation?.drift?.gap_direction === 'manual_has_more'
-              ? 'Manual tracker shows more bookings than system — 4 missing from ClubReady'
-              : 'System shows more bookings than manual tracker'}
+              ? 'Internal tracker shows more bookings than system — 4 missing from ClubReady'
+              : 'System shows more bookings than internal tracker'}
           </span>
         </div>
       )}
@@ -528,7 +528,7 @@ Write the manager-facing campaign status insight. Be direct. Acknowledge what EX
             <span style={{ color: validation.status === 'expected' ? 'var(--accent)' : 'var(--warn)', fontWeight: 600, textTransform: 'uppercase' }}>
               {validation.status}
             </span>
-            {' '}· Gap: {validation?.drift?.gap_bookings ?? 0} bookings in manual tracker not in ClubReady
+            {' '}· Gap: {validation?.drift?.gap_bookings ?? 0} bookings in internal tracker not in ClubReady
           </p>
         </Card>
       )}
@@ -560,7 +560,7 @@ Write the manager-facing campaign status insight. Be direct. Acknowledge what EX
             <ul style={{ fontSize: '12px', color: 'var(--text-2)', lineHeight: 1.9, margin: 0, padding: '0 0 0 14px' }}>
               <li>{adminCancelled} admin-initiated cancellations reducing show rate ({customerCancelled} customer-initiated)</li>
               <li>Without admin cancels: show rate ~{bookings.length > 0 ? (((confirmedShows + adminCancelled) / bookings.length) * 100).toFixed(0) : '—'}% (vs {showRatePct.toFixed(1)}% current)</li>
-              <li>{showGap > 0 ? `${showGap} show${showGap !== 1 ? 's' : ''} differ between manual tracker and system` : 'Manual tracker and system show counts aligned'}</li>
+              <li>{showGap > 0 ? `${showGap} show${showGap !== 1 ? 's' : ''} differ between internal tracker and system` : 'Internal tracker and system show counts aligned'}</li>
               <li>{bookingGap > 0 ? `${bookingGap} booking gap between tracker and ClubReady` : 'Booking counts aligned between tracker and ClubReady'}</li>
             </ul>
           </div>
