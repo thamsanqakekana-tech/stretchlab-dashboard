@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { supabase } from '../../lib/supabaseClient.js'
 import Card from '../../components/Card.jsx'
 
-// ─── Seed items (state persisted in Supabase, definitions stay in code) ───────
+// ─── Seed items (state persisted in Supabase + localStorage, definitions stay in code) ───
 const SEED_ITEMS = [
   {
     key: 'sl_1', owner: 'StretchLab',
@@ -47,18 +47,18 @@ const SEED_ITEMS = [
   },
 ]
 
-// ─── Urgency palette (neutral, no traffic-lights) ─────────────────────────────
+// ─── Urgency palette ──────────────────────────────────────────────────────────
 const URGENCY_CONFIG = {
   High:   { color: '#d97706', bg: 'rgba(217,119,6,0.10)'  },
   Medium: { color: '#6366f1', bg: 'rgba(99,102,241,0.10)' },
   Watch:  { color: '#94a3b8', bg: 'rgba(148,163,184,0.10)' },
 }
 
-// ─── Week helpers for non-ongoing reset ───────────────────────────────────────
+// ─── Week helpers ─────────────────────────────────────────────────────────────
 function getMondayOf(d) {
   const day = new Date(d)
-  const dow  = day.getDay()              // 0 = Sun
-  const diff = dow === 0 ? -6 : 1 - dow // back to Monday
+  const dow  = day.getDay()
+  const diff = dow === 0 ? -6 : 1 - dow
   day.setDate(day.getDate() + diff)
   day.setHours(0, 0, 0, 0)
   return day
@@ -71,9 +71,20 @@ function isSameWeek(d1, d2) {
 function isEffectivelyChecked(row, deadline) {
   if (!row?.checked) return false
   const ongoing = deadline.toLowerCase().includes('ongoing')
-  if (ongoing) return true                         // stays until manually unchecked
+  if (ongoing) return true
   if (!row.checked_at) return false
-  return isSameWeek(new Date(row.checked_at), new Date()) // weekly items reset each Mon
+  return isSameWeek(new Date(row.checked_at), new Date())
+}
+
+// ─── localStorage fallback ────────────────────────────────────────────────────
+const LS_KEY = 'pa_rows_v1'
+
+function lsLoad() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY) ?? '{}') } catch { return {} }
+}
+
+function lsSave(rows) {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(rows)) } catch {}
 }
 
 // ─── Author label from email ──────────────────────────────────────────────────
@@ -89,67 +100,65 @@ function fmtDate(ts) {
 }
 
 // ─── ChecklistItem ────────────────────────────────────────────────────────────
-function ChecklistItem({ item, row, onToggle, saving, isLast = false }) {
-  const checked  = isEffectivelyChecked(row, item.deadline)
-  const urg      = URGENCY_CONFIG[item.urgency] ?? URGENCY_CONFIG.Watch
+function ChecklistItem({ item, row, onToggle, saving, isLast = false, animIndex = 0 }) {
+  const checked   = isEffectivelyChecked(row, item.deadline)
+  const urg       = URGENCY_CONFIG[item.urgency] ?? URGENCY_CONFIG.Watch
   const isOngoing = item.deadline.toLowerCase().includes('ongoing')
 
   return (
     <div
+      className="pa-item"
       style={{
-        display: 'flex', gap: '12px', padding: '12px 0',
+        display: 'flex', gap: '12px', padding: '12px 8px',
         borderBottom: isLast ? 'none' : '1px solid var(--border)',
-        opacity: checked ? 0.5 : 1,
+        opacity: checked ? 0.55 : 1,
         transition: 'opacity 0.2s ease',
+        animationDelay: `${animIndex * 45}ms`,
+        cursor: saving ? 'wait' : 'pointer',
       }}
+      onClick={() => !saving && onToggle(item, row, checked)}
     >
-      {/* Checkbox */}
-      <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: saving ? 'wait' : 'pointer', flex: 1 }}>
-        <input
-          type="checkbox"
-          checked={checked}
-          disabled={saving}
-          onChange={() => onToggle(item, row, checked)}
-          style={{
-            marginTop: '2px', width: '16px', height: '16px',
-            accentColor: 'var(--accent)', cursor: 'pointer', flexShrink: 0,
-          }}
-        />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{
-            fontSize: '13px', fontWeight: 500, color: 'var(--text)',
-            margin: '0 0 6px', lineHeight: 1.5,
-            textDecoration: checked ? 'line-through' : 'none',
+      {/* Custom animated checkbox */}
+      <div
+        className={`pa-check-box${checked ? ' checked' : ''}`}
+        style={{ marginTop: '2px' }}
+      />
+
+      {/* Content */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{
+          fontSize: '13px', fontWeight: 500, color: 'var(--text)',
+          margin: '0 0 6px', lineHeight: 1.5,
+          textDecoration: checked ? 'line-through' : 'none',
+        }}>
+          {item.label}
+        </p>
+
+        {/* Tags row */}
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <span style={{
+            fontSize: '10px', fontWeight: 700, padding: '2px 7px', borderRadius: '4px',
+            color: urg.color, background: urg.bg,
+            textTransform: 'uppercase', letterSpacing: '0.06em',
           }}>
-            {item.label}
-          </p>
-
-          {/* Tags row */}
-          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
-            <span style={{
-              fontSize: '10px', fontWeight: 700, padding: '2px 7px', borderRadius: '4px',
-              color: urg.color, background: urg.bg,
-              textTransform: 'uppercase', letterSpacing: '0.06em',
-            }}>
-              {item.urgency}
-            </span>
-            <span style={{
-              fontSize: '10px', fontWeight: 600, padding: '2px 7px', borderRadius: '4px',
-              color: 'var(--muted)', background: 'var(--surface-2)',
-              letterSpacing: '0.04em',
-            }}>
-              {isOngoing ? 'Ongoing' : `Due ${item.deadline}`}
-            </span>
-          </div>
-
-          {/* Completion note */}
-          {checked && row?.checked_by && (
-            <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '6px 0 0', fontStyle: 'italic' }}>
-              {row.checked_by} marked complete {fmtDate(row.checked_at)}
-            </p>
-          )}
+            {item.urgency}
+          </span>
+          <span style={{
+            fontSize: '10px', fontWeight: 600, padding: '2px 7px', borderRadius: '4px',
+            color: 'var(--muted)', background: 'var(--surface-2)',
+            letterSpacing: '0.04em',
+          }}>
+            {isOngoing ? 'Ongoing' : `Due ${item.deadline}`}
+          </span>
         </div>
-      </label>
+
+        {/* Completion note */}
+        {checked && row?.checked_by && (
+          <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '6px 0 0', fontStyle: 'italic' }}>
+            {row.checked_by} marked complete {fmtDate(row.checked_at)}
+          </p>
+        )}
+      </div>
     </div>
   )
 }
@@ -218,7 +227,9 @@ function NotesPanel({ notes, onAdd, saving }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {[...notes].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).map((note, i) => (
             <div key={note.id ?? i} style={{
-              background: 'var(--bg)', border: '1px solid var(--border)',
+              background: 'var(--bg)',
+              border: '1px solid var(--border)',
+              borderLeft: '3px solid var(--accent)',
               borderRadius: '8px', padding: '10px 14px',
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
@@ -253,16 +264,20 @@ export default function PartnershipActions() {
 
   const authorLabel = authorFromEmail(user?.email)
 
-  // State
-  const [rows,        setRows]        = useState({})   // { item_key: { checked, checked_by, checked_at } }
+  const [rows,        setRows]        = useState({})
   const [notes,       setNotes]       = useState([])
   const [loadError,   setLoadError]   = useState(null)
   const [savingItem,  setSavingItem]  = useState(false)
   const [savingNote,  setSavingNote]  = useState(false)
   const [dataLoaded,  setDataLoaded]  = useState(false)
+  const [itemError,   setItemError]   = useState(null)
 
-  // Load checklist state + notes from Supabase
+  // Load checklist state + notes; localStorage fires instantly, Supabase overlays
   useEffect(() => {
+    // Apply localStorage immediately to avoid flash of unchecked state
+    const local = lsLoad()
+    if (Object.keys(local).length) setRows(local)
+
     if (!supabase) { setDataLoaded(true); return }
 
     Promise.all([
@@ -271,19 +286,21 @@ export default function PartnershipActions() {
     ]).then(([actionsRes, notesRes]) => {
       if (actionsRes.error) {
         console.warn('[PartnershipActions] actions load error:', actionsRes.error.message)
-        setLoadError('Checklist state could not be loaded — showing all items unchecked.')
-      } else {
+        setLoadError('Checklist state could not be loaded — showing locally saved state.')
+      } else if (actionsRes.data?.length) {
         const map = {}
-        ;(actionsRes.data ?? []).forEach(r => { map[r.item_key] = r })
+        actionsRes.data.forEach(r => { map[r.item_key] = r })
         setRows(map)
+        lsSave(map)
       }
+
       if (!notesRes.error) {
         setNotes(notesRes.data ?? [])
       }
       setDataLoaded(true)
     }).catch(err => {
       console.warn('[PartnershipActions] load error:', err)
-      setLoadError('Could not connect to the database. Showing all items unchecked.')
+      setLoadError('Could not connect to the database. Showing locally saved state.')
       setDataLoaded(true)
     })
   }, [])
@@ -293,29 +310,32 @@ export default function PartnershipActions() {
     const newChecked = !currentlyChecked
     const now        = new Date().toISOString()
 
-    // Optimistic update
-    setRows(prev => ({
-      ...prev,
-      [item.key]: {
-        item_key:   item.key,
-        checked:    newChecked,
-        checked_by: newChecked ? authorLabel : null,
-        checked_at: newChecked ? now : null,
-      },
-    }))
+    // Build updated row object and write to state + localStorage synchronously
+    const updatedRow = {
+      item_key:   item.key,
+      checked:    newChecked,
+      checked_by: newChecked ? authorLabel : null,
+      checked_at: newChecked ? now : null,
+    }
+
+    setRows(prev => {
+      const next = { ...prev, [item.key]: updatedRow }
+      lsSave(next)
+      return next
+    })
 
     if (!supabase) return
+
     setSavingItem(true)
     try {
       const { error } = await supabase
         .from('partnership_actions')
-        .upsert({
-          item_key:   item.key,
-          checked:    newChecked,
-          checked_by: newChecked ? authorLabel : null,
-          checked_at: newChecked ? now : null,
-        }, { onConflict: 'item_key' })
-      if (error) console.warn('[PartnershipActions] upsert error:', error.message)
+        .upsert(updatedRow, { onConflict: 'item_key' })
+      if (error) {
+        console.warn('[PartnershipActions] upsert error:', error.message)
+        setItemError('Saved locally. Cloud sync failed — changes will persist on this device.')
+        setTimeout(() => setItemError(null), 4000)
+      }
     } finally {
       setSavingItem(false)
     }
@@ -343,7 +363,6 @@ export default function PartnershipActions() {
       if (error) {
         console.warn('[PartnershipActions] note insert error:', error.message)
       } else if (data) {
-        // Replace optimistic with real row (has correct DB id and server timestamp)
         setNotes(prev => prev.map(n => n.id === optimistic.id ? data : n))
       }
     } finally {
@@ -370,14 +389,48 @@ export default function PartnershipActions() {
     )
   }
 
-  const slItems = SEED_ITEMS.filter(i => i.owner === 'StretchLab')
-  const exItems = SEED_ITEMS.filter(i => i.owner === 'Execo')
+  const slItems    = SEED_ITEMS.filter(i => i.owner === 'StretchLab')
+  const exItems    = SEED_ITEMS.filter(i => i.owner === 'Execo')
+  const totalItems = SEED_ITEMS.length
+  const totalDone  = SEED_ITEMS.filter(i => isEffectivelyChecked(rows[i.key], i.deadline)).length
 
   return (
     <div style={{ maxWidth: '1100px' }}>
+      <style>{`
+        @keyframes pa-fadeInUp {
+          from { opacity: 0; transform: translateY(8px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .pa-item {
+          animation: pa-fadeInUp 0.35s ease both;
+          border-radius: 8px;
+          transition: background 0.15s ease;
+        }
+        .pa-item:hover {
+          background: var(--surface-2, rgba(255,255,255,0.03));
+        }
+        .pa-check-box {
+          width: 18px; height: 18px; border-radius: 5px;
+          border: 2px solid var(--border); flex-shrink: 0;
+          display: flex; align-items: center; justify-content: center;
+          transition: background 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
+          cursor: pointer;
+        }
+        .pa-check-box.checked {
+          background: var(--accent); border-color: var(--accent);
+          transform: scale(1.1);
+        }
+        .pa-check-box.checked::after {
+          content: '';
+          width: 5px; height: 9px;
+          border-right: 2px solid #fff; border-bottom: 2px solid #fff;
+          transform: rotate(45deg) translate(-1px, -1px);
+          display: block;
+        }
+      `}</style>
 
       {/* Header */}
-      <div style={{ marginBottom: '24px' }}>
+      <div style={{ marginBottom: '20px' }}>
         <h1 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text)', margin: '0 0 4px' }}>
           Partnership Actions
         </h1>
@@ -387,13 +440,44 @@ export default function PartnershipActions() {
         </p>
       </div>
 
+      {/* Combined progress bar */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '20px',
+        padding: '12px 16px', background: 'var(--surface)', border: '1px solid var(--border)',
+        borderRadius: '10px',
+      }}>
+        <div style={{ flex: 1, height: '6px', background: 'var(--border)', borderRadius: '3px', overflow: 'hidden' }}>
+          <div style={{
+            width: `${totalItems > 0 ? (totalDone / totalItems) * 100 : 0}%`,
+            height: '100%', background: 'var(--accent)', borderRadius: '3px',
+            transition: 'width 0.4s ease',
+          }} />
+        </div>
+        <span style={{
+          fontSize: '11px', fontWeight: 700, color: 'var(--muted)',
+          fontFamily: 'JetBrains Mono, monospace', whiteSpace: 'nowrap',
+        }}>
+          {totalDone}/{totalItems} complete
+        </span>
+      </div>
+
       {/* DB warning */}
       {loadError && (
         <div style={{
           background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)',
-          borderRadius: '8px', padding: '10px 14px', marginBottom: '20px',
+          borderRadius: '8px', padding: '10px 14px', marginBottom: '16px',
         }}>
           <p style={{ fontSize: '12px', color: '#d97706', margin: 0 }}>{loadError}</p>
+        </div>
+      )}
+
+      {/* Inline sync error */}
+      {itemError && (
+        <div style={{
+          background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)',
+          borderRadius: '8px', padding: '8px 14px', marginBottom: '16px',
+        }}>
+          <p style={{ fontSize: '12px', color: '#d97706', margin: 0 }}>{itemError}</p>
         </div>
       )}
 
@@ -424,6 +508,7 @@ export default function PartnershipActions() {
               onToggle={handleToggle}
               saving={savingItem}
               isLast={idx === slItems.length - 1}
+              animIndex={idx}
             />
           ))}
         </Card>
@@ -452,6 +537,7 @@ export default function PartnershipActions() {
               onToggle={handleToggle}
               saving={savingItem}
               isLast={idx === exItems.length - 1}
+              animIndex={idx}
             />
           ))}
         </Card>
