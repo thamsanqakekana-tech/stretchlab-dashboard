@@ -90,10 +90,11 @@ function buildBookingBuckets(bookings) {
   // Guard: future-dated bookings (booking_date > today) must not be counted as attended
   // even if has_show=1, because the session hasn't happened yet.
   const todayMidnight = new Date(); todayMidnight.setHours(0, 0, 0, 0)
+  const todayStr = `${todayMidnight.getFullYear()}-${String(todayMidnight.getMonth()+1).padStart(2,'0')}-${String(todayMidnight.getDate()).padStart(2,'0')}`
   const isFutureDated = b => {
     const bd = b.booking_date || b['booking_date']
     if (!bd) return false
-    return new Date(String(bd).substring(0, 10)) > todayMidnight
+    return String(bd).substring(0, 10) > todayStr
   }
   const isConfirmedAttended = b => getHasShow(b) && !isFutureDated(b)
 
@@ -170,43 +171,27 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, bookings =
       return d >= m.start && d <= m.end
     })
 
-    // Attended count from ClubReady date-range, excluding future-dated sessions
-    const todayTs = today.getTime()
-    const attendedCount = monthBookings.filter(b => {
-      if (!getHasShowB(b)) return false
-      const bd = b.booking_date
-      if (!bd) return true
-      return new Date(String(bd).substring(0, 10)).getTime() <= todayTs
-    }).length
-
-    // fillPct: past months show target-achievement %; active month shows time elapsed %
-    const totalDays = Math.round((m.end - m.start) / 86400000) + 1
-    let fillPct = 0
-    const isActive   = today >= m.start && today <= m.end
-    const isComplete = today > m.end
-    if (isComplete) {
-      fillPct = Math.min(100, Math.round((attendedCount / m.target) * 100))
-    } else if (isActive) {
-      const elapsed = Math.floor((today - m.start) / 86400000) + 1
-      fillPct = Math.min(100, Math.round((elapsed / totalDays) * 100))
-    }
-
     const todayMidnight = new Date(); todayMidnight.setHours(0, 0, 0, 0)
+    const todayStrTl = `${todayMidnight.getFullYear()}-${String(todayMidnight.getMonth()+1).padStart(2,'0')}-${String(todayMidnight.getDate()).padStart(2,'0')}`
     const getBookingStatus = (b) => {
       const statusStr = String(b.current_status || '')
       const bd = b.booking_date
-      const bookingDate = bd ? new Date(String(bd).substring(0, 10)) : null
-      if (bookingDate && bookingDate > todayMidnight) return 'Upcoming'
-      if (getHasShowB(b)) return 'Attended'
-      if (statusStr.includes('Open Booking') || statusStr.includes('Completed Booking')) return statusStr.includes('Completed') ? 'Attended' : 'Upcoming'
+      const bds = bd ? String(bd).substring(0, 10) : null
+      // ClubReady status is source of truth — check status before date
+      if (getHasShowB(b) && (!bds || bds <= todayStrTl)) return 'Attended'
+      if (statusStr.includes('Completed Booking')) return 'Attended'
       if (statusStr.includes('No Show')) return 'No Show'
       if (statusStr.includes('Rescheduled')) return 'Rescheduled'
       if (statusStr.toLowerCase().includes('cancelled by admin')) return 'Cancelled by admin'
       if (statusStr.includes('Outside Policy')) return 'Cancelled (outside policy)'
       if (statusStr.includes('Within Policy') || statusStr.includes('Cancelled')) return 'Cancelled (within policy)'
+      if (statusStr.includes('Open Booking')) return 'Upcoming'
+      if (bds && bds > todayStrTl) return 'Upcoming'
       return statusStr || '—'
     }
     const statusPriority = s => s === 'Attended' ? 5 : s === 'Rescheduled' ? 4 : s === 'No Show' ? 3 : s === 'Upcoming' ? 2 : s.startsWith('Cancelled') ? 1 : 0
+
+    // Build deduped Map first so attendedCount matches the visible drill-down list
     const deduped = new Map()
     monthBookings.forEach(b => {
       const name   = [b.first_name, b.last_name].filter(Boolean).join(' ') || '—'
@@ -222,6 +207,21 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, bookings =
       }
     })
     const drillLeads = Array.from(deduped.values())
+
+    // attendedCount from deduped list — prevents double-counting duplicate ClubReady records
+    const attendedCount = drillLeads.filter(l => l.status === 'Attended').length
+
+    // fillPct: past months show target-achievement %; active month shows time elapsed %
+    const totalDays = Math.round((m.end - m.start) / 86400000) + 1
+    let fillPct = 0
+    const isActive   = today >= m.start && today <= m.end
+    const isComplete = today > m.end
+    if (isComplete) {
+      fillPct = Math.min(100, Math.round((attendedCount / m.target) * 100))
+    } else if (isActive) {
+      const elapsed = Math.floor((today - m.start) / 86400000) + 1
+      fillPct = Math.min(100, Math.round((elapsed / totalDays) * 100))
+    }
 
     return { ...m, fillPct, isActive, isComplete, attendedCount, drillLeads }
   })
@@ -498,9 +498,10 @@ function ConversionFunnel({ totalCalls, meaningfulConvs, bookingCount, attendedC
         date:   fmtDate(b.booking_date),
       })),
     upcoming: sortedPipe.map(r => ({
-      name:   [r.first_name, r.last_name].filter(Boolean).join(' ') || '—',
-      studio: String(r.booking_location || '').replace('StretchLab ', ''),
-      date:   fmtDate(r.booking_date),
+      name:    [r.first_name, r.last_name].filter(Boolean).join(' ') || '—',
+      studio:  String(r.booking_location || '').replace('StretchLab ', ''),
+      date:    fmtDate(r.booking_date),
+      postSow: r.booking_date && String(r.booking_date).substring(0, 10) > '2026-05-24',
     })),
   }
 
@@ -592,6 +593,11 @@ function ConversionFunnel({ totalCalls, meaningfulConvs, bookingCount, attendedC
                   </span>
                   <span style={{ fontSize: '12px', color: 'var(--text-2)', fontFamily: 'JetBrains Mono, monospace', whiteSpace: 'nowrap' }}>
                     {row.date}
+                    {row.postSow && (
+                      <span style={{ fontSize: '9px', fontWeight: 700, color: 'var(--muted)', background: 'var(--border)', padding: '1px 5px', borderRadius: '3px', marginLeft: '6px', verticalAlign: 'middle' }}>
+                        Post-SOW
+                      </span>
+                    )}
                   </span>
                 </div>
               ))}
@@ -881,7 +887,7 @@ function NarrativeCard({ totalCalls, meaningfulConvs, convRate, bookingCount, up
 }
 
 // ─── Pipeline Section ─────────────────────────────────────────────────────────
-function PipelineSection({ pipeline = [], isClientView = false }) {
+function PipelineSection({ pipeline = [], isClientView = false, sowEndStr = '' }) {
   if (!pipeline.length) return null
 
   const riskOrder = { High: 0, Medium: 1, Low: 2 }
@@ -943,14 +949,15 @@ function PipelineSection({ pipeline = [], isClientView = false }) {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {sorted.map((r, i) => {
-          const name    = [r.first_name, r.last_name].filter(Boolean).join(' ')
-          const studio  = String(r.booking_location || '').replace('StretchLab ', '')
-          const date    = r.booking_date
+          const name      = [r.first_name, r.last_name].filter(Boolean).join(' ')
+          const studio    = String(r.booking_location || '').replace('StretchLab ', '')
+          const date      = r.booking_date
             ? new Date(r.booking_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
             : '—'
-          const days    = Number(r.days_until || 0)
-          const color   = riskColor(r.risk_level)
-          const context = isClientView ? clientPipelineContext(r) : appointmentContext(r)
+          const days      = Number(r.days_until || 0)
+          const color     = riskColor(r.risk_level)
+          const context   = isClientView ? clientPipelineContext(r) : appointmentContext(r)
+          const isPostSow = sowEndStr && r.booking_date && String(r.booking_date).substring(0, 10) > sowEndStr
           return (
             <div key={i} style={{
               display: 'flex', alignItems: 'center', gap: '12px',
@@ -976,7 +983,14 @@ function PipelineSection({ pipeline = [], isClientView = false }) {
                 <p style={{ fontSize: '11px', color: 'var(--muted)', margin: 0 }}>{studio}</p>
               </div>
               <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text)', fontFamily: 'JetBrains Mono, monospace', margin: 0 }}>{date}</p>
+                <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text)', fontFamily: 'JetBrains Mono, monospace', margin: 0 }}>
+                  {date}
+                  {isPostSow && (
+                    <span style={{ fontSize: '9px', fontWeight: 700, color: 'var(--muted)', background: 'var(--border)', padding: '1px 5px', borderRadius: '3px', marginLeft: '6px', verticalAlign: 'middle' }}>
+                      Post-SOW
+                    </span>
+                  )}
+                </p>
                 <p style={{ fontSize: '10px', color: 'var(--muted)', margin: 0 }}>
                   {days <= 0 ? 'today' : days === 1 ? 'tomorrow' : `${days}d away`}
                 </p>
