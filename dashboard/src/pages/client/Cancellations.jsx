@@ -541,11 +541,7 @@ function CallTrackChart({ data }) {
         .attr('fill', 'transparent')
         .style('cursor', 'pointer')
         .on('mousemove', function (event) {
-          const rect = container.getBoundingClientRect()
-          const mx = event.clientX - rect.left
-          const my = event.clientY - rect.top
-          const left = mx + 14 + 310 > containerWidth ? mx - 324 : mx + 14
-          setTooltip({ x: left, y: my - 10, c })
+          setTooltip({ x: event.clientX, y: event.clientY, c })
         })
         .on('mouseleave', () => setTooltip(null))
 
@@ -588,9 +584,13 @@ function CallTrackChart({ data }) {
       {tooltip && (() => {
         const { c } = tooltip
         const { studio, contextMsg } = getRowTooltipContent(c)
+        const vw = window.innerWidth, vh = window.innerHeight
+        const ttW = 310, ttH = 200
+        const left = tooltip.x + 14 + ttW > vw ? tooltip.x - ttW - 14 : tooltip.x + 14
+        const top  = Math.max(8, Math.min(tooltip.y - 10, vh - ttH - 8))
         return (
           <div style={{
-            position: 'absolute', left: tooltip.x, top: tooltip.y,
+            position: 'fixed', left, top,
             zIndex: 9999, pointerEvents: 'none',
             background: C.surface, border: `1px solid ${C.border}`,
             borderRadius: '8px', padding: '12px 16px',
@@ -675,11 +675,7 @@ function TimingDonut({ data }) {
     paths.style('cursor', 'pointer')
       .on('mousemove', function (event, d) {
         d3.select(this).attr('d', arcH(d))
-        const rect = container.getBoundingClientRect()
-        const x = event.clientX - rect.left
-        const y = event.clientY - rect.top
-        const left = x + 14 + 270 > W ? x - 284 : x + 14
-        setTooltip({ x: left, y: y - 10, segment: d })
+        setTooltip({ x: event.clientX, y: event.clientY, segment: d })
       })
       .on('mouseleave', function (event, d) {
         d3.select(this).attr('d', arc(d))
@@ -717,24 +713,30 @@ function TimingDonut({ data }) {
 
   return (
     <div ref={containerRef} style={{ position: 'relative', flex: '1 1 0', minWidth: 0 }}>
-      {tooltip && (
-        <div style={{
-          position: 'absolute', left: tooltip.x, top: tooltip.y,
-          zIndex: 9999, pointerEvents: 'none',
-          background: C.surface, border: `1px solid ${C.border}`,
-          borderRadius: '8px', padding: '10px 14px',
-          fontSize: '12px', color: C.text,
-          minWidth: '200px', maxWidth: '270px', lineHeight: 1.65,
-          boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
-        }}>
-          <p style={{ fontWeight: 700, margin: '0 0 6px', color: tooltip.segment.data.color }}>
-            {tooltip.segment.data.label}: {tooltip.segment.data.count}
-          </p>
-          <p style={{ margin: 0, color: '#a1a1aa', fontSize: '11px', lineHeight: 1.5 }}>
-            {DONUT_TOOLTIP_TEXT[tooltip.segment.data.key]}
-          </p>
-        </div>
-      )}
+      {tooltip && (() => {
+        const vw = window.innerWidth, vh = window.innerHeight
+        const ttW = 270, ttH = 100
+        const left = tooltip.x + 14 + ttW > vw ? tooltip.x - ttW - 14 : tooltip.x + 14
+        const top  = Math.max(8, Math.min(tooltip.y - 10, vh - ttH - 8))
+        return (
+          <div style={{
+            position: 'fixed', left, top,
+            zIndex: 9999, pointerEvents: 'none',
+            background: C.surface, border: `1px solid ${C.border}`,
+            borderRadius: '8px', padding: '10px 14px',
+            fontSize: '12px', color: C.text,
+            minWidth: '200px', maxWidth: '270px', lineHeight: 1.65,
+            boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
+          }}>
+            <p style={{ fontWeight: 700, margin: '0 0 6px', color: tooltip.segment.data.color }}>
+              {tooltip.segment.data.label}: {tooltip.segment.data.count}
+            </p>
+            <p style={{ margin: 0, color: '#a1a1aa', fontSize: '11px', lineHeight: 1.5 }}>
+              {DONUT_TOOLTIP_TEXT[tooltip.segment.data.key]}
+            </p>
+          </div>
+        )
+      })()}
     </div>
   )
 }
@@ -829,11 +831,7 @@ function DayRiskBars({ data }) {
         .attr('fill', 'transparent')
         .style('cursor', 'pointer')
         .on('mousemove', function (event) {
-          const rect = container.getBoundingClientRect()
-          const mx = event.clientX - rect.left
-          const my = event.clientY - rect.top
-          const left = mx + 14 + 270 > W ? mx - 284 : mx + 14
-          setTooltip({ x: left, y: my - 10, d })
+          setTooltip({ x: event.clientX, y: event.clientY, d })
         })
         .on('mouseleave', () => setTooltip(null))
     })
@@ -843,24 +841,30 @@ function DayRiskBars({ data }) {
 
   return (
     <div ref={containerRef} style={{ position: 'relative', flex: '1 1 0', minWidth: 0 }}>
-      {tooltip && (
-        <div style={{
-          position: 'absolute', left: tooltip.x, top: tooltip.y,
-          zIndex: 9999, pointerEvents: 'none',
-          background: C.surface, border: `1px solid ${C.border}`,
-          borderRadius: '8px', padding: '10px 14px',
-          fontSize: '12px', color: C.text,
-          minWidth: '200px', maxWidth: '270px', lineHeight: 1.65,
-          boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
-        }}>
-          <p style={{ fontWeight: 700, margin: '0 0 6px', color: tooltip.d.color }}>
-            {tooltip.d.day}
-          </p>
-          <p style={{ margin: 0, color: '#a1a1aa', fontSize: '11px', lineHeight: 1.5 }}>
-            {DAY_TOOLTIP_TEXT[tooltip.d.day] || `${tooltip.d.count} cancellation${tooltip.d.count !== 1 ? 's' : ''} on ${tooltip.d.day}.`}
-          </p>
-        </div>
-      )}
+      {tooltip && (() => {
+        const vw = window.innerWidth, vh = window.innerHeight
+        const ttW = 270, ttH = 100
+        const left = tooltip.x + 14 + ttW > vw ? tooltip.x - ttW - 14 : tooltip.x + 14
+        const top  = Math.max(8, Math.min(tooltip.y - 10, vh - ttH - 8))
+        return (
+          <div style={{
+            position: 'fixed', left, top,
+            zIndex: 9999, pointerEvents: 'none',
+            background: C.surface, border: `1px solid ${C.border}`,
+            borderRadius: '8px', padding: '10px 14px',
+            fontSize: '12px', color: C.text,
+            minWidth: '200px', maxWidth: '270px', lineHeight: 1.65,
+            boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
+          }}>
+            <p style={{ fontWeight: 700, margin: '0 0 6px', color: tooltip.d.color }}>
+              {tooltip.d.day}
+            </p>
+            <p style={{ margin: 0, color: '#a1a1aa', fontSize: '11px', lineHeight: 1.5 }}>
+              {DAY_TOOLTIP_TEXT[tooltip.d.day] || `${tooltip.d.count} cancellation${tooltip.d.count !== 1 ? 's' : ''} on ${tooltip.d.day}.`}
+            </p>
+          </div>
+        )
+      })()}
     </div>
   )
 }

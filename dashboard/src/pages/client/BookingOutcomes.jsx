@@ -109,11 +109,7 @@ function FunnelChart() {
       overlay.transition().delay(i * 120 + 600).duration(1).attr('opacity', 1)
 
       overlay.on('mousemove', function(event) {
-        const cr   = container.getBoundingClientRect()
-        const mx   = event.clientX - cr.left
-        const my   = event.clientY - cr.top
-        const left = mx + 14 + 300 > cw ? mx - 314 : mx + 14
-        setTooltip({ x: left, y: my - 10, stage })
+        setTooltip({ x: event.clientX, y: event.clientY, stage })
       }).on('mouseleave', () => setTooltip(null))
 
       // Stage name
@@ -153,20 +149,26 @@ function FunnelChart() {
   return (
     <div ref={containerRef} style={{ width: '100%', position: 'relative', overflow: 'visible' }}>
       <svg ref={svgRef} style={{ display: 'block', overflow: 'visible' }} />
-      {tooltip && (
-        <div style={{
-          position: 'absolute', left: tooltip.x, top: tooltip.y, zIndex: 9999, pointerEvents: 'none',
-          background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px',
-          padding: '12px 14px', fontSize: '12px', color: 'var(--text-2)',
-          minWidth: '280px', maxWidth: '320px', lineHeight: 1.65,
-          boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
-        }}>
-          <p style={{ fontWeight: 700, color: 'var(--text)', margin: '0 0 6px', fontSize: '13px' }}>
-            {tooltip.stage.name} — {tooltip.stage.value.toLocaleString()}
-          </p>
-          <p style={{ margin: 0 }}>{tooltip.stage.tip}</p>
-        </div>
-      )}
+      {tooltip && (() => {
+        const vw = window.innerWidth, vh = window.innerHeight
+        const ttW = 320, ttH = 100
+        const left = tooltip.x + 14 + ttW > vw ? tooltip.x - ttW - 14 : tooltip.x + 14
+        const top  = Math.max(8, Math.min(tooltip.y - 10, vh - ttH - 8))
+        return (
+          <div style={{
+            position: 'fixed', left, top, zIndex: 9999, pointerEvents: 'none',
+            background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px',
+            padding: '12px 14px', fontSize: '12px', color: 'var(--text-2)',
+            minWidth: '280px', maxWidth: '320px', lineHeight: 1.65,
+            boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+          }}>
+            <p style={{ fontWeight: 700, color: 'var(--text)', margin: '0 0 6px', fontSize: '13px' }}>
+              {tooltip.stage.name} — {tooltip.stage.value.toLocaleString()}
+            </p>
+            <p style={{ margin: 0 }}>{tooltip.stage.tip}</p>
+          </div>
+        )
+      })()}
     </div>
   )
 }
@@ -280,11 +282,7 @@ function DayDotMatrix({ dowData }) {
           .attr('fill', 'transparent').style('cursor', 'pointer')
 
         overlay.on('mousemove', function(event) {
-          const cr2   = container.getBoundingClientRect()
-          const mx    = event.clientX - cr2.left
-          const my    = event.clientY - cr2.top
-          const left  = mx + 14 + 240 > cw ? mx - 254 : mx + 14
-          setTooltip({ x: left, y: my - 10, day, d })
+          setTooltip({ x: event.clientX, y: event.clientY, day, d })
         }).on('mouseleave', () => setTooltip(null))
       }
     })
@@ -296,9 +294,13 @@ function DayDotMatrix({ dowData }) {
       {tooltip && (() => {
         const { day, d } = tooltip
         const sr = +(d.show_rate_pct || 0), cr = +(d.cancel_rate_pct || 0)
+        const vw = window.innerWidth, vh = window.innerHeight
+        const ttW = 280, ttH = 160
+        const left = tooltip.x + 14 + ttW > vw ? tooltip.x - ttW - 14 : tooltip.x + 14
+        const top  = Math.max(8, Math.min(tooltip.y - 10, vh - ttH - 8))
         return (
           <div style={{
-            position: 'absolute', left: tooltip.x, top: tooltip.y, zIndex: 9999, pointerEvents: 'none',
+            position: 'fixed', left, top, zIndex: 9999, pointerEvents: 'none',
             background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px',
             padding: '12px 14px', fontSize: '12px', color: 'var(--text-2)',
             minWidth: '240px', maxWidth: '280px', lineHeight: 1.65,
@@ -437,11 +439,7 @@ function CancellationTimeline({ cancellations }) {
 
       // Hover
       circle.on('mousemove', function(event) {
-        const cr2  = container.getBoundingClientRect()
-        const mx   = event.clientX - cr2.left
-        const my   = event.clientY - cr2.top
-        const left = mx + 14 + 260 > cw ? mx - 274 : mx + 14
-        setTooltip({ x: left, y: my - 10, c })
+        setTooltip({ x: event.clientX, y: event.clientY, c })
       }).on('mouseleave', () => setTooltip(null))
     })
 
@@ -466,9 +464,13 @@ function CancellationTimeline({ cancellations }) {
         {tooltip && (() => {
           const { c } = tooltip
           const isAdmin = c.cancelled_by === 'Admin'
+          const vw = window.innerWidth, vh = window.innerHeight
+          const ttW = 280, ttH = 160
+          const left = tooltip.x + 14 + ttW > vw ? tooltip.x - ttW - 14 : tooltip.x + 14
+          const top  = Math.max(8, Math.min(tooltip.y - 10, vh - ttH - 8))
           return (
             <div style={{
-              position: 'absolute', left: tooltip.x, top: tooltip.y, zIndex: 9999, pointerEvents: 'none',
+              position: 'fixed', left, top, zIndex: 9999, pointerEvents: 'none',
               background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px',
               padding: '12px 14px', fontSize: '12px', color: 'var(--text-2)',
               minWidth: '240px', maxWidth: '280px', lineHeight: 1.65,
@@ -639,11 +641,7 @@ function BookingWindowChart({ windowData }) {
         .attr('x', 0).attr('y', y).attr('width', iW).attr('height', bw)
         .attr('fill', 'transparent').style('cursor', 'pointer')
         .on('mousemove', function(event) {
-          const cr2  = container.getBoundingClientRect()
-          const mx   = event.clientX - cr2.left
-          const my   = event.clientY - cr2.top
-          const left = mx + 14 + 240 > cw ? mx - 254 : mx + 14
-          setTooltip({ x: left, y: my - 10, row })
+          setTooltip({ x: event.clientX, y: event.clientY, row })
         }).on('mouseleave', () => setTooltip(null))
     })
   }, [ROWS, cw])
@@ -651,9 +649,14 @@ function BookingWindowChart({ windowData }) {
   return (
     <div ref={containerRef} style={{ width: '100%', position: 'relative', overflow: 'visible' }}>
       <svg ref={svgRef} style={{ display: 'block', overflow: 'visible' }} />
-      {tooltip && !tooltip.row.isTarget && (
+      {tooltip && !tooltip.row.isTarget && (() => {
+        const vw = window.innerWidth, vh = window.innerHeight
+        const ttW = 240, ttH = 120
+        const left = tooltip.x + 14 + ttW > vw ? tooltip.x - ttW - 14 : tooltip.x + 14
+        const top  = Math.max(8, Math.min(tooltip.y - 10, vh - ttH - 8))
+        return (
         <div style={{
-          position: 'absolute', left: tooltip.x, top: tooltip.y, zIndex: 9999, pointerEvents: 'none',
+          position: 'fixed', left, top, zIndex: 9999, pointerEvents: 'none',
           background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px',
           padding: '12px 14px', fontSize: '12px', color: 'var(--text-2)',
           minWidth: '200px', lineHeight: 1.65, boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
@@ -663,7 +666,8 @@ function BookingWindowChart({ windowData }) {
           <p style={{ margin: '2px 0' }}>Cancelled: <strong style={{ color: C.danger }}>{tooltip.row.cancelled || 0}</strong> ({(+tooltip.row.cancel_rate_pct || 0).toFixed(1)}%)</p>
           <p style={{ margin: '2px 0' }}>Shows: <strong style={{ color: C.accent }}>{tooltip.row.shows || 0}</strong> ({(+tooltip.row.show_rate_pct || 0).toFixed(1)}%)</p>
         </div>
-      )}
+        )
+      })()}
     </div>
   )
 }
@@ -756,11 +760,7 @@ function BookingHoursChart({ hourData }) {
         .attr('x', x).attr('y', 0).attr('width', barW).attr('height', iH)
         .attr('fill', 'transparent').style('cursor', 'pointer')
         .on('mousemove', function(event) {
-          const cr2  = container.getBoundingClientRect()
-          const mx   = event.clientX - cr2.left
-          const my   = event.clientY - cr2.top
-          const left = mx + 14 + 220 > cw ? mx - 234 : mx + 14
-          setTooltip({ x: left, y: my - 10, d })
+          setTooltip({ x: event.clientX, y: event.clientY, d })
         }).on('mouseleave', () => setTooltip(null))
     })
   }, [hourData, cw, total])
@@ -774,9 +774,13 @@ function BookingHoursChart({ hourData }) {
         const fmt   = d.hour < 12 ? `${d.hour}:00am` : d.hour === 12 ? '12:00pm' : `${d.hour - 12}:00pm`
         const isPeak    = d.hour === 13
         const isMorning = d.hour >= 9 && d.hour <= 13
+        const vw = window.innerWidth, vh = window.innerHeight
+        const ttW = 260, ttH = 140
+        const left = tooltip.x + 14 + ttW > vw ? tooltip.x - ttW - 14 : tooltip.x + 14
+        const top  = Math.max(8, Math.min(tooltip.y - 10, vh - ttH - 8))
         return (
           <div style={{
-            position: 'absolute', left: tooltip.x, top: tooltip.y, zIndex: 9999, pointerEvents: 'none',
+            position: 'fixed', left, top, zIndex: 9999, pointerEvents: 'none',
             background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px',
             padding: '12px 14px', fontSize: '12px', color: 'var(--text-2)',
             minWidth: '220px', lineHeight: 1.65, boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
