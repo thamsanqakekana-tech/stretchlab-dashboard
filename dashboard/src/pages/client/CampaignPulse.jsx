@@ -100,6 +100,17 @@ function buildBookingBuckets(bookings) {
 
   const attended      = bookings.filter(isConfirmedAttended)
   const attendedIds   = new Set(attended.map(getId))
+
+  // Deduplicate attended by full name — prevents ClubReady duplicate records (e.g. two Roan Luben rows) from inflating the count
+  const _attendedSeenNames = new Set()
+  const attendedUnique = attended.filter(b => {
+    const name = [b.first_name, b.last_name].filter(Boolean).join(' ').trim().toLowerCase()
+    if (!name) return true
+    if (_attendedSeenNames.has(name)) return false
+    _attendedSeenNames.add(name)
+    return true
+  })
+  const duplicateAttended = attended.length - attendedUnique.length
   const notAttended   = r => !attendedIds.has(getId(r))
 
   const noShow           = bookings.filter(r => notAttended(r) && getStatus(r).includes('No Show'))
@@ -124,7 +135,7 @@ function buildBookingBuckets(bookings) {
   const resolved = bookings.filter(r => !getStatus(r).includes('Open Booking')).length
   console.log('[Buckets] resolved (non-open-booking):', resolved)
 
-  const showRate            = resolved > 0 ? attended.length          / resolved : 0
+  const showRate            = resolved > 0 ? attendedUnique.length    / resolved : 0
   // Cancel rate denominator = total bookings (not resolved) per campaign methodology.
   // Using resolved inflates the rate by excluding pending appointments.
   const cancelRateAll       = total > 0 ? cancelledAll.length         / total : 0
@@ -138,7 +149,8 @@ function buildBookingBuckets(bookings) {
   })
 
   return {
-    attended, noShow, cancelledAll, cancelledCustomer, cancelledAdmin,
+    attended, attendedUnique, duplicateAttended,
+    noShow, cancelledAll, cancelledCustomer, cancelledAdmin,
     rescheduled, upcoming, other, total,
     resolved, showRate, cancelRateAll, cancelRateCustomer, cancelRateAdmin,
   }
@@ -1098,8 +1110,8 @@ export default function CampaignPulse() {
   const buckets = useMemo(() => buildBookingBuckets(bookings), [bookings])
 
   const resolved           = buckets.resolved
-  const confirmedShows     = buckets.attended.length   // pipeline-authoritative: has_show=1
-  const showRate           = resolved > 0 ? buckets.attended.length / resolved * 100 : 0
+  const confirmedShows     = buckets.attendedUnique.length  // deduped: 1 person = 1 attended session
+  const showRate           = resolved > 0 ? confirmedShows / resolved * 100 : 0
   const cancels            = buckets.cancelledAll.length
   const cancelRate         = buckets.cancelRateAll * 100
   const cancelRateCustomer = buckets.cancelRateCustomer * 100
@@ -1432,8 +1444,8 @@ export default function CampaignPulse() {
       {/* Booking accountability — answers "what happened to the other X%?" */}
       <p style={{ fontSize: '12px', color: 'var(--muted)', margin: '8px 0 20px', lineHeight: 1.5 }}>
         {isClientView
-          ? `Of ${bookings.length} appointments booked: ${confirmedShows} attended · ${upcoming} upcoming · ${cancels} did not proceed · ${buckets.noShow.length} no-show · ${buckets.rescheduled.length} rescheduled${buckets.other.length > 0 ? ` · ${buckets.other.length} pending confirmation` : ''}`
-          : `Of ${bookings.length} appointments booked: ${confirmedShows} attended · ${upcoming} upcoming · ${buckets.cancelledCustomer.length} lead-cancelled · ${buckets.cancelledAdmin.length} studio-cancelled · ${buckets.noShow.length} no-show · ${buckets.rescheduled.length} rescheduled${buckets.other.length > 0 ? ` · ${buckets.other.length} pending confirmation` : ''}`
+          ? `Of ${bookings.length} appointments booked: ${confirmedShows} attended · ${upcoming} upcoming · ${cancels} did not proceed · ${buckets.noShow.length} no-show · ${buckets.rescheduled.length} rescheduled${buckets.other.length > 0 ? ` · ${buckets.other.length} pending confirmation` : ''}${buckets.duplicateAttended > 0 ? ` · ${buckets.duplicateAttended} duplicate record${buckets.duplicateAttended > 1 ? 's' : ''} excluded` : ''}`
+          : `Of ${bookings.length} appointments booked: ${confirmedShows} attended · ${upcoming} upcoming · ${buckets.cancelledCustomer.length} lead-cancelled · ${buckets.cancelledAdmin.length} studio-cancelled · ${buckets.noShow.length} no-show · ${buckets.rescheduled.length} rescheduled${buckets.other.length > 0 ? ` · ${buckets.other.length} pending confirmation` : ''}${buckets.duplicateAttended > 0 ? ` · ${buckets.duplicateAttended} duplicate record${buckets.duplicateAttended > 1 ? 's' : ''} excluded` : ''}`
         }
       </p>
 
@@ -1868,7 +1880,7 @@ export default function CampaignPulse() {
         upcomingCount={upcoming}
         pipeline={filteredPipeline}
         bookings={bookings}
-        confirmedAttended={buckets.attended}
+        confirmedAttended={buckets.attendedUnique}
         isClientView={isClientView}
       />
 
