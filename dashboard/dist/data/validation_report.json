@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-05-07T09:31:24.537180",
+  "generated_at": "2026-05-07T16:58:58.264058",
   "system_metrics": {
-    "total_bookings": 74,
-    "shows": 21,
+    "total_bookings": 76,
+    "shows": 23,
     "cancellations": 48,
     "no_shows": 0
   },
@@ -12,29 +12,16 @@
     "month_2": 27
   },
   "drift": {
-    "booking_drift_pct": 29.8,
-    "gap_bookings": -17,
+    "booking_drift_pct": 33.3,
+    "gap_bookings": -19,
     "gap_direction": "system_has_more"
   },
   "status": "investigate",
   "show_gaps": {
     "tracker_held_count": 14,
-    "pipeline_shows": 21,
-    "gap_count": 2,
-    "gap_leads": [
-      {
-        "name": "Timothy Cooper",
-        "date": "2026-03-21 09:00:00",
-        "location": "Shreveport",
-        "notes": "Appointment held"
-      },
-      {
-        "name": "Cathy Barazi",
-        "date": "2026-04-11 00:00:00",
-        "location": "Bellaire",
-        "notes": "Booked by an internal team member."
-      }
-    ],
+    "pipeline_shows": 23,
+    "gap_count": 0,
+    "gap_leads": [],
     "note": "Leads recorded as held in the manual tracker with no confirmed attendance in ClubReady. Studio must update ClubReady records before these sessions can be counted in pipeline metrics."
   },
   "unlogged_attended": [

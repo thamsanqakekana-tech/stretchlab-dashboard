@@ -1,6 +1,6 @@
 metric,actual_value,actual_pct,benchmark_level,benchmark_pct,rank,gap_pct,status,icon
-conversion_rate,0.0094,0.9%,Average,0.5%,Industry Average,+0.4%,average,⚠️
-show_rate,0.3818,38.2%,Excellent,15.0%,Top 10%,+8.2%,excellent,✅✅✅
+conversion_rate,0.0097,1.0%,Average,0.5%,Industry Average,+0.5%,average,⚠️
+show_rate,0.4035,40.4%,Excellent,15.0%,Top 10%,+10.4%,excellent,✅✅✅
 no_show_rate,0.0,0.0%,Excellent,8.0%,Top 10%,+2.0%,excellent,✅✅✅
 engagement_rate,0.9019,90.2%,Excellent,65.0%,Top 10%,+5.2%,excellent,✅✅✅
-cancel_rate,0.5,50.0%,Needs Improvement,15.0%,Below Average,-35.0%,poor,❌
+cancel_rate,0.4868,48.7%,Needs Improvement,15.0%,Below Average,-33.7%,poor,❌

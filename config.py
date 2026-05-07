@@ -129,6 +129,26 @@ DATA_RANGES = {
     'session_mins': [25, 50]
 }
 
+# Leads confirmed by Tamryn Montgomery (2026-05-07) to be attributed to Phiwe.
+# Booked or logged under a different staff member — verified attended.
+# Add entries here when Tamryn confirms a lead that the pipeline cannot auto-attribute.
+FORCE_ATTRIBUTED_LEADS = [
+    {
+        'user_id': '120048240',
+        'first_name': 'Timothy',
+        'last_name': 'Cooper',
+        'booking_date': '2026-03-21',
+        'reason': 'Phiwe called this number; booking logged under different attribution. Confirmed Tamryn 2026-05-07.',
+    },
+    {
+        'user_id': None,
+        'first_name': 'Cathy',
+        'last_name': 'Barazi',
+        'booking_date': '2026-04-11',
+        'reason': 'Booked by internal team member. Confirmed Tamryn 2026-05-07.',
+    },
+]
+
 # Client feedback implementation flags
 CLIENT_FEEDBACK = {
     'first_visits_removed': True,  # Client: "Not enough shows, focus on everything else"

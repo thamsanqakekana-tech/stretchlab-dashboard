@@ -522,17 +522,61 @@ class DataTransformer:
         tamryn_bookings = tamryn_events.drop_duplicates(subset=['Booking ID'], keep='last')
         
         logger.info(f"  Tier 2 - Tamryn Override: {len(tamryn_bookings)} unique bookings")
-        
+
+        # TIER 3: FORCE-ATTRIBUTED LEADS — confirmed by Tamryn, logged under other staff
+        from config import FORCE_ATTRIBUTED_LEADS
+        force_user_ids = {str(l['user_id']) for l in FORCE_ATTRIBUTED_LEADS if l.get('user_id')}
+        force_names    = {(l['first_name'].lower(), l['last_name'].lower()) for l in FORCE_ATTRIBUTED_LEADS}
+
+        # Build a (name_lower, date_str) allowlist so name-matched rows are pinned to a specific date
+        force_name_dates = {
+            (l['first_name'].lower(), l['last_name'].lower()): l.get('booking_date')
+            for l in FORCE_ATTRIBUTED_LEADS
+        }
+
+        tier3_id   = bookings[bookings['User ID'].astype(str).isin(force_user_ids)].copy()
+        tier3_name = bookings[
+            bookings.apply(
+                lambda r: (
+                    str(r.get('First Name', '')).strip().lower(),
+                    str(r.get('Last Name',  '')).strip().lower()
+                ) in force_names, axis=1
+            )
+        ].copy()
+        tier3_raw = pd.concat([tier3_id, tier3_name], ignore_index=True)
+        if len(tier3_raw):
+            tier3_raw['Booking Last Modified Date'] = pd.to_datetime(
+                tier3_raw['Booking Last Modified Date'], errors='coerce'
+            )
+            tier3_raw['_booking_date_str'] = pd.to_datetime(
+                tier3_raw['Booking Date'], errors='coerce'
+            ).dt.strftime('%Y-%m-%d')
+            # Filter name-matched rows to their pinned booking date
+            def _keep_row(r):
+                key = (str(r.get('First Name', '')).strip().lower(),
+                       str(r.get('Last Name',  '')).strip().lower())
+                pin = force_name_dates.get(key)
+                if pin is None:
+                    return True  # user_id matched — no date restriction needed
+                return r['_booking_date_str'] == pin
+            tier3_raw = tier3_raw[tier3_raw.apply(_keep_row, axis=1)]
+            tier3_raw = tier3_raw.sort_values('Booking Last Modified Date')
+        tier3_bookings = tier3_raw.drop_duplicates(subset=['Booking ID'], keep='last')
+        # Remove any already captured by Tier 1 or Tier 2
+        existing_ids = set(phiwe_bookings['Booking ID'].tolist()) | set(tamryn_bookings['Booking ID'].tolist())
+        tier3_bookings = tier3_bookings[~tier3_bookings['Booking ID'].isin(existing_ids)]
+        logger.info(f"  Tier 3 - Force attributed: {len(tier3_bookings)} unique bookings")
+
         # COMBINE - NO PHONE MATCHING
-        all_bookings = pd.concat([phiwe_bookings, tamryn_bookings]).drop_duplicates(
+        all_bookings = pd.concat([phiwe_bookings, tamryn_bookings, tier3_bookings]).drop_duplicates(
             subset=['Booking ID']
         )
-        
+
         logger.info(f"\n  {'='*60}")
         logger.info(f"  TOTAL PHIWE BOOKINGS: {len(all_bookings)}")
         logger.info(f"  {'='*60}")
         logger.info(f"  From {initial_count:,} total events in database")
-        logger.info(f"  Direct: {len(phiwe_bookings)} + Tamryn: {len(tamryn_bookings)}")
+        logger.info(f"  Direct: {len(phiwe_bookings)} + Tamryn: {len(tamryn_bookings)} + Force: {len(tier3_bookings)}")
         
         # Set attribution — Tamryn books on Phiwe's behalf, attribute all as Direct
         all_bookings['attribution_method'] = 'Direct'

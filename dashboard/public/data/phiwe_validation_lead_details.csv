@@ -10,7 +10,7 @@ Chasity Allen,2026-03-17 16:00:00,Shreveport,No,True,1,Client lost this sale,10 
 Samantha Bennett,2026-03-02 11:00:00,Shreveport,Yes,True,1,Appointment held,10 Month,0.0,Yes
 Askel Matre,2026-03-06 13:00:00,Bellaire ,No,True,1,"Cancelled - no pre-payment, no show",12 Month,0.0,No
 Felicia Jewitt,2026-03-14 10:00:00,Shreveport,No,True,1,Flexologist changed times. The client was re-booked for April 4. Cancelled ,8 Month ,0.0,No
-Timothy Cooper,2026-03-21 09:00:00,Shreveport,Yes,False,1,Appointment held,10 Month,0.0,Yes
+Timothy Cooper,2026-03-21 09:00:00,Shreveport,Yes,True,1,Appointment held,10 Month,0.0,Yes
 Euronda Jefferson,2026-03-10 13:00:00,Shreveport,No,True,1,"Cancelled - no pre-payment, no show",10 Month,0.0,No
 Angela Washington,2026-03-14 13:00:00,Shreveport,No,True,1,Internal team mishap,12 Month,0.0,No
 Rochelle Hargrove,2026-03-14 11:00:00,Shreveport,No,True,1,Internal team mishap,12 Month,0.0,No
@@ -30,7 +30,7 @@ Chase Fondren,2026-04-10 00:00:00,Bellaire ,No,True,1,Cancelled,Not sure,,No
 Rafael Smith,2026-03-31 09:00:00,Heights,No,True,1,"Cancelled - no pre-payment, no show",6 Month,5.0,No
 Rochelle Ashe,2026-04-27 10:00:00,Bunker Hill,No,True,1,Future dated,12 Month,0.0,
 Steve Bynum,2026-04-06 00:00:00,Pearland,Yes,True,2,Booked on Tamryn's account/ laptop. Second stretch booked,,,Yes
-Cathy Barazi,2026-04-11 00:00:00,Bellaire ,Yes,False,2,Booked by an internal team member. ,,,Yes
+Cathy Barazi,2026-04-11 00:00:00,Bellaire ,Yes,True,2,Booked by an internal team member. ,,,Yes
 Ronald Maxwell ,2026-03-26 00:00:00,Cherry Street ,Yes,True,2,"Paid, no show",,,No
 JD. Davis,2026-03-30 00:00:00,Pearland,Yes,False,2,Second stretch booked already ,,,Yes
 Maryam Taghadosi,2026-04-17 00:00:00,River Oaks ,Yes,True,2,Held ,,,Yes
