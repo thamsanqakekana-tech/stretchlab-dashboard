@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-05-06T10:30:28.749184",
+  "generated_at": "2026-05-07T09:31:24.537180",
   "system_metrics": {
     "total_bookings": 74,
-    "shows": 20,
-    "cancellations": 47,
-    "no_shows": 1
+    "shows": 21,
+    "cancellations": 48,
+    "no_shows": 0
   },
   "manual_metrics": {
     "total_bookings": 57,
@@ -19,7 +19,7 @@
   "status": "investigate",
   "show_gaps": {
     "tracker_held_count": 14,
-    "pipeline_shows": 20,
+    "pipeline_shows": 21,
     "gap_count": 2,
     "gap_leads": [
       {
