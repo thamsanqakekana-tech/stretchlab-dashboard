@@ -1620,7 +1620,7 @@ class DataTransformer:
             'first_name':       flags['First Name'].values,
             'last_name':        flags['Last Name'].values,
             'location':         flags['Location Name'].values,
-            'first_visit_date': flags['Booking\nDate'].values,
+            'first_visit_date': flags['Booking Date'].values,
             'cellphone':        flags['Cellphone'].values,
             'flag_reason':      'Phiwe called this number; lead completed first visit under different booking attribution',
             'confidence':       'Medium',

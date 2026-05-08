@@ -1,7 +1,7 @@
 {
-  "total_bookings": 76,
+  "total_bookings": 77,
   "total_cancelled": 48,
-  "cancel_rate_pct": 63.2,
+  "cancel_rate_pct": 62.3,
   "causes": [
     {
       "cause": "Long booking windows (>14 days)",
@@ -13,8 +13,8 @@
     },
     {
       "cause": "Insufficient pre-booking contact",
-      "count": 28,
-      "percentage": 58.3,
+      "count": 27,
+      "percentage": 56.2,
       "impact": "High",
       "action": "Strengthen confirmation follow-up before booking is confirmed",
       "active": true
