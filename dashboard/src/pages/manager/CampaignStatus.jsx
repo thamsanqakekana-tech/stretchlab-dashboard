@@ -454,7 +454,7 @@ Write the manager-facing campaign status insight. Be direct. Acknowledge what EX
       </Card>
 
       {/* ── SOW Ramp Progress ─────────────────────────────────────────────── */}
-      <Card title="SOW Ramp Progress · Target 77 Kept Appointments by May 24" style={{ marginBottom: '24px' }}>
+      <Card title={`SOW Ramp Progress · Target ${RAMP_TARGETS[3]} Kept Appointments by ${new Date(CAMPAIGN_MONTHS[CAMPAIGN_MONTHS.length-1].end + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`} style={{ marginBottom: '24px' }}>
         <SowProgressBar
           confirmedShows={confirmedShows}
           upcoming={upcoming}
@@ -573,7 +573,7 @@ Write the manager-facing campaign status insight. Be direct. Acknowledge what EX
               <li>Update ClubReady within 24h of each appointment</li>
               <li>Review flexologist scheduling at Bunker Hill + Shreveport</li>
               <li>Pre-notification to EXECO when admin needs to cancel</li>
-              <li>SOW target: 77 kept appointments by May 24</li>
+              <li>SOW target: {RAMP_TARGETS[3]} kept appointments by {new Date(CAMPAIGN_MONTHS[CAMPAIGN_MONTHS.length-1].end + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}</li>
             </ul>
           </div>
 

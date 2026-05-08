@@ -166,6 +166,7 @@ const MONTHS = CAMPAIGN_MONTHS.map(m => ({
   dateRange: new Date(m.start + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
     + ' – ' + new Date(m.end + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
 }))
+const SOW_END_LABEL = MONTHS[MONTHS.length - 1].end.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
 
 // ─── Timeline Bar ─────────────────────────────────────────────────────────────
 function CampaignTimeline({ ramp = [], forecast = [], sowTarget = RAMP_TARGETS[3], bookings = [], validationLeads = [], upcomingCount = 0 }) {
@@ -224,10 +225,9 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = RAMP_TARGETS[3
     })
     const drillLeads = Array.from(deduped.values())
 
-    // attendedCount from raw has_show=1 — matches pipeline-authoritative count (deduped list is for display only)
-    const attendedCount = monthBookings.filter(b =>
-      getHasShowB(b) && (!b.booking_date || String(b.booking_date).substring(0, 10) <= todayStrTl)
-    ).length
+    // attendedCount and upcomingCount derived from deduped drill list so header always matches the expanded table
+    const attendedCount    = drillLeads.filter(l => l.status === 'Attended').length
+    const segUpcomingCount = drillLeads.filter(l => l.status === 'Upcoming').length
 
     // fillPct: past months show target-achievement %; active month shows time elapsed %
     const totalDays = Math.round((m.end - m.start) / 86400000) + 1
@@ -241,7 +241,7 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = RAMP_TARGETS[3
       fillPct = Math.min(100, Math.round((elapsed / totalDays) * 100))
     }
 
-    return { ...m, fillPct, isActive, isComplete, attendedCount, drillLeads }
+    return { ...m, fillPct, isActive, isComplete, attendedCount, upcomingCount: segUpcomingCount, drillLeads }
   })
 
   return (
@@ -251,7 +251,7 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = RAMP_TARGETS[3
           Campaign Progress · SOW Month {segments.find(s => s.isActive)?.num ?? 3} of 3
         </p>
         <p style={{ fontSize: '11px', color: 'var(--muted)', margin: 0 }}>
-          Target: {sowTarget} kept appointments by May 24
+          Target: {sowTarget} kept appointments by {SOW_END_LABEL}
         </p>
       </div>
 
@@ -296,8 +296,8 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = RAMP_TARGETS[3
                 {(hasLeads || seg.attendedCount > 0) && (
                   <span style={{ fontSize: '10px', color: 'var(--text-2)', flex: 1, textAlign: 'center', whiteSpace: 'nowrap' }}>
                     <span style={{ color: 'var(--status-above)', fontWeight: 700 }}>{seg.attendedCount} attended</span>
-                    {(seg.isActive ? upcomingCount : 0) > 0 && (
-                      <span style={{ color: 'var(--muted)' }}> · {seg.isActive ? upcomingCount : 0} upcoming</span>
+                    {seg.upcomingCount > 0 && (
+                      <span style={{ color: 'var(--muted)' }}> · {seg.upcomingCount} upcoming</span>
                     )}
                   </span>
                 )}
@@ -465,7 +465,7 @@ function SowProgressMini({ confirmedShows, upcoming, sowTarget = RAMP_TARGETS[3]
         </span>
         <span style={{ fontSize: '12px', color: 'var(--muted)' }}>
           {remaining > 0
-            ? `${remaining} more sessions needed to hit the May 24 target`
+            ? `${remaining} more sessions needed to hit the ${SOW_END_LABEL} target`
             : `On track for the ${sowTarget}-session target`}
         </span>
         {upcoming > 0 && (
@@ -519,7 +519,6 @@ function ConversionFunnel({ totalCalls, meaningfulConvs, bookingCount, attendedC
       name:    [r.first_name, r.last_name].filter(Boolean).join(' ') || '—',
       studio:  String(r.booking_location || '').replace('StretchLab ', ''),
       date:    fmtDate(r.booking_date),
-      postSow: r.booking_date && String(r.booking_date).substring(0, 10) > '2026-05-24',
     })),
   }
 
@@ -611,11 +610,6 @@ function ConversionFunnel({ totalCalls, meaningfulConvs, bookingCount, attendedC
                   </span>
                   <span style={{ fontSize: '12px', color: 'var(--text-2)', fontFamily: 'JetBrains Mono, monospace', whiteSpace: 'nowrap' }}>
                     {row.date}
-                    {row.postSow && (
-                      <span style={{ fontSize: '9px', fontWeight: 700, color: 'var(--muted)', background: 'var(--border)', padding: '1px 5px', borderRadius: '3px', marginLeft: '6px', verticalAlign: 'middle' }}>
-                        Post-SOW
-                      </span>
-                    )}
                   </span>
                 </div>
               ))}
@@ -1003,11 +997,6 @@ function PipelineSection({ pipeline = [], isClientView = false, sowEndStr = '' }
               <div style={{ textAlign: 'right', flexShrink: 0 }}>
                 <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text)', fontFamily: 'JetBrains Mono, monospace', margin: 0 }}>
                   {date}
-                  {isPostSow && (
-                    <span style={{ fontSize: '9px', fontWeight: 700, color: 'var(--muted)', background: 'var(--border)', padding: '1px 5px', borderRadius: '3px', marginLeft: '6px', verticalAlign: 'middle' }}>
-                      Post-SOW
-                    </span>
-                  )}
                 </p>
                 <p style={{ fontSize: '10px', color: 'var(--muted)', margin: 0 }}>
                   {days <= 0 ? 'today' : days === 1 ? 'tomorrow' : `${days}d away`}
@@ -1450,8 +1439,8 @@ export default function CampaignPulse() {
       {/* Booking accountability — answers "what happened to the other X%?" */}
       <p style={{ fontSize: '12px', color: 'var(--muted)', margin: '8px 0 20px', lineHeight: 1.5 }}>
         {isClientView
-          ? `Of ${bookings.length} appointments booked: ${confirmedShows} attended · ${upcoming} upcoming · ${cancels} did not proceed · ${buckets.noShow.length} no-show · ${buckets.rescheduled.length} rescheduled${buckets.other.length > 0 ? ` · ${buckets.other.length} pending confirmation` : ''}${buckets.duplicateAttended > 0 ? ` · ${buckets.duplicateAttended} duplicate record${buckets.duplicateAttended > 1 ? 's' : ''} excluded` : ''}`
-          : `Of ${bookings.length} appointments booked: ${confirmedShows} attended · ${upcoming} upcoming · ${buckets.cancelledCustomer.length} lead-cancelled · ${buckets.cancelledAdmin.length} studio-cancelled · ${buckets.noShow.length} no-show · ${buckets.rescheduled.length} rescheduled${buckets.other.length > 0 ? ` · ${buckets.other.length} pending confirmation` : ''}${buckets.duplicateAttended > 0 ? ` · ${buckets.duplicateAttended} duplicate record${buckets.duplicateAttended > 1 ? 's' : ''} excluded` : ''}`
+          ? `Of ${bookings.length} appointments booked: ${confirmedShows} attended · ${upcoming} upcoming · ${cancels} did not proceed · ${buckets.noShow.length} no-show · ${buckets.rescheduled.length} rescheduled${buckets.other.length > 0 ? ` · ${buckets.other.length} pending confirmation` : ''}`
+          : `Of ${bookings.length} appointments booked: ${confirmedShows} attended · ${upcoming} upcoming · ${buckets.cancelledCustomer.length} lead-cancelled · ${buckets.cancelledAdmin.length} studio-cancelled · ${buckets.noShow.length} no-show · ${buckets.rescheduled.length} rescheduled${buckets.other.length > 0 ? ` · ${buckets.other.length} pending confirmation` : ''}`
         }
       </p>
 

@@ -8,7 +8,10 @@
  * This avoids compliance issues (touchpoint counts, studio-directed actions)
  * that can slip through LLM generation.
  */
-import { COLD_OUTREACH_BENCHMARKS } from './config.js'
+import { COLD_OUTREACH_BENCHMARKS, CAMPAIGN_MONTHS } from './config.js'
+
+const SOW_END_LABEL = new Date(CAMPAIGN_MONTHS[CAMPAIGN_MONTHS.length - 1].end + 'T00:00:00')
+  .toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
 
 export async function generateInsight(role, promptText) {
   if (role === 'client') return '' // client insight is built dynamically — see buildClientInsight()
@@ -76,7 +79,7 @@ export function buildClientInsight({ confirmedShows, showRate, upcoming, cancelR
     `The **${showRate.toFixed(1)}%** show rate on appointments with a confirmed outcome ${vsLabel} the cold re-engagement standard — ` +
     `the leads who say yes are actually showing up. ` +
     `The bigger challenge is the **${cancelRateCustomer.toFixed(1)}%** of appointments that did not hold — ` +
-    `and closing that gap through Phiwe's confirmation follow-up is the clearest lever before May 24. ` +
+    `and closing that gap through Phiwe's confirmation follow-up is the clearest lever before ${SOW_END_LABEL}. ` +
     `${upcoming} appointments are in the pipeline right now. ` +
     `Each one is a dormant contact one good session away from becoming an active member again.`
   )
