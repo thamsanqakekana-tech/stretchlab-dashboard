@@ -10,8 +10,15 @@
  */
 import { COLD_OUTREACH_BENCHMARKS } from './config.js'
 
-export async function generateInsight(role, _userPrompt) {
+export async function generateInsight(role, promptText) {
   if (role === 'client') return '' // client insight is built dynamically — see buildClientInsight()
+
+  // Manager role: build from live page-specific promptText — always fresh, page-specific, no API needed
+  if (role === 'manager' && promptText && promptText.trim()) {
+    return summariseManagerPrompt(promptText)
+  }
+
+  // Admin/other roles: read from pre-generated pipeline JSON
   try {
     const response = await fetch('/data/phiwe_insights.json')
     if (!response.ok) return ''
@@ -20,6 +27,26 @@ export async function generateInsight(role, _userPrompt) {
   } catch {
     return ''
   }
+}
+
+function summariseManagerPrompt(prompt) {
+  const dataSection = prompt
+    .replace(/\n?Write [^\n]*/gi, '')
+    .replace(/\n?Be direct[^\n]*/gi, '')
+    .trim()
+  if (!dataSection) return ''
+
+  const lines = dataSection.split('\n').map(l => l.trim()).filter(l => l && !l.endsWith('view.') && !l.endsWith('view'))
+
+  const rateLines   = lines.filter(l => /\d+\.?\d*%/.test(l) && /(benchmark|rate|conversion)/i.test(l))
+  const countLines  = lines.filter(l => /(Total calls|Bookings:|Confirmed shows|Upcoming|admin.+cancel|customer.+cancel)/i.test(l))
+  const targetLines = lines.filter(l => /(SOW|Month 3|churn|drift|hypothetical|risk)/i.test(l))
+
+  return [
+    rateLines.slice(0, 4).join('\n'),
+    countLines.slice(0, 3).join('\n'),
+    targetLines.slice(0, 3).join('\n'),
+  ].filter(Boolean).join('\n\n')
 }
 
 /**

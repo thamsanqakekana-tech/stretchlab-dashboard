@@ -65,19 +65,8 @@ function buildStudioStats(leads, cancellations = []) {
 
   return Object.entries(grouped).map(([studio, bks]) => {
     const attendedBks = bks.filter(b => hasShow(b) && !isFutureBooking(b))
-    const _seenNames = new Set()
-    const attendedUnique = attendedBks.filter(b => {
-      const name = [b.first_name, b.last_name].filter(Boolean).join(' ').trim().toLowerCase()
-      if (!name) return true
-      if (_seenNames.has(name)) return false
-      _seenNames.add(name)
-      return true
-    })
-    const attended = attendedUnique.length
-    // Use attended booking IDs (not has_show flag) as the guard for all other buckets.
-    // This ensures deduped bookings (same person, multiple has_show=1 rows) still get
-    // classified by their status rather than falling through every bucket.
-    const attendedIds  = new Set(attendedUnique.map(b => String(b.booking_id)))
+    const attended    = attendedBks.length
+    const attendedIds = new Set(attendedBks.map(b => String(b.booking_id)))
     const notAttended  = b => !attendedIds.has(String(b.booking_id))
     const upcoming     = bks.filter(b => notAttended(b) && getStatus(b).includes('Open Booking')).length
     const noShows      = bks.filter(b => notAttended(b) && getStatus(b).includes('No Show')).length

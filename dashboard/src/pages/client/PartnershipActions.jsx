@@ -333,8 +333,6 @@ export default function PartnershipActions() {
         .upsert(updatedRow, { onConflict: 'item_key' })
       if (error) {
         console.warn('[PartnershipActions] upsert error:', error.message)
-        setItemError('Saved locally. Cloud sync failed — changes will persist on this device.')
-        setTimeout(() => setItemError(null), 4000)
       }
     } finally {
       setSavingItem(false)

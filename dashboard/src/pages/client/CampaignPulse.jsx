@@ -183,7 +183,7 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = RAMP_TARGETS[3
     const monthBookings = bookings.filter(b => {
       const bd = b.booking_date
       if (!bd) return false
-      const d = new Date(String(bd).substring(0, 10))
+      const d = new Date(String(bd).substring(0, 10) + 'T00:00:00')
       return d >= m.start && d <= m.end
     })
 
@@ -224,8 +224,10 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = RAMP_TARGETS[3
     })
     const drillLeads = Array.from(deduped.values())
 
-    // attendedCount from deduped list — prevents double-counting duplicate ClubReady records
-    const attendedCount = drillLeads.filter(l => l.status === 'Attended').length
+    // attendedCount from raw has_show=1 — matches pipeline-authoritative count (deduped list is for display only)
+    const attendedCount = monthBookings.filter(b =>
+      getHasShowB(b) && (!b.booking_date || String(b.booking_date).substring(0, 10) <= todayStrTl)
+    ).length
 
     // fillPct: past months show target-achievement %; active month shows time elapsed %
     const totalDays = Math.round((m.end - m.start) / 86400000) + 1
