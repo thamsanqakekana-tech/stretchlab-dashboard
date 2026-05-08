@@ -13,10 +13,11 @@ import {
   pivotToObject,
 } from '../../utils/dataLoader.js'
 import Card from '../../components/Card.jsx'
+import { RAMP_TARGETS, CAMPAIGN_MONTHS } from '../../utils/config.js'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-const SOW_DEADLINE     = new Date('2026-05-24')
-const SOW_TARGET       = 77
+const SOW_DEADLINE     = new Date(CAMPAIGN_MONTHS[CAMPAIGN_MONTHS.length - 1].end + 'T00:00:00')
+const SOW_TARGET       = RAMP_TARGETS[3]
 const SHOW_RATE_FLOOR  = 33    // % — trigger confirmation action if below
 const INTRO_PRICE      = 69
 const MEMBERSHIP_PRICE = 338

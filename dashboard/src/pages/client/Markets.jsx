@@ -7,10 +7,11 @@ import Card from '../../components/Card.jsx'
 import Tooltip from '../../components/Tooltip.jsx'
 import InsightBlock from '../../components/InsightBlock.jsx'
 import { Loader, Empty } from './Overview.jsx'
+import { RAMP_TARGETS } from '../../utils/config.js'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const HOUSTON_CODES = new Set([281, 346, 713, 832])
-const SOW_TARGET    = 77
+const SOW_TARGET    = RAMP_TARGETS[3]
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function showRateColor(rate) {

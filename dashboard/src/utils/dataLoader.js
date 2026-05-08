@@ -3,8 +3,9 @@
  * All CSV loaders return Promise<Array<Object>>.
  * JSON loaders return Promise<Object|null>.
  *
- * CSV tables: Supabase-first with automatic fallback to local CSV files.
- * JSON files: local fetch only (phiwe_insights.json, root_cause_analysis.json, validation_report.json).
+ * All CSV loaders read from local pipeline output files in /data/.
+ * Supabase helpers (loadFromSupabase, loadCSV) are retained but not used by default.
+ * JSON files: local fetch only.
  */
 
 import Papa from 'papaparse'
@@ -88,41 +89,39 @@ export function parsePct(v) {
 }
 
 // ─── BASE (transform.py) ────────────────────────────────────────────────────
-export const loadCalls                = () => loadCSV('phiwe_calls.csv')
-// Local-only: Supabase phiwe_bookings table is stale — bypass to ensure has_show accuracy.
+export const loadCalls                = () => loadCSVLocal('phiwe_calls.csv')
 export const loadBookings             = () => loadCSVLocal('phiwe_bookings.csv')
-export const loadDailyPerformance     = () => loadCSV('phiwe_daily_performance.csv')
-export const loadByStudio             = () => loadCSV('phiwe_by_studio.csv')
-export const loadByAreaCode           = () => loadCSV('phiwe_by_area_code.csv')
+export const loadDailyPerformance     = () => loadCSVLocal('phiwe_daily_performance.csv')
+export const loadByStudio             = () => loadCSVLocal('phiwe_by_studio.csv')
+export const loadByAreaCode           = () => loadCSVLocal('phiwe_by_area_code.csv')
 export const loadPipeline             = () => loadCSVLocal('phiwe_pipeline.csv')
-export const loadCallTiming           = () => loadCSV('phiwe_call_timing.csv')
-export const loadLeadFunnel           = () => loadCSV('phiwe_lead_funnel.csv')
-export const loadUnifiedLeads         = () => loadCSV('phiwe_unified_leads.csv')
-export const loadCancellationAnalysis = () => loadCSV('phiwe_cancellation_analysis.csv')
-export const loadBookingOutcomes      = () => loadCSV('phiwe_booking_outcomes.csv')
-export const loadBookingWindowAnalysis= () => loadCSV('phiwe_booking_window_analysis.csv')
-export const loadDayOfWeekPerformance = () => loadCSV('phiwe_day_of_week_performance.csv')
+export const loadCallTiming           = () => loadCSVLocal('phiwe_call_timing.csv')
+export const loadLeadFunnel           = () => loadCSVLocal('phiwe_lead_funnel.csv')
+export const loadUnifiedLeads         = () => loadCSVLocal('phiwe_unified_leads.csv')
+export const loadCancellationAnalysis = () => loadCSVLocal('phiwe_cancellation_analysis.csv')
+export const loadBookingOutcomes      = () => loadCSVLocal('phiwe_booking_outcomes.csv')
+export const loadBookingWindowAnalysis= () => loadCSVLocal('phiwe_booking_window_analysis.csv')
+export const loadDayOfWeekPerformance = () => loadCSVLocal('phiwe_day_of_week_performance.csv')
 export const loadRootCauseAnalysis    = () => loadJSON('root_cause_analysis.json')
 export const loadValidationReport     = () => loadJSON('validation_report.json')
 
 // ─── ENHANCED (enhance_pipeline.py) ─────────────────────────────────────────
-export const loadBenchmarksComparison = () => loadCSV('phiwe_benchmarks_comparison.csv')
-export const loadRevenueIntelligence  = () => loadCSV('phiwe_revenue_intelligence.csv')
-export const loadForecast30Day        = () => loadCSV('phiwe_forecast_30_day.csv')
-export const loadCampaignHealth       = () => loadCSV('phiwe_campaign_health.csv')
-export const loadCohortAnalysis       = () => loadCSV('phiwe_cohort_analysis.csv')
-export const loadCallTimingOptimized  = () => loadCSV('phiwe_call_timing_optimized.csv')
+export const loadBenchmarksComparison = () => loadCSVLocal('phiwe_benchmarks_comparison.csv')
+export const loadRevenueIntelligence  = () => loadCSVLocal('phiwe_revenue_intelligence.csv')
+export const loadForecast30Day        = () => loadCSVLocal('phiwe_forecast_30_day.csv')
+export const loadCampaignHealth       = () => loadCSVLocal('phiwe_campaign_health.csv')
+export const loadCohortAnalysis       = () => loadCSVLocal('phiwe_cohort_analysis.csv')
+export const loadCallTimingOptimized  = () => loadCSVLocal('phiwe_call_timing_optimized.csv')
 
 // ─── NEW (added to transform.py) ─────────────────────────────────────────────
-export const loadConversionTrends     = () => loadCSV('phiwe_conversion_trends.csv')
-export const loadLoyalsnapEngagement  = () => loadCSV('phiwe_loyalsnap_engagement.csv')
-export const loadFlexologistPerformance=() => loadCSV('phiwe_flexologist_performance.csv')
-export const loadRampVsTarget          = () => loadCSV('phiwe_ramp_vs_target.csv')
-export const loadVelocityTrend         = () => loadCSV('phiwe_velocity_trend.csv')
+export const loadConversionTrends     = () => loadCSVLocal('phiwe_conversion_trends.csv')
+export const loadLoyalsnapEngagement  = () => loadCSVLocal('phiwe_loyalsnap_engagement.csv')
+export const loadFlexologistPerformance=() => loadCSVLocal('phiwe_flexologist_performance.csv')
+export const loadRampVsTarget          = () => loadCSVLocal('phiwe_ramp_vs_target.csv')
+export const loadVelocityTrend         = () => loadCSVLocal('phiwe_velocity_trend.csv')
 
 // ─── DATA INTEGRITY ──────────────────────────────────────────────────────────
-export const loadUnattributedFlags     = () => loadCSV('phiwe_unattributed_flags.csv')
-// Local-only: Supabase copy may lag behind pipeline date normalization fixes.
+export const loadUnattributedFlags     = () => loadCSVLocal('phiwe_unattributed_flags.csv')
 export const loadValidationLeadDetails = () => loadCSVLocal('phiwe_validation_lead_details.csv')
 
 // ─── NARRATIVE (Groq-generated insights written by pipeline) ─────────────────

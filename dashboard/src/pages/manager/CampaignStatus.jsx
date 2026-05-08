@@ -23,7 +23,7 @@ import Card from '../../components/Card.jsx'
 import BenchmarkBar from '../../components/BenchmarkBar.jsx'
 import InsightBlock from '../../components/InsightBlock.jsx'
 
-const SOW_TARGET = 77
+const SOW_TARGET = RAMP_TARGETS[3]
 
 const CHURN_COLORS = { HIGH: 'var(--danger)', MEDIUM: 'var(--warn)', LOW: 'var(--accent)' }
 

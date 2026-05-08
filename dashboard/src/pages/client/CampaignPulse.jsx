@@ -23,6 +23,8 @@ import {
   benchmarkLabel,
   benchmarkColor,
   COLD_OUTREACH_BENCHMARKS,
+  RAMP_TARGETS,
+  CAMPAIGN_MONTHS,
 } from '../../utils/config.js'
 import { useAuth } from '../../context/AuthContext.jsx'
 import Card from '../../components/Card.jsx'
@@ -135,7 +137,7 @@ function buildBookingBuckets(bookings) {
   const resolved = bookings.filter(r => !getStatus(r).includes('Open Booking')).length
   console.log('[Buckets] resolved (non-open-booking):', resolved)
 
-  const showRate            = resolved > 0 ? attendedUnique.length    / resolved : 0
+  const showRate            = resolved > 0 ? attended.length          / resolved : 0
   // Cancel rate denominator = total bookings (not resolved) per campaign methodology.
   // Using resolved inflates the rate by excluding pending appointments.
   const cancelRateAll       = total > 0 ? cancelledAll.length         / total : 0
@@ -156,15 +158,17 @@ function buildBookingBuckets(bookings) {
   }
 }
 
-// ─── Campaign month boundaries ────────────────────────────────────────────────
-const MONTHS = [
-  { num: 1, label: 'Month 1', start: new Date('2026-02-24'), end: new Date('2026-03-24'), target: 30, dateRange: 'Feb 24 – Mar 24' },
-  { num: 2, label: 'Month 2', start: new Date('2026-03-25'), end: new Date('2026-04-24'), target: 50, dateRange: 'Mar 25 – Apr 24' },
-  { num: 3, label: 'Month 3', start: new Date('2026-04-25'), end: new Date('2026-05-24'), target: 77, dateRange: 'Apr 25 – May 24' },
-]
+// ─── Campaign month boundaries — derived from config.js CAMPAIGN_MONTHS ──────
+const MONTHS = CAMPAIGN_MONTHS.map(m => ({
+  ...m,
+  start: new Date(m.start + 'T00:00:00'),
+  end:   new Date(m.end   + 'T00:00:00'),
+  dateRange: new Date(m.start + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    + ' – ' + new Date(m.end + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+}))
 
 // ─── Timeline Bar ─────────────────────────────────────────────────────────────
-function CampaignTimeline({ ramp = [], forecast = [], sowTarget = 77, bookings = [], validationLeads = [], upcomingCount = 0 }) {
+function CampaignTimeline({ ramp = [], forecast = [], sowTarget = RAMP_TARGETS[3], bookings = [], validationLeads = [], upcomingCount = 0 }) {
   const today = new Date()
   const [expanded, setExpanded] = useState(null)
 
@@ -442,7 +446,7 @@ function KpiCard({ label, value, unit = '%', subLine, annotation, benchmarkDetai
 }
 
 // ─── SOW Progress Mini ────────────────────────────────────────────────────────
-function SowProgressMini({ confirmedShows, upcoming, sowTarget = 77 }) {
+function SowProgressMini({ confirmedShows, upcoming, sowTarget = RAMP_TARGETS[3] }) {
   const remaining    = Math.max(0, sowTarget - confirmedShows)
   const confirmedPct = Math.min((confirmedShows / sowTarget) * 100, 100)
   const upcomingPct  = Math.min((upcoming / sowTarget) * 100, 100 - confirmedPct)
@@ -1110,7 +1114,7 @@ export default function CampaignPulse() {
   const buckets = useMemo(() => buildBookingBuckets(bookings), [bookings])
 
   const resolved           = buckets.resolved
-  const confirmedShows     = buckets.attendedUnique.length  // deduped: 1 person = 1 attended session
+  const confirmedShows     = buckets.attended.length  // pipeline-authoritative has_show=1 count
   const showRate           = resolved > 0 ? confirmedShows / resolved * 100 : 0
   const cancels            = buckets.cancelledAll.length
   const cancelRate         = buckets.cancelRateAll * 100
