@@ -29,7 +29,7 @@ booking_id,first_name,last_name,booking_location,cancelled_by,cancellation_timin
 743714716,Lamonica,Martin,StretchLab Shreveport,Admin,Short Notice (1-7 days),1,<7 days,-1.0,Friday,2026-04-10,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
 744399180,Tynisha,Alexander,StretchLab Cherry Street,Customer,Advance (7+ days),41,30+ days,41.0,Friday,2026-05-22,Cancelled Within Policy Rules - No session credit lost
 744385757,Stephen,Weeks,StretchLab Cherry Street,Admin,Last Minute (<24hr),0,<7 days,0.0,Wednesday,2026-04-15,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
-740823643,Maryam,Taghadosi,StretchLab River Oaks ,Customer,Last Minute (<24hr),0,<7 days,0.0,Friday,2026-04-17,Cancelled Within Policy Rules - No session credit lost
+740823643,Maryam,Taghadosi,StretchLab River Oaks,Customer,Last Minute (<24hr),0,<7 days,0.0,Friday,2026-04-17,Cancelled Within Policy Rules - No session credit lost
 741336745,Candy,Smith,StretchLab Bunker Hill,Customer,Last Minute (<24hr),0,<7 days,0.0,Monday,2026-04-20,Cancelled Within Policy Rules - No session credit lost
 744357883,Richard,Webb,StretchLab Cherry Street,Customer,Last Minute (<24hr),0,<7 days,0.0,Wednesday,2026-04-22,Cancelled Within Policy Rules - No session credit lost
 749325255,Cortez,Cortez,StretchLab Heights,Customer,Short Notice (1-7 days),1,<7 days,-1.0,Friday,2026-04-24,Cancelled Outside Policy Rules - Session Lost
@@ -40,7 +40,7 @@ booking_id,first_name,last_name,booking_location,cancelled_by,cancellation_timin
 749294280,Melvinia,McClain,StretchLab Heights,Admin,Short Notice (1-7 days),1,<7 days,-1.0,Friday,2026-05-01,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
 741179331,David,Kocsis Jr,StretchLab Pearland,Customer,Last Minute (<24hr),0,<7 days,0.0,Sunday,2026-05-03,Cancelled Within Policy Rules - No session credit lost
 743254076,Samuel,Amos,StretchLab Bellaire,Customer,Last Minute (<24hr),0,<7 days,0.0,Monday,2026-05-04,Cancelled Within Policy Rules - No session credit lost
-750800026,Abdul,Khan,StretchLab River Oaks ,Customer,Last Minute (<24hr),0,<7 days,0.0,Monday,2026-05-04,Cancelled Within Policy Rules - No session credit lost
+750800026,Abdul,Khan,StretchLab River Oaks,Customer,Last Minute (<24hr),0,<7 days,0.0,Monday,2026-05-04,Cancelled Within Policy Rules - No session credit lost
 751169826,Darwin,Jones,StretchLab Shreveport,Customer,Last Minute (<24hr),0,<7 days,0.0,Tuesday,2026-05-05,Cancelled Within Policy Rules - No session credit lost
 750718486,Kenacia,Hunter,StretchLab Bellaire,Admin,Short Notice (1-7 days),1,<7 days,-1.0,Monday,2026-05-04,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
 748157239,Christopher,Ejike-Ukah,StretchLab Bellaire,Admin,Last Minute (<24hr),0,<7 days,0.0,Tuesday,2026-05-05,Cancelled By Admin - Not Customer Fault - No Session Credit Lost

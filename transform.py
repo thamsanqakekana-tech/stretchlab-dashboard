@@ -632,6 +632,17 @@ class DataTransformer:
         bookings['cell_phone'] = bookings['Cell Phone']
         bookings['work_phone'] = bookings['Work Phone']
         bookings['booking_location'] = bookings['Booking Location']
+        # Normalize booking_location — fixes typos from raw ClubReady export.
+        # Add entries here whenever a new typo is discovered in the source data.
+        _LOCATION_FIXES = {
+            'stretchlab shrepeort': 'StretchLab Shreveport',
+        }
+        bookings['booking_location'] = (
+            bookings['booking_location']
+            .astype(str)
+            .str.strip()
+            .apply(lambda x: _LOCATION_FIXES.get(x.strip().lower(), x.strip()))
+        )
         bookings['session_mins'] = pd.to_numeric(bookings['Session Mins'], errors='coerce')
         bookings['booking_event'] = bookings['Booking Event']
         bookings['current_status'] = bookings['Current Status'].astype(str).str.strip()

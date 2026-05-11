@@ -177,15 +177,18 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = RAMP_TARGETS[3
 
   const getHasShowB = b => b.has_show === true || b.has_show === 1 || String(b.has_show ?? '').trim() === '1'
 
-  const segments = MONTHS.map((m) => {
+  const segments = MONTHS.map((m, i) => {
     const rampRow = ramp.find(r => +r.month === m.num)
+    const isLastMonth = i === MONTHS.length - 1
 
-    // Source monthly leads from ClubReady bookings by booking_date within month range
+    // Source monthly leads from ClubReady bookings by booking_date within month range.
+    // Last month has no upper bound: bookings scheduled beyond the SOW end date still
+    // belong to this campaign and must appear in M3's count and drill-down.
     const monthBookings = bookings.filter(b => {
       const bd = b.booking_date
       if (!bd) return false
       const d = new Date(String(bd).substring(0, 10) + 'T00:00:00')
-      return d >= m.start && d <= m.end
+      return d >= m.start && (isLastMonth ? true : d <= m.end)
     })
 
     const todayMidnight = new Date(); todayMidnight.setHours(0, 0, 0, 0)
