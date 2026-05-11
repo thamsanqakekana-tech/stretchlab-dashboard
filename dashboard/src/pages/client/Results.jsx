@@ -65,7 +65,14 @@ function buildStudioStats(leads, cancellations = []) {
 
   return Object.entries(grouped).map(([studio, bks]) => {
     const attendedBks = bks.filter(b => hasShow(b) && !isFutureBooking(b))
-    const attended    = attendedBks.length
+    const _seen = new Set()
+    const attendedUniq = attendedBks.filter(b => {
+      const n = [b.first_name, b.last_name].filter(Boolean).join(' ').trim().toLowerCase()
+      if (!n) return true
+      if (_seen.has(n)) return false
+      _seen.add(n); return true
+    })
+    const attended    = attendedUniq.length
     const attendedIds = new Set(attendedBks.map(b => String(b.booking_id)))
     const notAttended  = b => !attendedIds.has(String(b.booking_id))
     const upcoming     = bks.filter(b => notAttended(b) && getStatus(b).includes('Open Booking')).length

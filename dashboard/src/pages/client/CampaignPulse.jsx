@@ -1105,7 +1105,7 @@ export default function CampaignPulse() {
   const buckets = useMemo(() => buildBookingBuckets(bookings), [bookings])
 
   const resolved           = buckets.resolved
-  const confirmedShows     = buckets.attended.length  // pipeline-authoritative has_show=1 count
+  const confirmedShows     = buckets.attendedUnique.length  // deduped by name — removes ClubReady cancel+reschedule duplicates
   const showRate           = resolved > 0 ? confirmedShows / resolved * 100 : 0
   const cancels            = buckets.cancelledAll.length
   const cancelRate         = buckets.cancelRateAll * 100
