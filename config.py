@@ -129,6 +129,15 @@ DATA_RANGES = {
     'session_mins': [25, 50]
 }
 
+# SOW campaign month boundaries — must stay in sync with dashboard/src/utils/config.js CAMPAIGN_MONTHS
+# Used by _build_ramp_vs_target so pipeline month assignments match dashboard exactly.
+from datetime import date as _date
+SOW_MONTH_BOUNDARIES = [
+    {'month': 1, 'start': _date(2026, 2, 24), 'end': _date(2026, 3, 24), 'target': 30},
+    {'month': 2, 'start': _date(2026, 3, 25), 'end': _date(2026, 4, 24), 'target': 50},
+    {'month': 3, 'start': _date(2026, 4, 25), 'end': _date(2026, 5, 24), 'target': 77},
+]
+
 # Leads confirmed by Tamryn Montgomery (2026-05-07) to be attributed to Phiwe.
 # Booked or logged under a different staff member — verified attended.
 # Add entries here when Tamryn confirms a lead that the pipeline cannot auto-attribute.

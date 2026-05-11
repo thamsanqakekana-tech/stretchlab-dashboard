@@ -447,11 +447,34 @@ class DataTransformer:
         # Merge validation outputs (validation_report + validation_lead_details)
         if validation_outputs:
             outputs.update(validation_outputs)
-        
+
+        # Project bookings and lead_funnel to clean output columns only.
+        # Drops raw Excel pass-through columns (Source Store ID, Log Date, Booking Made By, etc.)
+        # and internal pipeline columns (matched_by_user_id, full_name_lower, matched_by_name,
+        # _booking_date_str, user_id). All internal columns were needed until this point.
+        _BOOKING_COLS = [
+            'booking_id', 'first_name', 'last_name', 'email', 'phone_clean',
+            'booking_location', 'booking_date', 'booking_event', 'current_status',
+            'booking_outcome', 'has_show', 'is_no_show', 'is_scheduled',
+            'is_cancelled', 'is_cancelled_admin', 'is_cancelled_customer',
+            'is_future', 'is_past', 'is_resolved',
+            'session_mins', 'attribution_method',
+            'area_code', 'city', 'state', 'region',
+            'booking_day_of_week', 'booking_hour', 'days_to_booking',
+        ]
+        _LEAD_FUNNEL_COLS = _BOOKING_COLS + [
+            'total_calls', 'first_call_date', 'last_call_date',
+            'has_call_record', 'days_first_call_to_booking',
+        ]
+        for key, col_list in [('bookings', _BOOKING_COLS), ('lead_funnel', _LEAD_FUNNEL_COLS)]:
+            if key in outputs and len(outputs[key]) > 0:
+                present = [c for c in col_list if c in outputs[key].columns]
+                outputs[key] = outputs[key][present].copy()
+
         logger.info("="*70)
         logger.info("TRANSFORMATION COMPLETE")
         logger.info("="*70)
-        
+
         return outputs
     
     def _transform_calls(self, calls):
@@ -659,48 +682,53 @@ class DataTransformer:
         bookings.loc[bookings['booking_event'] == 'No-Show', 'booking_outcome'] = 'No-Show'
         bookings.loc[bookings['booking_event'] == 'New Booking Made', 'booking_outcome'] = 'New'
         
+        # Save baseline outcomes (after booking_event init) before any Completed assignments.
+        # The dedup runs after ALL sources (first_visits + cross-ref) have marked Completed,
+        # so it reverts to this snapshot — not an intermediate state that the cross-ref would undo.
+        bookings['_pre_match_outcome'] = bookings['booking_outcome'].copy()
+
         # Match with first_visits (THIS OVERRIDES booking events)
         if first_visits is not None and len(first_visits) > 0:
             logger.info(f"\n  MATCHING WITH FIRST_VISITS SHEET...")
-            
+
             # Get completed first visits
             completed_visits = first_visits[first_visits['Status'] == 'Complete'].copy()
             logger.info(f"    Total completed first visits: {len(completed_visits)}")
-            
+
             # Match by User ID (primary key)
             visit_user_ids = set(completed_visits['User ID'].dropna())
             bookings['matched_by_user_id'] = bookings['user_id'].isin(visit_user_ids)
             user_id_matches = bookings['matched_by_user_id'].sum()
             logger.info(f"    Matched by User ID: {user_id_matches}")
-            
+
             # Match by name (secondary key for missing User IDs)
             completed_visits['full_name'] = (
-                completed_visits['First Name'].fillna('') + ' ' + 
+                completed_visits['First Name'].fillna('') + ' ' +
                 completed_visits['Last Name'].fillna('')
             ).str.lower().str.strip()
-            
+
             bookings['full_name_lower'] = (
-                bookings['first_name'].fillna('') + ' ' + 
+                bookings['first_name'].fillna('') + ' ' +
                 bookings['last_name'].fillna('')
             ).str.lower().str.strip()
-            
+
             visit_names = set(completed_visits['full_name'])
             bookings['matched_by_name'] = (
-                bookings['full_name_lower'].isin(visit_names) & 
+                bookings['full_name_lower'].isin(visit_names) &
                 ~bookings['matched_by_user_id']
             )
             name_matches = bookings['matched_by_name'].sum()
             logger.info(f"    Matched by Name (additional): {name_matches}")
-            
+
             # CRITICAL: Mark as Completed if matched in first_visits
             # This OVERRIDES any previous outcome assignment
             bookings.loc[
                 (bookings['matched_by_user_id'] | bookings['matched_by_name']),
                 'booking_outcome'
             ] = 'Completed'
-            
+
             total_shows = (bookings['booking_outcome'] == 'Completed').sum()
-            logger.info(f"    TOTAL SHOWS FOUND: {total_shows}")
+            logger.info(f"    TOTAL SHOWS after first_visits match: {total_shows}")
 
         # STEP 2: Booking Completed event cross-reference (ClubReady data only)
         # Sessions logged as 'Booking Completed' by internal staff on behalf of Phiwe leads
@@ -723,6 +751,29 @@ class DataTransformer:
                 logger.info(f"    Booking Completed cross-ref: {needs_update.sum()} booking(s) updated")
                 for _, row in bookings[needs_update].iterrows():
                     logger.info(f"      → {row['first_name']} {row['last_name']} ({row['booking_location']})")
+
+        # DEDUP: One attendance per lead — runs after ALL Completed assignments (first_visits + cross-ref).
+        # A cancel/reschedule chain can create multiple Phiwe booking records for the same session.
+        # Keep only the canonical booking (highest booking_id = most recently created) per user;
+        # revert the others to their pre-match baseline so they don't inflate the show count.
+        dupes_reverted = 0
+        for uid, grp in bookings[bookings['booking_outcome'] == 'Completed'].groupby('user_id'):
+            if len(grp) <= 1:
+                continue
+            canonical_idx = pd.to_numeric(grp['booking_id'], errors='coerce').idxmax()
+            to_revert = grp.index[grp.index != canonical_idx]
+            bookings.loc[to_revert, 'booking_outcome'] = bookings.loc[to_revert, '_pre_match_outcome']
+            dupes_reverted += len(to_revert)
+            logger.info(
+                f"    Dedup: {grp.loc[canonical_idx, 'first_name']} {grp.loc[canonical_idx, 'last_name']}"
+                f" — kept booking_id {grp.loc[canonical_idx, 'booking_id']}, reverted {len(to_revert)}"
+            )
+        if dupes_reverted:
+            logger.info(
+                f"    After dedup: {(bookings['booking_outcome'] == 'Completed').sum()} unique shows"
+                f" ({dupes_reverted} duplicate(s) reverted)"
+            )
+        bookings.drop(columns=['_pre_match_outcome'], errors='ignore', inplace=True)
 
         # Fallback to status for remaining unknowns
         unknown = bookings['booking_outcome'] == 'Unknown'
@@ -793,8 +844,11 @@ class DataTransformer:
         
         bookings_daily.columns = ['date', 'new_bookings', 'shows', 'cancellations', 'no_shows']
         
-        # Merge
+        # Merge — fillna(0) would silently convert int64 count columns to float64, so cast back
         daily = calls_daily.merge(bookings_daily, on='date', how='left').fillna(0)
+        for _col in ['new_bookings', 'shows', 'cancellations', 'no_shows']:
+            if _col in daily.columns:
+                daily[_col] = daily[_col].astype(int)
         
         # Calculate rates
         daily['booking_rate_pct'] = np.where(
@@ -1475,61 +1529,51 @@ class DataTransformer:
         """SOW ramp progress vs Month 1/2/3 targets (30/50/77 kept appointments).
         Columns: month, target_kept_appts, actual_kept_appts, pct_of_target, on_track
 
-        Month boundaries are 30-day windows from campaign start:
-          Month 1 = campaign_start to campaign_start + 30 days  (days 0–30)
-          Month 2 = campaign_start + 31 days to +60 days        (days 31–60)
-          Month 3 = campaign_start + 61 days onwards            (days 61+)
-
-        Campaign start = earliest call_start_time in the calls DataFrame.
-        Uses booking_date (not calendar month) with has_show == 1.
+        Month boundaries are fixed calendar dates from config.SOW_MONTH_BOUNDARIES,
+        kept in sync with dashboard/src/utils/config.js CAMPAIGN_MONTHS.
+        Uses booking_date with has_show == 1 (already deduped — one row per unique attendee).
         """
         logger.info("\nBuilding ramp vs target...")
 
-        SOW_TARGETS = {1: 30, 2: 50, 3: 77}
+        from config import SOW_MONTH_BOUNDARIES
 
         has_shows = bookings[bookings['has_show'] == 1].copy()
 
         if has_shows.empty or 'booking_date' not in has_shows.columns:
             return pd.DataFrame([
-                {'month': m, 'target_kept_appts': t, 'actual_kept_appts': 0,
-                 'pct_of_target': 0.0, 'on_track': False}
-                for m, t in SOW_TARGETS.items()
+                {'month': mb['month'], 'target_kept_appts': mb['target'],
+                 'actual_kept_appts': 0, 'pct_of_target': 0.0, 'on_track': False}
+                for mb in SOW_MONTH_BOUNDARIES
             ])
 
-        # Campaign start = earliest call date (authoritative source: calls data)
-        if calls is not None and 'call_start_time' in calls.columns and len(calls) > 0:
-            campaign_start = pd.to_datetime(calls['call_start_time'], errors='coerce').min().date()
-        else:
-            campaign_start = pd.to_datetime(has_shows['booking_date']).min().date()
-
-        logger.info(f"  Campaign start: {campaign_start}")
-
-        # Assign month based on 30-day windows from campaign_start
-        from datetime import date as date_type, timedelta
-        m1_end = campaign_start + timedelta(days=30)   # 2026-02-24 + 30 = 2026-03-25
-        m2_end = campaign_start + timedelta(days=60)   # 2026-02-24 + 60 = 2026-04-24
-
-        def assign_month(d):
-            if hasattr(d, 'date'):
-                d = d.date()
-            if d <= m1_end:
-                return 1
-            elif d <= m2_end:
-                return 2
-            else:
-                return 3
-
         has_shows['booking_date_parsed'] = pd.to_datetime(has_shows['booking_date'], errors='coerce')
-        has_shows['campaign_month'] = has_shows['booking_date_parsed'].apply(
-            lambda d: assign_month(d) if pd.notna(d) else 3
+
+        def assign_month_fixed(d):
+            if pd.isna(d):
+                return None  # exclude unparseable dates — do NOT silently bucket to M3
+            d = d.date() if hasattr(d, 'date') else d
+            for mb in SOW_MONTH_BOUNDARIES:
+                if mb['start'] <= d <= mb['end']:
+                    return mb['month']
+            return None  # outside SOW window
+
+        has_shows['campaign_month'] = has_shows['booking_date_parsed'].apply(assign_month_fixed)
+
+        invalid = has_shows['campaign_month'].isna().sum()
+        if invalid:
+            logger.warning(f"  {invalid} show(s) have unparseable/out-of-range dates — excluded from ramp")
+
+        monthly = (
+            has_shows.dropna(subset=['campaign_month'])
+            .groupby('campaign_month').size()
+            .reset_index(name='actual_kept_appts')
         )
 
-        monthly = has_shows.groupby('campaign_month').size().reset_index(name='actual_kept_appts')
-
         rows = []
-        for month, target in SOW_TARGETS.items():
-            actual = int(monthly.loc[monthly['campaign_month'] == month, 'actual_kept_appts'].values[0]
-                         if month in monthly['campaign_month'].values else 0)
+        for mb in SOW_MONTH_BOUNDARIES:
+            month, target = mb['month'], mb['target']
+            actual_vals = monthly.loc[monthly['campaign_month'] == month, 'actual_kept_appts'].values
+            actual = int(actual_vals[0]) if len(actual_vals) > 0 else 0
             pct = round(actual / target * 100, 1) if target > 0 else 0.0
             rows.append({
                 'month': month,
@@ -1539,7 +1583,12 @@ class DataTransformer:
                 'on_track': actual >= target,
             })
 
-        logger.info(f"  Campaign month boundaries: M1 end={m1_end}, M2 end={m2_end}")
+        logger.info(
+            f"  Campaign month boundaries: "
+            f"M1={SOW_MONTH_BOUNDARIES[0]['start']}–{SOW_MONTH_BOUNDARIES[0]['end']}, "
+            f"M2={SOW_MONTH_BOUNDARIES[1]['start']}–{SOW_MONTH_BOUNDARIES[1]['end']}, "
+            f"M3={SOW_MONTH_BOUNDARIES[2]['start']}–{SOW_MONTH_BOUNDARIES[2]['end']}"
+        )
         logger.info(f"  Ramp: {rows}")
         return pd.DataFrame(rows)
 

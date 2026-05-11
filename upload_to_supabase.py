@@ -35,11 +35,7 @@ def infer_pg_type(series: pd.Series) -> str:
     non_null = series.dropna()
     if non_null.empty:
         return "TEXT"
-    # Try boolean
-    unique = set(str(v).strip().lower() for v in non_null)
-    if unique <= {"true", "false", "1", "0", "yes", "no"}:
-        return "BOOLEAN"
-    # Use pandas dtype — float64 columns stay NUMERIC, int64 get INTEGER/BIGINT
+    # Integer dtypes first — avoids misclassifying 0/1 int columns as BOOLEAN
     if pd.api.types.is_integer_dtype(non_null):
         max_val = non_null.max()
         min_val = non_null.min()
@@ -59,6 +55,10 @@ def infer_pg_type(series: pd.Series) -> str:
         except (ValueError, TypeError):
             pass
         return "NUMERIC"
+    # Boolean check for object columns only (string "true"/"false" values)
+    unique = set(str(v).strip().lower() for v in non_null)
+    if unique <= {"true", "false"}:
+        return "BOOLEAN"
     # Try numeric parse for object columns
     try:
         float_vals = non_null.astype(float)
@@ -74,7 +74,7 @@ def infer_pg_type(series: pd.Series) -> str:
     return "TEXT"
 
 def generate_create_table(table_name: str, df: pd.DataFrame) -> str:
-    """Generate a CREATE TABLE IF NOT EXISTS statement."""
+    """Generate DROP + CREATE TABLE statement so re-running always uses correct column types."""
     col_defs = []
     for col in df.columns:
         pg_type = infer_pg_type(df[col])
@@ -82,7 +82,8 @@ def generate_create_table(table_name: str, df: pd.DataFrame) -> str:
         col_defs.append(f"  {safe_col} {pg_type}")
     cols_sql = ",\n".join(col_defs)
     return (
-        f'CREATE TABLE IF NOT EXISTS "{table_name}" (\n'
+        f'DROP TABLE IF EXISTS "{table_name}" CASCADE;\n'
+        f'CREATE TABLE "{table_name}" (\n'
         f'  id BIGSERIAL PRIMARY KEY,\n'
         f'{cols_sql}\n'
         f');\n'
