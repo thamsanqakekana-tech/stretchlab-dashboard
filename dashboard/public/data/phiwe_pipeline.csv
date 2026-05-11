@@ -1,15 +1,8 @@
 booking_id,first_name,last_name,phone_clean,email,booking_date,days_until,booking_location,session_mins,total_calls_made,risk_level,attribution_method
-751496397,Óscar,Olasava,9182183062,montecristoaaaa@gmail.com,2026-05-09,1,StretchLab South Tulsa,50,1.0,High,Direct
-751517294,Rosario,Chico,3163003172,chico.media.tv@gmail.com,2026-06-06,29,StretchLab South Tulsa,50,1.0,High,Direct
-754153111,Cindy,Blass,8326799483,cindyblass@gmail.com,2026-05-16,8,StretchLab Heights,50,1.0,High,Direct
-748618426,Debbie,Webb,8176918389,mypromus@yahoo.com,2026-05-11,3,StretchLab Bunker Hill,50,6.0,Low,Direct
-753478595,Ariel,Wallace,8322195266,only_ariel@yahoo.com,2026-05-16,8,StretchLab Bunker Hill,50,1.0,High,Direct
-747936313,Fame,Gilliam,3187545294,gilli3@aol.com,2026-05-11,3,StretchLab Shreveport,50,4.0,Medium,Direct
-751124945,Amyanna,Geramy,3184225724,iamamyannag@gmail.com,2026-05-16,8,StretchLab Shreveport,50,1.0,High,Direct
-751150490,Kateesha,Martinez,3187712540,martinez.wrk.org@gmail.com,2026-05-09,1,StretchLab Shreveport,50,2.0,High,Direct
-751206428,Donald,King,3185729033,drking98@gmail.com,2026-05-09,1,StretchLab Shreveport,50,1.0,High,Direct
-751211001,Roslyn,Goodall,2142289068,roslyngoodall@gmail.com,2026-05-13,5,StretchLab Shreveport,50,2.0,High,Direct
-753308276,Tadarell,Maiden,3184408341,tmaiden414@gmail.com,2026-05-30,22,StretchLab Shreveport,50,1.0,High,Direct
-753334693,Georgia,Taylor,3182008447,taylorgeorgia68@gmail.com,2026-05-13,5,StretchLab Shreveport,50,1.0,High,Direct
-749417966,David,Dole,3135106286,daviddole7@gmail.com,2026-05-09,1,StretchLab Brighton,50,1.0,High,Direct
-749421469,Kelly,Dole,7345020273,kelly.dole@att.net,2026-05-09,1,StretchLab Brighton,50,0.0,High,Direct
+751517294,Rosario,Chico,3163003172,chico.media.tv@gmail.com,2026-06-06,26,StretchLab South Tulsa,50,1,High,Direct
+754153111,Cindy,Blass,8326799483,cindyblass@gmail.com,2026-05-16,5,StretchLab Heights,50,1,High,Direct
+753478595,Ariel,Wallace,8322195266,only_ariel@yahoo.com,2026-05-16,5,StretchLab Bunker Hill,50,1,High,Direct
+751124945,Amyanna,Geramy,3184225724,iamamyannag@gmail.com,2026-05-16,5,StretchLab Shreveport,50,1,High,Direct
+751211001,Roslyn,Goodall,2142289068,roslyngoodall@gmail.com,2026-05-13,2,StretchLab Shreveport,50,2,High,Direct
+753308276,Tadarell,Maiden,3184408341,tmaiden414@gmail.com,2026-05-30,19,StretchLab Shreveport,50,1,High,Direct
+753334693,Georgia,Taylor,3182008447,taylorgeorgia68@gmail.com,2026-05-13,2,StretchLab Shreveport,50,1,High,Direct

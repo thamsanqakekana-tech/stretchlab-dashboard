@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-05-08T10:05:29.079048",
+  "generated_at": "2026-05-11T09:40:39.880042",
   "system_metrics": {
     "total_bookings": 77,
-    "shows": 25,
-    "cancellations": 48,
-    "no_shows": 0
+    "shows": 27,
+    "cancellations": 53,
+    "no_shows": 1
   },
   "manual_metrics": {
     "total_bookings": 57,
@@ -19,7 +19,7 @@
   "status": "investigate",
   "show_gaps": {
     "tracker_held_count": 14,
-    "pipeline_shows": 25,
+    "pipeline_shows": 27,
     "gap_count": 0,
     "gap_leads": [],
     "note": "Leads recorded as held in the manual tracker with no confirmed attendance in ClubReady. Studio must update ClubReady records before these sessions can be counted in pipeline metrics."
