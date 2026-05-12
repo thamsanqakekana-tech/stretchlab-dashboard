@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-05-11T10:55:22.130566",
+  "generated_at": "2026-05-12T10:35:50.703615",
   "system_metrics": {
-    "total_bookings": 77,
+    "total_bookings": 78,
     "shows": 26,
     "cancellations": 53,
     "no_shows": 1
@@ -12,8 +12,8 @@
     "month_2": 27
   },
   "drift": {
-    "booking_drift_pct": 35.1,
-    "gap_bookings": -20,
+    "booking_drift_pct": 36.8,
+    "gap_bookings": -21,
     "gap_direction": "system_has_more"
   },
   "status": "investigate",

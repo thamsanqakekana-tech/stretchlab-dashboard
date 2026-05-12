@@ -42,7 +42,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_booking_outcomes" FOR DELETE TO anon
 
 
 
--- phiwe_booking_window_analysis (3 rows)
+-- phiwe_booking_window_analysis (4 rows)
 
 DROP TABLE IF EXISTS "phiwe_booking_window_analysis" CASCADE;
 CREATE TABLE "phiwe_booking_window_analysis" (
@@ -61,7 +61,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_booking_window_analysis" FOR DELETE 
 
 
 
--- phiwe_bookings (77 rows)
+-- phiwe_bookings (78 rows)
 
 DROP TABLE IF EXISTS "phiwe_bookings" CASCADE;
 CREATE TABLE "phiwe_bookings" (
@@ -102,7 +102,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_bookings" FOR DELETE TO anon USING (
 
 
 
--- phiwe_by_area_code (268 rows)
+-- phiwe_by_area_code (269 rows)
 
 DROP TABLE IF EXISTS "phiwe_by_area_code" CASCADE;
 CREATE TABLE "phiwe_by_area_code" (
@@ -182,7 +182,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_call_timing_optimized" FOR DELETE TO
 
 
 
--- phiwe_calls (8154 rows)
+-- phiwe_calls (8296 rows)
 
 DROP TABLE IF EXISTS "phiwe_calls" CASCADE;
 CREATE TABLE "phiwe_calls" (
@@ -260,7 +260,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_cancellation_analysis" FOR DELETE TO
 
 
 
--- phiwe_cohort_analysis (3 rows)
+-- phiwe_cohort_analysis (4 rows)
 
 DROP TABLE IF EXISTS "phiwe_cohort_analysis" CASCADE;
 CREATE TABLE "phiwe_cohort_analysis" (
@@ -301,7 +301,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_conversion_trends" FOR DELETE TO ano
 
 
 
--- phiwe_daily_performance (53 rows)
+-- phiwe_daily_performance (54 rows)
 
 DROP TABLE IF EXISTS "phiwe_daily_performance" CASCADE;
 CREATE TABLE "phiwe_daily_performance" (
@@ -388,7 +388,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_forecast_30_day" FOR DELETE TO anon 
 
 
 
--- phiwe_lead_funnel (77 rows)
+-- phiwe_lead_funnel (78 rows)
 
 DROP TABLE IF EXISTS "phiwe_lead_funnel" CASCADE;
 CREATE TABLE "phiwe_lead_funnel" (
@@ -434,7 +434,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_lead_funnel" FOR DELETE TO anon USIN
 
 
 
--- phiwe_loyalsnap_engagement (1537 rows)
+-- phiwe_loyalsnap_engagement (2566 rows)
 
 DROP TABLE IF EXISTS "phiwe_loyalsnap_engagement" CASCADE;
 CREATE TABLE "phiwe_loyalsnap_engagement" (
@@ -453,7 +453,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_loyalsnap_engagement" FOR DELETE TO 
 
 
 
--- phiwe_pipeline (7 rows)
+-- phiwe_pipeline (8 rows)
 
 DROP TABLE IF EXISTS "phiwe_pipeline" CASCADE;
 CREATE TABLE "phiwe_pipeline" (
@@ -532,7 +532,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_unattributed_flags" FOR DELETE TO an
 
 
 
--- phiwe_unified_leads (81 rows)
+-- phiwe_unified_leads (82 rows)
 
 DROP TABLE IF EXISTS "phiwe_unified_leads" CASCADE;
 CREATE TABLE "phiwe_unified_leads" (

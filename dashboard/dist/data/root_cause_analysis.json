@@ -1,7 +1,7 @@
 {
-  "total_bookings": 77,
+  "total_bookings": 78,
   "total_cancelled": 53,
-  "cancel_rate_pct": 68.8,
+  "cancel_rate_pct": 67.9,
   "causes": [
     {
       "cause": "Long booking windows (>14 days)",

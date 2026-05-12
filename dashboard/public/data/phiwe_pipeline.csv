@@ -1,8 +1,9 @@
 booking_id,first_name,last_name,phone_clean,email,booking_date,days_until,booking_location,session_mins,total_calls_made,risk_level,attribution_method
-751517294,Rosario,Chico,3163003172,chico.media.tv@gmail.com,2026-06-06,26,StretchLab South Tulsa,50,1,High,Direct
-754153111,Cindy,Blass,8326799483,cindyblass@gmail.com,2026-05-16,5,StretchLab Heights,50,1,High,Direct
-753478595,Ariel,Wallace,8322195266,only_ariel@yahoo.com,2026-05-16,5,StretchLab Bunker Hill,50,1,High,Direct
-751124945,Amyanna,Geramy,3184225724,iamamyannag@gmail.com,2026-05-16,5,StretchLab Shreveport,50,1,High,Direct
-751211001,Roslyn,Goodall,2142289068,roslyngoodall@gmail.com,2026-05-13,2,StretchLab Shreveport,50,2,High,Direct
-753308276,Tadarell,Maiden,3184408341,tmaiden414@gmail.com,2026-05-30,19,StretchLab Shreveport,50,1,High,Direct
-753334693,Georgia,Taylor,3182008447,taylorgeorgia68@gmail.com,2026-05-13,2,StretchLab Shreveport,50,1,High,Direct
+755259586,Danyai,Murray,5626056455,danyaimurray@gmail.com,2026-06-03,22,StretchLab Shreveport,50,2,High,Direct
+751517294,Rosario,Chico,3163003172,chico.media.tv@gmail.com,2026-06-06,25,StretchLab South Tulsa,50,1,High,Direct
+754153111,Cindy,Blass,8326799483,cindyblass@gmail.com,2026-05-16,4,StretchLab Heights,50,1,High,Direct
+753478595,Ariel,Wallace,8322195266,only_ariel@yahoo.com,2026-05-16,4,StretchLab Bunker Hill,50,1,High,Direct
+751124945,Amyanna,Geramy,3184225724,iamamyannag@gmail.com,2026-05-16,4,StretchLab Shreveport,50,1,High,Direct
+751211001,Roslyn,Goodall,2142289068,roslyngoodall@gmail.com,2026-05-13,1,StretchLab Shreveport,50,2,High,Direct
+753308276,Tadarell,Maiden,3184408341,tmaiden414@gmail.com,2026-05-30,18,StretchLab Shreveport,50,1,High,Direct
+753334693,Georgia,Taylor,3182008447,taylorgeorgia68@gmail.com,2026-05-13,1,StretchLab Shreveport,50,1,High,Direct
