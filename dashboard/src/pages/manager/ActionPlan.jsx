@@ -13,14 +13,14 @@ import {
   pivotToObject,
 } from '../../utils/dataLoader.js'
 import Card from '../../components/Card.jsx'
-import { RAMP_TARGETS, CAMPAIGN_MONTHS } from '../../utils/config.js'
+import { RAMP_TARGETS, CAMPAIGN_MONTHS, SESSION_INTRO_PRICE, MEMBERSHIP_MONTHLY_PRICE } from '../../utils/config.js'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const SOW_DEADLINE     = new Date(CAMPAIGN_MONTHS[CAMPAIGN_MONTHS.length - 1].end + 'T00:00:00')
 const SOW_TARGET       = RAMP_TARGETS[3]
 const SHOW_RATE_FLOOR  = 33    // % — trigger confirmation action if below
-const INTRO_PRICE      = 69
-const MEMBERSHIP_PRICE = 338
+const INTRO_PRICE      = SESSION_INTRO_PRICE
+const MEMBERSHIP_PRICE = MEMBERSHIP_MONTHLY_PRICE
 
 function addDays(n) {
   const d = new Date()
@@ -293,7 +293,7 @@ function generateActions({ pipeline, bookings, cancellations, validationLeads, c
     actions.push({
       id:        'sow-sprint',
       priority:  'important',
-      title:     `${daysLeft}-day sprint: ${sowGap} sessions needed to hit the May 24 SOW target`,
+      title:     `${daysLeft}-day sprint: ${sowGap} sessions needed to hit the ${SOW_DEADLINE.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} SOW target`,
       owner:     'multi',
       why:       `Campaign is at ${confirmedShows} confirmed sessions against a ${SOW_TARGET}-session SOW target. ${inPipeline} upcoming appointments are in the pipeline. The gap requires ${dailyTarget} confirmed sessions per day for the next ${daysLeft} days. Without a sprint plan this week, Month 3 closes out significantly below commitment.`,
       impact: {
@@ -637,7 +637,7 @@ export default function ActionPlan() {
             <div>
               <p style={{ fontSize: '10px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 2px' }}>SOW Deadline</p>
               <p style={{ fontSize: '13px', fontWeight: 600, fontFamily: 'JetBrains Mono, monospace', color: daysLeft <= 14 ? 'var(--danger)' : 'var(--warn)', margin: 0 }}>
-                {daysLeft} days · May 24
+                {daysLeft} days · {SOW_DEADLINE.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
               </p>
             </div>
             {completedCount > 0 && (

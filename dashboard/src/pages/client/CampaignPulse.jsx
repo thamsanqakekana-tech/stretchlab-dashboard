@@ -201,6 +201,7 @@ function CampaignTimeline({ ramp = [], forecast = [], sowTarget = RAMP_TARGETS[3
       if (getHasShowB(b) && (!bds || bds <= todayStrTl)) return 'Attended'
       if (statusStr.includes('Completed Booking')) return 'Attended'
       if (statusStr.includes('No Show')) return 'No Show'
+      if (bds && bds >= todayStrTl && !statusStr.includes('Cancelled')) return 'Upcoming'
       if (statusStr.includes('Rescheduled')) return 'Rescheduled'
       if (statusStr.toLowerCase().includes('cancelled by admin')) return 'Cancelled by admin'
       if (statusStr.includes('Outside Policy')) return 'Cancelled (outside policy)'
@@ -1114,12 +1115,11 @@ export default function CampaignPulse() {
   const cancelRate         = buckets.cancelRateAll * 100
   const cancelRateCustomer = buckets.cancelRateCustomer * 100
   const cancelRateAdmin    = buckets.cancelRateAdmin * 100
-  const upcoming           = buckets.upcoming.length
-
   // Filter pipeline against attended booking IDs: phiwe_pipeline.csv can include leads
   // whose has_show=1 is already confirmed but whose ClubReady status is still 'Open Booking'.
   const attendedBookingIds = new Set(buckets.attended.map(b => String(b.booking_id ?? '')).filter(Boolean))
   const filteredPipeline   = pipeline.filter(r => !attendedBookingIds.has(String(r.booking_id ?? '')))
+  const upcoming           = filteredPipeline.length  // authoritative: pipeline.csv rows = future + not cancelled
 
   // ── SOW target (derived from ramp CSV; fallback 77) ─────────────────────────
   const sowTarget = useMemo(

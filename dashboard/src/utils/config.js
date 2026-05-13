@@ -104,6 +104,11 @@ export const VALIDATION_THRESHOLDS = {
 // SOW ramp targets by month
 export const RAMP_TARGETS = { 1: 30, 2: 50, 3: 77 }
 
+// Campaign pricing — read by dashboard components; sourced from phiwe_revenue_intelligence.csv
+// at runtime when available, falling back to these config values.
+export const SESSION_INTRO_PRICE      = 69   // $69 introductory session
+export const MEMBERSHIP_MONTHLY_PRICE = 338  // $338 average monthly membership
+
 // SOW campaign date boundaries
 export const CAMPAIGN_MONTHS = [
   { num: 1, label: 'Month 1', start: '2026-02-24', end: '2026-03-24', target: 30 },

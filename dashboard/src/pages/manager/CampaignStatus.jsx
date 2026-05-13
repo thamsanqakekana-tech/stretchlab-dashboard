@@ -18,6 +18,8 @@ import {
   RAMP_TARGETS,
   COLD_OUTREACH_BENCHMARKS,
   CAMPAIGN_MONTHS,
+  SESSION_INTRO_PRICE,
+  MEMBERSHIP_MONTHLY_PRICE,
 } from '../../utils/config.js'
 import Card from '../../components/Card.jsx'
 import BenchmarkBar from '../../components/BenchmarkBar.jsx'
@@ -187,6 +189,8 @@ export default function CampaignStatus() {
 
   const health        = useMemo(() => pivotToObject(data.healthRows  ?? []), [data.healthRows])
   const revenue       = useMemo(() => pivotToObject(data.revenueRows ?? []), [data.revenueRows])
+  const introPrice      = +(revenue.intro_price      ?? SESSION_INTRO_PRICE)
+  const membershipPrice = +(revenue.membership_price ?? MEMBERSHIP_MONTHLY_PRICE)
   const benchmarks    = data.benchmarks    ?? []
   const validation    = data.validation   ?? {}
   const calls         = data.calls        ?? []
@@ -214,7 +218,10 @@ export default function CampaignStatus() {
   const resolved          = confirmedShows + noShowCount + confirmedCancels
   const showRate          = resolved > 0 ? (confirmedShows / resolved) * 100 : 0
   const cancelRate        = bookings.length > 0 ? (confirmedCancels / bookings.length) * 100 : 0
-  const upcoming          = useMemo(() => bookings.filter(b => String(b.current_status || '').includes('Open Booking')).length, [bookings])
+  const upcoming          = useMemo(() => bookings.filter(b => {
+    const s = String(b.current_status || '')
+    return (parseInt(b.is_future) === 1 || b.is_future === true) && !s.includes('Cancelled')
+  }).length, [bookings])
 
   const adminCancelled    = useMemo(() => cancellations.filter(c => c.cancelled_by === 'Admin').length, [cancellations])
   const customerCancelled = useMemo(() => cancellations.filter(c => c.cancelled_by === 'Customer').length, [cancellations])
@@ -263,7 +270,7 @@ ${adminCancelled} admin-initiated cancellations (cancelled_by=Admin in ClubReady
 Without admin cancellations, hypothetical show rate = ~${bookings.length > 0 ? (((confirmedShows + adminCancelled) / bookings.length) * 100).toFixed(0) : 0}%.
 Churn risk: ${churnRisk}.
 Booking drift vs internal tracker: ${driftPct}%.
-Month 3 SOW target: ${RAMP_TARGETS[3]} kept appointments by May 24.
+Month 3 SOW target: ${RAMP_TARGETS[3]} kept appointments by ${new Date(CAMPAIGN_MONTHS[CAMPAIGN_MONTHS.length-1].end + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}.
 Write the manager-facing campaign status insight. Be direct. Acknowledge what EXECO controls (conversation, booking, show rate — all above/within cold benchmark). Identify what StretchLab must fix (admin disruptions, ClubReady logging). State Month 3 path.`
   }, [loading, convRate, bookingConvRate, showRatePct, cancelRate, totalCalls, meaningfulConvs, bookings.length, confirmedShows, upcoming, churnRisk, driftPct, adminCancelled, customerCancelled, showRangeLabel, bookingRangeLabel, cancelRangeLabel])
 
@@ -429,27 +436,27 @@ Write the manager-facing campaign status insight. Be direct. Acknowledge what EX
           <div>
             <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '0 0 4px' }}>Intro Revenue (confirmed)</p>
             <p style={{ fontSize: '26px', fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: 'var(--text)', margin: '0 0 3px' }}>
-              ${(confirmedShows * 69).toLocaleString()}
+              ${(confirmedShows * introPrice).toLocaleString()}
             </p>
-            <p style={{ fontSize: '11px', color: 'var(--muted)' }}>{confirmedShows} × $69 intro session</p>
+            <p style={{ fontSize: '11px', color: 'var(--muted)' }}>{confirmedShows} × ${introPrice} intro session</p>
           </div>
           <div>
             <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '0 0 4px' }}>Membership Potential</p>
             <p style={{ fontSize: '26px', fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: 'var(--accent)', margin: '0 0 3px' }}>
-              ${(confirmedShows * 338).toLocaleString()}
+              ${(confirmedShows * membershipPrice).toLocaleString()}
             </p>
-            <p style={{ fontSize: '11px', color: 'var(--muted)' }}>If all {confirmedShows} convert @ $338/mo</p>
+            <p style={{ fontSize: '11px', color: 'var(--muted)' }}>If all {confirmedShows} convert @ ${membershipPrice}/mo</p>
           </div>
           <div>
             <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '0 0 4px' }}>Pipeline Revenue (upcoming)</p>
             <p style={{ fontSize: '26px', fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: '#38bdf8', margin: '0 0 3px' }}>
-              ${(upcoming * 69).toLocaleString()}
+              ${(upcoming * introPrice).toLocaleString()}
             </p>
             <p style={{ fontSize: '11px', color: 'var(--muted)' }}>If all {upcoming} upcoming appointments show</p>
           </div>
         </div>
         <p style={{ fontSize: '11px', color: 'var(--muted)', borderTop: '1px solid var(--border)', paddingTop: '10px', margin: 0 }}>
-          Revenue figures are directional. Intro session = $69. Monthly membership = $338 average. Not for client-facing reporting.
+          Revenue figures are directional. Intro session = ${introPrice}. Monthly membership = ${membershipPrice} average. Not for client-facing reporting.
         </p>
       </Card>
 
