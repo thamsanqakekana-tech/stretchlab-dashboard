@@ -32,7 +32,8 @@ const SEGMENT_ACCENT = {
 const DAYS_OF_WEEK = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
 const todayMidnight = new Date(); todayMidnight.setHours(0, 0, 0, 0)
 const todayStr = `${todayMidnight.getFullYear()}-${String(todayMidnight.getMonth()+1).padStart(2,'0')}-${String(todayMidnight.getDate()).padStart(2,'0')}`
-const isFutureBooking = b => { const bd = b.booking_date || b['booking_date']; return !!bd && String(bd).substring(0, 10) > todayStr }
+const isFutureBooking        = b => { const bd = b.booking_date || b['booking_date']; return !!bd && String(bd).substring(0, 10) > todayStr }
+const isTodayOrFutureBooking = b => { const bd = b.booking_date || b['booking_date']; return !!bd && String(bd).substring(0, 10) >= todayStr }
 
 // ─── Count-up animation ───────────────────────────────────────────────────────
 function CountUp({ value, duration = 900 }) {
@@ -75,7 +76,9 @@ function buildStudioStats(leads, cancellations = []) {
     const attended    = attendedUniq.length
     const attendedIds = new Set(attendedBks.map(b => String(b.booking_id)))
     const notAttended  = b => !attendedIds.has(String(b.booking_id))
-    const upcoming     = bks.filter(b => notAttended(b) && getStatus(b).includes('Open Booking')).length
+    // upcoming = any future/today booking that isn't cancelled or already attended
+    // (catches both 'Open Booking' and 'Rescheduled By Admin' future appointments)
+    const upcoming     = bks.filter(b => notAttended(b) && isTodayOrFutureBooking(b) && !getStatus(b).includes('Cancelled')).length
     const noShows      = bks.filter(b => notAttended(b) && getStatus(b).includes('No Show')).length
     const adminCancels = bks.filter(b => notAttended(b) && getStatus(b).includes('Cancelled By Admin')).length
     const custCancels  = bks.filter(b => notAttended(b) && (
@@ -83,7 +86,8 @@ function buildStudioStats(leads, cancellations = []) {
       getStatus(b).includes('Cancelled Outside Policy')
     )).length
     const totalCancels = adminCancels + custCancels
-    const rescheduled  = bks.filter(b => notAttended(b) && getStatus(b).includes('Rescheduled')).length
+    // rescheduled = only past rescheduled (future rescheduled are counted in upcoming above)
+    const rescheduled  = bks.filter(b => notAttended(b) && !isTodayOrFutureBooking(b) && getStatus(b).includes('Rescheduled')).length
     const total        = bks.length
     const resolved     = attended + totalCancels + noShows
     const showRate     = resolved > 0 ? attended / resolved : 0
@@ -483,8 +487,11 @@ function StudioSignalCard({ s, isManagerView, pipeline = [], cardIndex = 0 }) {
                 <tbody>
                   {sortedBks.map((bk, i) => {
                     const status = String(bk.current_status || bk['Current Status'] || '').trim()
-                    const bkFuture = isFutureBooking(bk)
-                    const uo     = +bk.has_show === 1 && !bkFuture                          ? 'attended'
+                    const bkTodayOrFuture = isTodayOrFutureBooking(bk)
+                    // has_show is authoritative (no date guard) — catches leads who attended
+                    // but whose ClubReady status was later changed to Cancelled/Rescheduled
+                    const uo     = +bk.has_show === 1                                        ? 'attended'
+                      : bkTodayOrFuture && !status.includes('Cancelled')                    ? 'upcoming'
                       : status.includes('Open Booking')                                     ? 'upcoming'
                       : status.includes('No Show')                                          ? 'no_show'
                       : status.includes('Rescheduled')                                      ? 'rescheduled'
