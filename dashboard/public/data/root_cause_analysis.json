@@ -1,7 +1,7 @@
 {
-  "total_bookings": 78,
-  "total_cancelled": 53,
-  "cancel_rate_pct": 67.9,
+  "total_bookings": 80,
+  "total_cancelled": 54,
+  "cancel_rate_pct": 67.5,
   "causes": [
     {
       "cause": "Long booking windows (>14 days)",
@@ -13,8 +13,8 @@
     },
     {
       "cause": "Insufficient pre-booking contact",
-      "count": 30,
-      "percentage": 56.6,
+      "count": 31,
+      "percentage": 57.4,
       "impact": "High",
       "action": "Strengthen confirmation follow-up before booking is confirmed",
       "active": true
@@ -22,7 +22,7 @@
     {
       "cause": "Friday appointments",
       "count": 13,
-      "percentage": 24.5,
+      "percentage": 24.1,
       "impact": "Medium",
       "action": "Add Friday pre-session confirmation follow-up",
       "active": true

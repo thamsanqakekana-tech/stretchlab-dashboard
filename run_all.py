@@ -83,7 +83,16 @@ def main():
     print(f"  ✅  latest.json → {date_str}")
 
     # Step 5 — Sync to Supabase (non-fatal: network may be unavailable)
-    run([sys.executable, "upload_to_supabase.py"], check=False, label="[5/5] Sync Supabase")
+    run([sys.executable, "upload_to_supabase.py"], check=False, label="[5/6] Sync Supabase")
+
+    # Step 6 — Manager weekly deck (non-fatal)
+    run([sys.executable, "generate_weekly_deck.py", date_str], check=False, label="[6/6] Manager weekly deck")
+
+    # Copy weekly deck to dashboard/public/data/ (already covered by the loop above if file exists)
+    weekly_deck = dated_dir / "manager_weekly_deck.html"
+    if weekly_deck.exists():
+        shutil.copy2(weekly_deck, DASHBOARD_DATA / "manager_weekly_deck.html")
+        print(f"  ✅  manager_weekly_deck.html → {DASHBOARD_DATA}")
 
     print(f"\n{'='*60}")
     print(f"  ✅  ALL DONE — {date_str}")

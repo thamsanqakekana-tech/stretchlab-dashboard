@@ -1,13 +1,13 @@
 booking_event,current_status,count,percentage
-Booking Cancelled,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,9,11.5
-Booking Cancelled,Cancelled Outside Policy Rules - Session Lost,3,3.8
-Booking Cancelled,Cancelled Within Policy Rules - No session credit lost,14,17.9
-Booking Cancelled,Rescheduled By Admin,2,2.6
-Booking Completed,Completed Booking,8,10.3
-New Booking Made,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,11,14.1
-New Booking Made,Cancelled Outside Policy Rules - Session Lost,4,5.1
-New Booking Made,Cancelled Within Policy Rules - No session credit lost,12,15.4
-New Booking Made,Completed Booking,4,5.1
-New Booking Made,Open Booking - not yet logged,7,9.0
+Booking Cancelled,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,7,8.8
+Booking Cancelled,Cancelled Outside Policy Rules - Session Lost,2,2.5
+Booking Cancelled,Cancelled Within Policy Rules - No session credit lost,14,17.5
+Booking Cancelled,Rescheduled By Admin,3,3.8
+Booking Completed,Completed Booking,8,10.0
+New Booking Made,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,13,16.2
+New Booking Made,Cancelled Outside Policy Rules - Session Lost,5,6.2
+New Booking Made,Cancelled Within Policy Rules - No session credit lost,13,16.2
+New Booking Made,Completed Booking,4,5.0
+New Booking Made,Open Booking - not yet logged,7,8.8
 New Booking Made,Rescheduled By Admin,3,3.8
-No-Show,No Show Booking,1,1.3
+No-Show,No Show Booking,1,1.2

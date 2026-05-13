@@ -1,22 +1,22 @@
 area_code,city,state,region,total_calls,unique_leads,bookings,shows,booking_rate_pct,show_rate_pct,engagement_rate_pct
-832,Houston,Texas,Texas-Houston,1360,865,10.0,6.0,0.7352941176470588,60.0,90.88905216752387
+832,Houston,Texas,Texas-Houston,1363,867,10.0,6.0,0.7336757153338225,60.0,90.9090909090909
 318,Shreveport,Louisiana,Louisiana,1137,635,24.0,9.0,2.1108179419525066,37.5,88.48857644991213
 713,Houston,Texas,Texas-Houston,964,598,7.0,2.0,0.7261410788381742,28.57142857142857,90.14522821576763
-918,Tulsa,Oklahoma,Oklahoma,847,567,7.0,1.0,0.8264462809917356,14.285714285714285,89.49232585596222
+918,Tulsa,Oklahoma,Oklahoma,897,599,8.0,1.0,0.8918617614269788,12.5,89.85507246376811
 281,Houston,Texas,Texas-Houston,534,344,5.0,1.0,0.9363295880149813,20.0,90.0749063670412
-248,Troy,Michigan,Michigan,384,288,0.0,0.0,0.0,0.0,95.57291666666666
-810,Flint,Michigan,Michigan,245,179,1.0,0.0,0.40816326530612246,0.0,96.3265306122449
+248,Troy,Michigan,Michigan,399,295,0.0,0.0,0.0,0.0,95.73934837092732
+810,Flint,Michigan,Michigan,260,187,1.0,0.0,0.38461538461538464,0.0,96.15384615384616
 346,Houston,Texas,Texas-Houston,199,111,2.0,1.0,1.0050251256281406,50.0,87.43718592964824
-734,Ann Arbor,Michigan,Michigan,123,88,1.0,1.0,0.8130081300813009,100.0,93.4959349593496
-517,Lansing,Michigan,Michigan,86,60,1.0,1.0,1.1627906976744187,100.0,93.02325581395348
+734,Ann Arbor,Michigan,Michigan,135,94,2.0,1.0,1.4814814814814816,50.0,94.07407407407408
+517,Lansing,Michigan,Michigan,95,65,1.0,1.0,1.0526315789473684,100.0,93.6842105263158
 979,Bryan-College Station,Texas,Texas-Other,84,44,1.0,0.0,1.1904761904761905,0.0,89.28571428571429
 313,Detroit,Michigan,Michigan,70,48,1.0,1.0,1.4285714285714286,100.0,91.42857142857143
-405,Oklahoma City,Oklahoma,Oklahoma,66,47,0.0,0.0,0.0,0.0,81.81818181818183
+405,Oklahoma City,Oklahoma,Oklahoma,68,47,0.0,0.0,0.0,0.0,82.35294117647058
+586,Warren,Michigan,Michigan,65,49,0.0,0.0,0.0,0.0,95.38461538461539
 512,Austin,Texas,Texas-Other,64,42,0.0,0.0,0.0,0.0,98.4375
-586,Warren,Michigan,Michigan,63,49,0.0,0.0,0.0,0.0,95.23809523809523
 409,Beaumont,Texas,Texas-Other,54,36,0.0,0.0,0.0,0.0,70.37037037037037
 337,Lafayette,Louisiana,Louisiana,51,30,0.0,0.0,0.0,0.0,72.54901960784314
-817,Fort Worth,Texas,Texas-Other,49,25,1.0,0.0,2.0408163265306123,0.0,95.91836734693877
+817,Fort Worth,Texas,Texas-Other,50,25,1.0,0.0,2.0,0.0,96.0
 214,Dallas,Texas,Texas-Other,47,30,2.0,0.0,4.25531914893617,0.0,97.87234042553192
 504,New Orleans,Louisiana,Louisiana,44,30,0.0,0.0,0.0,0.0,90.9090909090909
 903,Tyler,Texas,Texas-Other,38,21,2.0,1.0,5.263157894736842,50.0,94.73684210526315
@@ -24,247 +24,247 @@ area_code,city,state,region,total_calls,unique_leads,bookings,shows,booking_rate
 210,San Antonio,Texas,Texas-Other,36,26,0.0,0.0,0.0,0.0,94.44444444444444
 917,New York City,New York,New York,35,16,0.0,0.0,0.0,0.0,91.42857142857143
 225,Baton Rouge,Louisiana,Louisiana,33,18,0.0,0.0,0.0,0.0,90.9090909090909
+469,Dallas,Texas,Texas-Houston,32,16,0.0,0.0,0.0,0.0,100.0
+539,Tulsa,Oklahoma,Oklahoma,31,21,0.0,0.0,0.0,0.0,74.19354838709677
 901,Memphis,Tennessee,Tennessee,31,17,0.0,0.0,0.0,0.0,93.54838709677419
 314,St. Louis,Missouri,Missouri,30,15,1.0,0.0,3.3333333333333335,0.0,80.0
-469,Dallas,Texas,Texas-Houston,30,15,0.0,0.0,0.0,0.0,100.0
-539,Tulsa,Oklahoma,Oklahoma,29,19,0.0,0.0,0.0,0.0,72.41379310344827
 404,Atlanta,Georgia,Georgia,29,16,0.0,0.0,0.0,0.0,93.10344827586206
+501,Little Rock,Arkansas,Arkansas,28,14,0.0,0.0,0.0,0.0,92.85714285714286
 580,Lawton,Oklahoma,Oklahoma,28,16,0.0,0.0,0.0,0.0,78.57142857142857
-501,Little Rock,Arkansas,Arkansas,27,13,0.0,0.0,0.0,0.0,92.5925925925926
 678,Atlanta,Georgia,Georgia,25,14,0.0,0.0,0.0,0.0,96.0
 562,Long Beach,California,California,25,6,1.0,0.0,4.0,0.0,96.0
+989,Saginaw,Michigan,Michigan,25,19,0.0,0.0,0.0,0.0,92.0
+773,Chicago,Illinois,Illinois,24,12,0.0,0.0,0.0,0.0,95.83333333333334
 956,Laredo,Texas,Texas-Other,24,16,0.0,0.0,0.0,0.0,95.83333333333334
-989,Saginaw,Michigan,Michigan,24,19,0.0,0.0,0.0,0.0,91.66666666666666
-773,Chicago,Illinois,Illinois,23,12,0.0,0.0,0.0,0.0,95.65217391304348
-479,Fayetteville,Arkansas,Arkansas,22,13,1.0,0.0,4.545454545454546,0.0,100.0
+479,Fayetteville,Arkansas,Arkansas,23,14,1.0,0.0,4.3478260869565215,0.0,100.0
 870,Jonesboro,Arkansas,Arkansas,21,13,0.0,0.0,0.0,0.0,66.66666666666666
+316,Wichita,Kansas,Kansas,20,14,1.0,0.0,5.0,0.0,65.0
 347,New York City,New York,New York,19,15,0.0,0.0,0.0,0.0,94.73684210526315
-316,Wichita,Kansas,Kansas,19,13,1.0,0.0,5.263157894736842,0.0,63.1578947368421
 361,Corpus Christi,Texas,Texas-Other,19,11,0.0,0.0,0.0,0.0,94.73684210526315
-720,Denver,Colorado,Colorado,18,12,0.0,0.0,0.0,0.0,94.44444444444444
 310,Los Angeles,California,California,18,10,1.0,0.0,5.555555555555555,0.0,100.0
+720,Denver,Colorado,Colorado,18,12,0.0,0.0,0.0,0.0,94.44444444444444
 619,San Diego,California,California,17,7,0.0,0.0,0.0,0.0,88.23529411764706
 312,Chicago,Illinois,Illinois,17,12,0.0,0.0,0.0,0.0,82.35294117647058
-616,Grand Rapids,Michigan,Michigan,16,7,1.0,0.0,6.25,0.0,81.25
-516,Long Island,New York,New York,16,9,0.0,0.0,0.0,0.0,100.0
-254,Waco,Texas,Texas-Other,16,10,0.0,0.0,0.0,0.0,81.25
 305,Miami,Florida,Florida,16,11,0.0,0.0,0.0,0.0,81.25
+254,Waco,Texas,Texas-Other,16,10,0.0,0.0,0.0,0.0,81.25
+516,Long Island,New York,New York,16,9,0.0,0.0,0.0,0.0,100.0
+682,Fort Worth,Texas,Texas-Other,16,12,0.0,0.0,0.0,0.0,100.0
+616,Grand Rapids,Michigan,Michigan,16,7,1.0,0.0,6.25,0.0,81.25
 203,Bridgeport,Connecticut,Connecticut,15,9,0.0,0.0,0.0,0.0,100.0
-682,Fort Worth,Texas,Texas-Other,15,11,0.0,0.0,0.0,0.0,100.0
-432,Midland,Texas,Texas-Other,14,6,0.0,0.0,0.0,0.0,100.0
 443,Baltimore,Maryland,Maryland,14,9,0.0,0.0,0.0,0.0,100.0
-706,Augusta,Georgia,Georgia,14,5,0.0,0.0,0.0,0.0,92.85714285714286
-972,Dallas,Texas,Texas-Houston,14,9,0.0,0.0,0.0,0.0,78.57142857142857
 609,Trenton,New Jersey,New Jersey,14,4,0.0,0.0,0.0,0.0,85.71428571428571
+972,Dallas,Texas,Texas-Houston,14,9,0.0,0.0,0.0,0.0,78.57142857142857
+706,Augusta,Georgia,Georgia,14,5,0.0,0.0,0.0,0.0,92.85714285714286
+269,Kalamazoo,Michigan,Michigan,14,7,0.0,0.0,0.0,0.0,64.28571428571429
+432,Midland,Texas,Texas-Other,14,6,0.0,0.0,0.0,0.0,100.0
 510,Oakland,California,California,13,8,0.0,0.0,0.0,0.0,100.0
 303,Denver,Colorado,Colorado,13,9,0.0,0.0,0.0,0.0,100.0
-269,Kalamazoo,Michigan,Michigan,13,7,0.0,0.0,0.0,0.0,69.23076923076923
-323,Los Angeles,California,California,12,7,0.0,0.0,0.0,0.0,91.66666666666666
-662,Tupelo,Mississippi,Mississippi,12,9,0.0,0.0,0.0,0.0,91.66666666666666
+951,Riverside,California,California,12,6,0.0,0.0,0.0,0.0,100.0
 202,Washington,DC,DC,12,6,0.0,0.0,0.0,0.0,83.33333333333334
 919,Raleigh,North Carolina,North Carolina,12,11,0.0,0.0,0.0,0.0,83.33333333333334
-951,Riverside,California,California,12,6,0.0,0.0,0.0,0.0,100.0
-816,Kansas City,Missouri,Missouri,11,7,0.0,0.0,0.0,0.0,90.9090909090909
-601,Jackson,Mississippi,Mississippi,11,9,0.0,0.0,0.0,0.0,90.9090909090909
-502,Louisville,Kentucky,Kentucky,11,8,0.0,0.0,0.0,0.0,90.9090909090909
+662,Tupelo,Mississippi,Mississippi,12,9,0.0,0.0,0.0,0.0,91.66666666666666
+323,Los Angeles,California,California,12,7,0.0,0.0,0.0,0.0,91.66666666666666
 407,Orlando,Florida,Florida,11,6,0.0,0.0,0.0,0.0,100.0
-317,Indianapolis,Indiana,Indiana,11,7,0.0,0.0,0.0,0.0,100.0
-949,Irvine,California,California,11,7,0.0,0.0,0.0,0.0,100.0
-916,Sacramento,California,California,11,7,0.0,0.0,0.0,0.0,72.72727272727273
+702,Las Vegas,Nevada,Nevada,11,8,0.0,0.0,0.0,0.0,90.9090909090909
 704,Charlotte,North Carolina,North Carolina,11,5,0.0,0.0,0.0,0.0,63.63636363636363
-423,Chattanooga,Tennessee,Tennessee,10,5,0.0,0.0,0.0,0.0,100.0
-615,Nashville,Tennessee,Tennessee,10,6,0.0,0.0,0.0,0.0,100.0
-414,Milwaukee,Wisconsin,Wisconsin,10,6,0.0,0.0,0.0,0.0,60.0
-205,Birmingham,Alabama,Alabama,10,8,0.0,0.0,0.0,0.0,90.0
-402,Omaha,Nebraska,Nebraska,10,6,0.0,0.0,0.0,0.0,50.0
-641,Mason City,Iowa,Iowa,10,1,0.0,0.0,0.0,0.0,100.0
-256,Huntsville,Alabama,Alabama,10,5,2.0,0.0,20.0,0.0,90.0
+816,Kansas City,Missouri,Missouri,11,7,0.0,0.0,0.0,0.0,90.9090909090909
+949,Irvine,California,California,11,7,0.0,0.0,0.0,0.0,100.0
+502,Louisville,Kentucky,Kentucky,11,8,0.0,0.0,0.0,0.0,90.9090909090909
+205,Birmingham,Alabama,Alabama,11,9,0.0,0.0,0.0,0.0,90.9090909090909
+317,Indianapolis,Indiana,Indiana,11,7,0.0,0.0,0.0,0.0,100.0
+916,Sacramento,California,California,11,7,0.0,0.0,0.0,0.0,72.72727272727273
+601,Jackson,Mississippi,Mississippi,11,9,0.0,0.0,0.0,0.0,90.9090909090909
 646,New York City,New York,New York,10,7,0.0,0.0,0.0,0.0,100.0
-215,Philadelphia,Pennsylvania,Pennsylvania,10,7,0.0,0.0,0.0,0.0,100.0
-702,Las Vegas,Nevada,Nevada,10,8,0.0,0.0,0.0,0.0,90.0
+641,Mason City,Iowa,Iowa,10,1,0.0,0.0,0.0,0.0,100.0
+703,Arlington,Virginia,Virginia,10,8,0.0,0.0,0.0,0.0,90.0
+615,Nashville,Tennessee,Tennessee,10,6,0.0,0.0,0.0,0.0,100.0
+423,Chattanooga,Tennessee,Tennessee,10,5,0.0,0.0,0.0,0.0,100.0
+414,Milwaukee,Wisconsin,Wisconsin,10,6,0.0,0.0,0.0,0.0,60.0
 803,Columbia,South Carolina,South Carolina,10,4,0.0,0.0,0.0,0.0,80.0
+402,Omaha,Nebraska,Nebraska,10,6,0.0,0.0,0.0,0.0,50.0
+215,Philadelphia,Pennsylvania,Pennsylvania,10,7,0.0,0.0,0.0,0.0,100.0
 315,Syracuse,New York,New York,10,4,0.0,0.0,0.0,0.0,100.0
+843,Charleston,South Carolina,South Carolina,10,6,0.0,0.0,0.0,0.0,90.0
 321,Orlando,Florida,Florida,10,5,0.0,0.0,0.0,0.0,90.0
-630,Chicago,Illinois,Illinois,9,7,0.0,0.0,0.0,0.0,88.88888888888889
-850,Tallahassee,Florida,Florida,9,7,0.0,0.0,0.0,0.0,88.88888888888889
-985,Slidell,Louisiana,Louisiana,9,7,0.0,0.0,0.0,0.0,66.66666666666666
-843,Charleston,South Carolina,South Carolina,9,6,0.0,0.0,0.0,0.0,88.88888888888889
-240,Silver Spring,Maryland,Maryland,9,6,0.0,0.0,0.0,0.0,88.88888888888889
-415,San Francisco,California,California,9,5,0.0,0.0,0.0,0.0,100.0
-703,Arlington,Virginia,Virginia,9,7,0.0,0.0,0.0,0.0,88.88888888888889
+256,Huntsville,Alabama,Alabama,10,5,2.0,0.0,20.0,0.0,90.0
 571,Arlington,Virginia,Virginia,9,8,0.0,0.0,0.0,0.0,100.0
+415,San Francisco,California,California,9,5,0.0,0.0,0.0,0.0,100.0
+850,Tallahassee,Florida,Florida,9,7,0.0,0.0,0.0,0.0,88.88888888888889
+630,Chicago,Illinois,Illinois,9,7,0.0,0.0,0.0,0.0,88.88888888888889
+240,Silver Spring,Maryland,Maryland,9,6,0.0,0.0,0.0,0.0,88.88888888888889
+815,Rockford,Illinois,Illinois,9,6,0.0,0.0,0.0,0.0,88.88888888888889
+985,Slidell,Louisiana,Louisiana,9,7,0.0,0.0,0.0,0.0,66.66666666666666
 904,Jacksonville,Florida,Florida,9,5,0.0,0.0,0.0,0.0,100.0
-231,Traverse City,Michigan,Michigan,8,6,0.0,0.0,0.0,0.0,75.0
 574,South Bend,Indiana,Indiana,8,5,0.0,0.0,0.0,0.0,62.5
-925,Concord,California,California,8,4,0.0,0.0,0.0,0.0,100.0
-719,Colorado Springs,Colorado,Colorado,8,4,0.0,0.0,0.0,0.0,100.0
-815,Rockford,Illinois,Illinois,8,5,0.0,0.0,0.0,0.0,87.5
+231,Traverse City,Michigan,Michigan,8,6,0.0,0.0,0.0,0.0,75.0
 417,Springfield,Missouri,Missouri,8,5,0.0,0.0,0.0,0.0,37.5
-251,Mobile,Alabama,Alabama,8,7,0.0,0.0,0.0,0.0,75.0
-430,Tyler,Texas,Texas-Other,8,1,0.0,0.0,0.0,0.0,100.0
 408,San Jose,California,California,8,6,0.0,0.0,0.0,0.0,87.5
+719,Colorado Springs,Colorado,Colorado,8,4,0.0,0.0,0.0,0.0,100.0
+430,Tyler,Texas,Texas-Other,8,1,0.0,0.0,0.0,0.0,100.0
+925,Concord,California,California,8,4,0.0,0.0,0.0,0.0,100.0
+251,Mobile,Alabama,Alabama,8,7,0.0,0.0,0.0,0.0,75.0
 509,Spokane,Washington,Washington,7,5,0.0,0.0,0.0,0.0,71.42857142857143
-602,Phoenix,Arizona,Arizona,7,6,0.0,0.0,0.0,0.0,57.14285714285714
-513,Cincinnati,Ohio,Ohio,7,5,0.0,0.0,0.0,0.0,85.71428571428571
-808,Honolulu,Hawaii,Hawaii,7,5,0.0,0.0,0.0,0.0,100.0
-830,San Antonio,Texas,Texas-Other,7,2,0.0,0.0,0.0,0.0,71.42857142857143
 334,Montgomery,Alabama,Alabama,7,4,0.0,0.0,0.0,0.0,100.0
-859,Lexington,Kentucky,Kentucky,7,5,0.0,0.0,0.0,0.0,85.71428571428571
 561,West Palm Beach,Florida,Florida,7,5,0.0,0.0,0.0,0.0,100.0
+602,Phoenix,Arizona,Arizona,7,6,0.0,0.0,0.0,0.0,57.14285714285714
 201,Jersey City,New Jersey,New Jersey,7,7,0.0,0.0,0.0,0.0,100.0
-940,Wichita Falls,Texas,Texas-Other,6,4,0.0,0.0,0.0,0.0,66.66666666666666
-620,Wichita,Kansas,Kansas,6,4,0.0,0.0,0.0,0.0,100.0
-716,Buffalo,New York,New York,6,4,0.0,0.0,0.0,0.0,100.0
-412,Pittsburgh,Pennsylvania,Pennsylvania,6,4,0.0,0.0,0.0,0.0,83.33333333333334
-701,Other,Other,Other,6,2,0.0,0.0,0.0,0.0,50.0
-860,Hartford,Connecticut,Connecticut,6,4,0.0,0.0,0.0,0.0,100.0
-708,Chicago,Illinois,Illinois,6,4,0.0,0.0,0.0,0.0,100.0
-954,Fort Lauderdale,Florida,Florida,6,4,0.0,0.0,0.0,0.0,100.0
-732,New Brunswick,New Jersey,New Jersey,6,4,0.0,0.0,0.0,0.0,100.0
-770,Atlanta,Georgia,Georgia,6,3,0.0,0.0,0.0,0.0,100.0
+808,Honolulu,Hawaii,Hawaii,7,5,0.0,0.0,0.0,0.0,100.0
+859,Lexington,Kentucky,Kentucky,7,5,0.0,0.0,0.0,0.0,85.71428571428571
+830,San Antonio,Texas,Texas-Other,7,2,0.0,0.0,0.0,0.0,71.42857142857143
+513,Cincinnati,Ohio,Ohio,7,5,0.0,0.0,0.0,0.0,85.71428571428571
 786,Miami,Florida,Florida,6,5,2.0,1.0,33.33333333333333,50.0,100.0
-980,Charlotte,North Carolina,North Carolina,6,2,0.0,0.0,0.0,0.0,100.0
-239,Naples,Florida,Florida,6,4,0.0,0.0,0.0,0.0,100.0
 806,Lubbock,Texas,Texas-Other,6,5,0.0,0.0,0.0,0.0,83.33333333333334
-612,Other,Other,Other,5,4,0.0,0.0,0.0,0.0,100.0
-216,Cleveland,Ohio,Ohio,5,5,0.0,0.0,0.0,0.0,80.0
-614,Columbus,Ohio,Ohio,5,4,0.0,0.0,0.0,0.0,100.0
-814,Erie,Pennsylvania,Pennsylvania,5,4,0.0,0.0,0.0,0.0,80.0
-618,East St. Louis,Illinois,Illinois,5,4,0.0,0.0,0.0,0.0,80.0
-813,Tampa,Florida,Florida,5,5,0.0,0.0,0.0,0.0,100.0
-410,Baltimore,Maryland,Maryland,5,3,0.0,0.0,0.0,0.0,100.0
-970,Fort Collins,Colorado,Colorado,5,4,0.0,0.0,0.0,0.0,80.0
-714,Anaheim,California,California,5,3,0.0,0.0,0.0,0.0,100.0
-760,Palm Springs,California,California,5,4,0.0,0.0,0.0,0.0,60.0
-213,Los Angeles,California,California,5,5,0.0,0.0,0.0,0.0,80.0
-319,Cedar Rapids,Iowa,Iowa,5,4,0.0,0.0,0.0,0.0,100.0
-219,Gary,Indiana,Indiana,5,3,0.0,0.0,0.0,0.0,100.0
-973,Newark,New Jersey,New Jersey,5,4,1.0,0.0,20.0,0.0,100.0
-913,Other,Other,Other,5,3,0.0,0.0,0.0,0.0,100.0
-530,Chico,California,California,5,4,0.0,0.0,0.0,0.0,100.0
+701,Other,Other,Other,6,2,0.0,0.0,0.0,0.0,50.0
+732,New Brunswick,New Jersey,New Jersey,6,4,0.0,0.0,0.0,0.0,100.0
+860,Hartford,Connecticut,Connecticut,6,4,0.0,0.0,0.0,0.0,100.0
+716,Buffalo,New York,New York,6,4,0.0,0.0,0.0,0.0,100.0
+708,Chicago,Illinois,Illinois,6,4,0.0,0.0,0.0,0.0,100.0
+620,Wichita,Kansas,Kansas,6,4,0.0,0.0,0.0,0.0,100.0
+770,Atlanta,Georgia,Georgia,6,3,0.0,0.0,0.0,0.0,100.0
+913,Other,Other,Other,6,4,0.0,0.0,0.0,0.0,100.0
+980,Charlotte,North Carolina,North Carolina,6,2,0.0,0.0,0.0,0.0,100.0
+412,Pittsburgh,Pennsylvania,Pennsylvania,6,4,0.0,0.0,0.0,0.0,83.33333333333334
+940,Wichita Falls,Texas,Texas-Other,6,4,0.0,0.0,0.0,0.0,66.66666666666666
+954,Fort Lauderdale,Florida,Florida,6,4,0.0,0.0,0.0,0.0,100.0
+973,Newark,New Jersey,New Jersey,6,4,1.0,0.0,16.666666666666664,0.0,100.0
+239,Naples,Florida,Florida,6,4,0.0,0.0,0.0,0.0,100.0
 419,Toledo,Ohio,Ohio,5,2,0.0,0.0,0.0,0.0,100.0
-484,Allentown,Pennsylvania,Pennsylvania,5,2,0.0,0.0,0.0,0.0,100.0
 914,Yonkers,New York,New York,5,4,0.0,0.0,0.0,0.0,100.0
-470,Atlanta,Georgia,Georgia,4,3,0.0,0.0,0.0,0.0,100.0
-540,Roanoke,Virginia,Virginia,4,4,0.0,0.0,0.0,0.0,100.0
+219,Gary,Indiana,Indiana,5,3,0.0,0.0,0.0,0.0,100.0
+714,Anaheim,California,California,5,3,0.0,0.0,0.0,0.0,100.0
+410,Baltimore,Maryland,Maryland,5,3,0.0,0.0,0.0,0.0,100.0
+484,Allentown,Pennsylvania,Pennsylvania,5,2,0.0,0.0,0.0,0.0,100.0
+216,Cleveland,Ohio,Ohio,5,5,0.0,0.0,0.0,0.0,80.0
+618,East St. Louis,Illinois,Illinois,5,4,0.0,0.0,0.0,0.0,80.0
+530,Chico,California,California,5,4,0.0,0.0,0.0,0.0,100.0
+614,Columbus,Ohio,Ohio,5,4,0.0,0.0,0.0,0.0,100.0
+612,Other,Other,Other,5,4,0.0,0.0,0.0,0.0,100.0
+760,Palm Springs,California,California,5,4,0.0,0.0,0.0,0.0,60.0
+765,Muncie,Indiana,Indiana,5,4,0.0,0.0,0.0,0.0,80.0
+814,Erie,Pennsylvania,Pennsylvania,5,4,0.0,0.0,0.0,0.0,80.0
+970,Fort Collins,Colorado,Colorado,5,4,0.0,0.0,0.0,0.0,80.0
+813,Tampa,Florida,Florida,5,5,0.0,0.0,0.0,0.0,100.0
+319,Cedar Rapids,Iowa,Iowa,5,4,0.0,0.0,0.0,0.0,100.0
+213,Los Angeles,California,California,5,5,0.0,0.0,0.0,0.0,80.0
 858,San Diego,California,California,4,3,0.0,0.0,0.0,0.0,25.0
-740,Newark,Ohio,Ohio,4,3,0.0,0.0,0.0,0.0,100.0
 937,Dayton,Ohio,Ohio,4,1,0.0,0.0,0.0,0.0,100.0
-228,Biloxi,Mississippi,Mississippi,4,3,0.0,0.0,0.0,0.0,100.0
-909,San Bernardino,California,California,4,4,0.0,0.0,0.0,0.0,100.0
-570,Scranton,Pennsylvania,Pennsylvania,4,4,0.0,0.0,0.0,0.0,100.0
-757,Virginia Beach,Virginia,Virginia,4,2,0.0,0.0,0.0,0.0,100.0
-765,Muncie,Indiana,Indiana,4,3,0.0,0.0,0.0,0.0,75.0
-262,Racine,Wisconsin,Wisconsin,4,2,0.0,0.0,0.0,0.0,100.0
-856,Camden,New Jersey,New Jersey,4,3,0.0,0.0,0.0,0.0,100.0
-505,Albuquerque,New Mexico,New Mexico,4,3,0.0,0.0,0.0,0.0,100.0
 270,Bowling Green,Kentucky,Kentucky,4,4,0.0,0.0,0.0,0.0,100.0
-801,Salt Lake City,Utah,Utah,4,3,0.0,0.0,0.0,0.0,100.0
-508,Worcester,Massachusetts,Massachusetts,4,4,0.0,0.0,0.0,0.0,75.0
-480,Phoenix,Arizona,Arizona,4,4,0.0,0.0,0.0,0.0,100.0
-302,Wilmington,Delaware,Delaware,4,4,0.0,0.0,0.0,0.0,100.0
 818,Los Angeles,California,California,4,4,0.0,0.0,0.0,0.0,100.0
 828,Asheville,North Carolina,North Carolina,4,3,0.0,0.0,0.0,0.0,75.0
+470,Atlanta,Georgia,Georgia,4,3,0.0,0.0,0.0,0.0,100.0
+801,Salt Lake City,Utah,Utah,4,3,0.0,0.0,0.0,0.0,100.0
+856,Camden,New Jersey,New Jersey,4,3,0.0,0.0,0.0,0.0,100.0
 775,Reno,Nevada,Nevada,4,2,0.0,0.0,0.0,0.0,50.0
+740,Newark,Ohio,Ohio,4,3,0.0,0.0,0.0,0.0,100.0
+262,Racine,Wisconsin,Wisconsin,4,2,0.0,0.0,0.0,0.0,100.0
+757,Virginia Beach,Virginia,Virginia,4,2,0.0,0.0,0.0,0.0,100.0
+909,San Bernardino,California,California,4,4,0.0,0.0,0.0,0.0,100.0
+302,Wilmington,Delaware,Delaware,4,4,0.0,0.0,0.0,0.0,100.0
+505,Albuquerque,New Mexico,New Mexico,4,3,0.0,0.0,0.0,0.0,100.0
+508,Worcester,Massachusetts,Massachusetts,4,4,0.0,0.0,0.0,0.0,75.0
+540,Roanoke,Virginia,Virginia,4,4,0.0,0.0,0.0,0.0,100.0
+228,Biloxi,Mississippi,Mississippi,4,3,0.0,0.0,0.0,0.0,100.0
 661,Bakersfield,California,California,4,2,0.0,0.0,0.0,0.0,50.0
+570,Scranton,Pennsylvania,Pennsylvania,4,4,0.0,0.0,0.0,0.0,100.0
+480,Phoenix,Arizona,Arizona,4,4,0.0,0.0,0.0,0.0,100.0
 915,El Paso,Texas,Texas-Other,3,3,0.0,0.0,0.0,0.0,100.0
-769,Other,Other,Other,3,1,0.0,0.0,0.0,0.0,100.0
 518,Other,Other,Other,3,3,0.0,0.0,0.0,0.0,66.66666666666666
-929,New York City,New York,New York,3,3,0.0,0.0,0.0,0.0,100.0
-503,Portland,Oregon,Oregon,3,2,0.0,0.0,0.0,0.0,100.0
-217,Springfield,Illinois,Illinois,3,3,0.0,0.0,0.0,0.0,100.0
-731,Jackson,Tennessee,Tennessee,3,2,0.0,0.0,0.0,0.0,100.0
-541,Other,Other,Other,3,3,0.0,0.0,0.0,0.0,100.0
 440,Cleveland,Ohio,Ohio,3,3,0.0,0.0,0.0,0.0,100.0
+267,Philadelphia,Pennsylvania,Pennsylvania,3,3,0.0,0.0,0.0,0.0,66.66666666666666
+360,Bellingham,Washington,Washington,3,1,0.0,0.0,0.0,0.0,33.33333333333333
+573,Columbia,Missouri,Missouri,3,3,1.0,0.0,33.33333333333333,0.0,100.0
+888,Toll-Free,Unknown,Other,3,1,0.0,0.0,0.0,0.0,0.0
+603,Manchester,New Hampshire,New Hampshire,3,2,0.0,0.0,0.0,0.0,66.66666666666666
+260,Fort Wayne,Indiana,Indiana,3,2,0.0,0.0,0.0,0.0,100.0
 336,Greensboro,North Carolina,North Carolina,3,2,0.0,0.0,0.0,0.0,100.0
+541,Other,Other,Other,3,3,0.0,0.0,0.0,0.0,100.0
+769,Other,Other,Other,3,1,0.0,0.0,0.0,0.0,100.0
+731,Jackson,Tennessee,Tennessee,3,2,0.0,0.0,0.0,0.0,100.0
+906,Marquette,Michigan,Michigan,3,2,0.0,0.0,0.0,0.0,100.0
+572,Other,Other,Other,3,1,0.0,0.0,0.0,0.0,100.0
+503,Portland,Oregon,Oregon,3,2,0.0,0.0,0.0,0.0,100.0
+718,New York City,New York,New York,3,2,0.0,0.0,0.0,0.0,100.0
+657,Anaheim,California,California,3,1,0.0,0.0,0.0,0.0,100.0
 865,Knoxville,Tennessee,Tennessee,3,2,0.0,0.0,0.0,0.0,100.0
+217,Springfield,Illinois,Illinois,3,3,0.0,0.0,0.0,0.0,100.0
 928,Flagstaff,Arizona,Arizona,3,2,0.0,0.0,0.0,0.0,100.0
 863,Other,Other,Other,3,2,0.0,0.0,0.0,0.0,100.0
-260,Fort Wayne,Indiana,Indiana,3,2,0.0,0.0,0.0,0.0,100.0
-360,Bellingham,Washington,Washington,3,1,0.0,0.0,0.0,0.0,33.33333333333333
-888,Toll-Free,Unknown,Other,3,1,0.0,0.0,0.0,0.0,0.0
-267,Philadelphia,Pennsylvania,Pennsylvania,3,3,0.0,0.0,0.0,0.0,66.66666666666666
-657,Anaheim,California,California,3,1,0.0,0.0,0.0,0.0,100.0
-572,Other,Other,Other,3,1,0.0,0.0,0.0,0.0,100.0
+929,New York City,New York,New York,3,3,0.0,0.0,0.0,0.0,100.0
 434,Charlottesville,Virginia,Virginia,3,1,0.0,0.0,0.0,0.0,0.0
-906,Marquette,Michigan,Michigan,3,2,0.0,0.0,0.0,0.0,100.0
 585,Rochester,New York,New York,3,2,0.0,0.0,0.0,0.0,100.0
-603,Manchester,New Hampshire,New Hampshire,3,2,0.0,0.0,0.0,0.0,66.66666666666666
-718,New York City,New York,New York,3,2,0.0,0.0,0.0,0.0,100.0
-945,Other,Other,Other,2,2,0.0,0.0,0.0,0.0,50.0
-207,Portland,Maine,Maine,2,1,0.0,0.0,0.0,0.0,100.0
-857,Boston,Massachusetts,Massachusetts,2,2,0.0,0.0,0.0,0.0,100.0
+912,Savannah,Georgia,Georgia,2,1,0.0,0.0,0.0,0.0,100.0
 907,Anchorage,Alaska,Alaska,2,2,0.0,0.0,0.0,0.0,100.0
+908,Elizabeth,New Jersey,New Jersey,2,2,0.0,0.0,0.0,0.0,100.0
 931,Clarksville,Tennessee,Tennessee,2,2,0.0,0.0,0.0,0.0,100.0
 978,Lowell,Massachusetts,Massachusetts,2,2,0.0,0.0,0.0,0.0,100.0
-862,Newark,New Jersey,New Jersey,2,2,0.0,0.0,0.0,0.0,100.0
-908,Elizabeth,New Jersey,New Jersey,2,2,0.0,0.0,0.0,0.0,100.0
-910,Fayetteville,North Carolina,North Carolina,2,2,0.0,0.0,0.0,0.0,100.0
-912,Savannah,Georgia,Georgia,2,1,0.0,0.0,0.0,0.0,100.0
-847,Chicago,Illinois,Illinois,2,2,0.0,0.0,0.0,0.0,100.0
-941,Sarasota,Florida,Florida,2,1,0.0,0.0,0.0,0.0,100.0
+207,Portland,Maine,Maine,2,1,0.0,0.0,0.0,0.0,100.0
 898,Other,Other,Other,2,1,0.0,0.0,0.0,0.0,0.0
+847,Chicago,Illinois,Illinois,2,2,0.0,0.0,0.0,0.0,100.0
+857,Boston,Massachusetts,Massachusetts,2,2,0.0,0.0,0.0,0.0,100.0
+945,Other,Other,Other,2,2,0.0,0.0,0.0,0.0,50.0
+941,Sarasota,Florida,Florida,2,1,0.0,0.0,0.0,0.0,100.0
+862,Newark,New Jersey,New Jersey,2,2,0.0,0.0,0.0,0.0,100.0
+910,Fayetteville,North Carolina,North Carolina,2,2,0.0,0.0,0.0,0.0,100.0
 650,San Mateo,California,California,2,2,0.0,0.0,0.0,0.0,100.0
 805,Other,Other,Other,2,2,0.0,0.0,0.0,0.0,100.0
-224,Other,Other,Other,2,1,0.0,0.0,0.0,0.0,100.0
-573,Columbia,Missouri,Missouri,2,2,1.0,0.0,50.0,0.0,100.0
-253,Tacoma,Washington,Washington,2,2,0.0,0.0,0.0,0.0,100.0
-636,Other,Other,Other,2,1,0.0,0.0,0.0,0.0,100.0
-515,Des Moines,Iowa,Iowa,2,2,0.0,0.0,0.0,0.0,100.0
-304,Charleston,West Virginia,West Virginia,2,2,0.0,0.0,0.0,0.0,100.0
-478,Macon,Georgia,Georgia,2,1,0.0,0.0,0.0,0.0,100.0
 660,Sedalia,Missouri,Missouri,2,2,0.0,0.0,0.0,0.0,100.0
-223,Lancaster,Pennsylvania,Pennsylvania,2,1,0.0,0.0,0.0,0.0,100.0
-707,Santa Rosa,California,California,2,2,0.0,0.0,0.0,0.0,100.0
-548,Ontario,Canada,Canada,2,1,0.0,0.0,0.0,0.0,0.0
-717,Harrisburg,Pennsylvania,Pennsylvania,2,2,0.0,0.0,0.0,0.0,100.0
-332,New York City,New York,New York,2,1,0.0,0.0,0.0,0.0,100.0
-727,St. Petersburg,Florida,Florida,2,2,0.0,0.0,0.0,0.0,100.0
+304,Charleston,West Virginia,West Virginia,2,2,0.0,0.0,0.0,0.0,100.0
 325,Abilene,Texas,Texas-Other,2,2,0.0,0.0,0.0,0.0,50.0
+332,New York City,New York,New York,2,1,0.0,0.0,0.0,0.0,100.0
+406,Billings,Montana,Montana,2,1,1.0,1.0,50.0,100.0,100.0
+253,Tacoma,Washington,Washington,2,2,0.0,0.0,0.0,0.0,100.0
+478,Macon,Georgia,Georgia,2,1,0.0,0.0,0.0,0.0,100.0
+514,Other,Other,Other,2,1,0.0,0.0,0.0,0.0,100.0
+515,Des Moines,Iowa,Iowa,2,2,0.0,0.0,0.0,0.0,100.0
 531,Other,Other,Other,2,2,0.0,0.0,0.0,0.0,100.0
+224,Other,Other,Other,2,1,0.0,0.0,0.0,0.0,100.0
+223,Lancaster,Pennsylvania,Pennsylvania,2,1,0.0,0.0,0.0,0.0,100.0
+636,Other,Other,Other,2,1,0.0,0.0,0.0,0.0,100.0
+548,Ontario,Canada,Canada,2,1,0.0,0.0,0.0,0.0,0.0
+707,Santa Rosa,California,California,2,2,0.0,0.0,0.0,0.0,100.0
+727,St. Petersburg,Florida,Florida,2,2,0.0,0.0,0.0,0.0,100.0
 754,Fort Lauderdale,Florida,Florida,2,2,0.0,0.0,0.0,0.0,50.0
 772,Stuart,Florida,Florida,2,2,0.0,0.0,0.0,0.0,100.0
-514,Other,Other,Other,2,1,0.0,0.0,0.0,0.0,100.0
-406,Billings,Montana,Montana,2,1,1.0,1.0,50.0,100.0,100.0
-252,Rocky Mount,North Carolina,North Carolina,1,1,0.0,0.0,0.0,0.0,100.0
-475,Bridgeport,Connecticut,Connecticut,1,1,0.0,0.0,0.0,0.0,0.0
-507,Rochester,Minnesota,Minnesota,1,1,0.0,0.0,0.0,0.0,100.0
-424,Los Angeles,California,California,1,1,0.0,0.0,0.0,0.0,100.0
+717,Harrisburg,Pennsylvania,Pennsylvania,2,2,0.0,0.0,0.0,0.0,100.0
+864,Greenville,South Carolina,South Carolina,1,1,0.0,0.0,0.0,0.0,100.0
 386,Daytona Beach,Florida,Florida,1,1,0.0,0.0,0.0,0.0,100.0
+252,Rocky Mount,North Carolina,North Carolina,1,1,0.0,0.0,0.0,0.0,100.0
+424,Los Angeles,California,California,1,1,0.0,0.0,0.0,0.0,100.0
 413,Springfield,Massachusetts,Massachusetts,1,1,0.0,0.0,0.0,0.0,100.0
+845,Poughkeepsie,New York,New York,1,1,0.0,0.0,0.0,0.0,0.0
 403,Calgary,Canada,Canada,1,1,0.0,0.0,0.0,0.0,100.0
 401,Providence,Rhode Island,Rhode Island,1,1,0.0,0.0,0.0,0.0,100.0
-952,Minneapolis,Minnesota,Minnesota,1,1,0.0,0.0,0.0,0.0,100.0
 385,Other,Other,Other,1,1,0.0,0.0,0.0,0.0,100.0
+952,Minneapolis,Minnesota,Minnesota,1,1,0.0,0.0,0.0,0.0,100.0
+747,Los Angeles,California,California,1,1,0.0,0.0,0.0,0.0,100.0
 377,Other,Other,Other,1,1,0.0,0.0,0.0,0.0,0.0
 352,Other,Other,Other,1,1,0.0,0.0,0.0,0.0,100.0
 330,Other,Other,Other,1,1,0.0,0.0,0.0,0.0,100.0
+209,Other,Other,Other,1,1,0.0,0.0,0.0,0.0,100.0
 309,Peoria,Illinois,Illinois,1,1,0.0,0.0,0.0,0.0,100.0
-984,Raleigh,North Carolina,North Carolina,1,1,0.0,0.0,0.0,0.0,100.0
 307,Other,Other,Other,1,1,0.0,0.0,0.0,0.0,100.0
-920,Other,Other,Other,1,1,0.0,0.0,0.0,0.0,100.0
-551,Jersey City,New Jersey,New Jersey,1,1,0.0,0.0,0.0,0.0,100.0
-519,Other,Other,Other,1,1,0.0,0.0,0.0,0.0,0.0
-206,Other,Other,Other,1,1,0.0,0.0,0.0,0.0,100.0
+984,Raleigh,North Carolina,North Carolina,1,1,0.0,0.0,0.0,0.0,100.0
 787,San Juan,Puerto Rico,Puerto Rico,1,1,0.0,0.0,0.0,0.0,0.0
-747,Los Angeles,California,California,1,1,0.0,0.0,0.0,0.0,100.0
-845,Poughkeepsie,New York,New York,1,1,0.0,0.0,0.0,0.0,0.0
-737,Austin,Texas,Texas-Other,1,1,0.0,0.0,0.0,0.0,100.0
-726,San Antonio,Texas,Texas-Other,1,1,0.0,0.0,0.0,0.0,100.0
-724,Pittsburgh,Pennsylvania,Pennsylvania,1,1,0.0,0.0,0.0,0.0,100.0
-712,Other,Other,Other,1,1,0.0,0.0,0.0,0.0,100.0
-864,Greenville,South Carolina,South Carolina,1,1,0.0,0.0,0.0,0.0,100.0
+475,Bridgeport,Connecticut,Connecticut,1,1,0.0,0.0,0.0,0.0,0.0
+920,Other,Other,Other,1,1,0.0,0.0,0.0,0.0,100.0
+507,Rochester,Minnesota,Minnesota,1,1,0.0,0.0,0.0,0.0,100.0
+575,Roswell,New Mexico,New Mexico,1,1,0.0,0.0,0.0,0.0,0.0
 651,Other,Other,Other,1,1,0.0,0.0,0.0,0.0,100.0
 872,Chicago,Illinois,Illinois,1,1,0.0,0.0,0.0,0.0,100.0
+712,Other,Other,Other,1,1,0.0,0.0,0.0,0.0,100.0
 608,Madison,Wisconsin,Wisconsin,1,1,0.0,0.0,0.0,0.0,100.0
-209,Other,Other,Other,1,1,0.0,0.0,0.0,0.0,100.0
-902,Other,Other,Other,1,1,0.0,0.0,0.0,0.0,100.0
 607,Other,Other,Other,1,1,0.0,0.0,0.0,0.0,0.0
+902,Other,Other,Other,1,1,0.0,0.0,0.0,0.0,100.0
+206,Other,Other,Other,1,1,0.0,0.0,0.0,0.0,100.0
 183,Other,Other,Other,1,1,0.0,0.0,0.0,0.0,0.0
-575,Roswell,New Mexico,New Mexico,1,1,0.0,0.0,0.0,0.0,0.0
 563,Other,Other,Other,1,1,0.0,0.0,0.0,0.0,100.0
+737,Austin,Texas,Texas-Other,1,1,0.0,0.0,0.0,0.0,100.0
+724,Pittsburgh,Pennsylvania,Pennsylvania,1,1,0.0,0.0,0.0,0.0,100.0
 559,Fresno,California,California,1,1,0.0,0.0,0.0,0.0,100.0
+551,Jersey City,New Jersey,New Jersey,1,1,0.0,0.0,0.0,0.0,100.0
 804,Richmond,Virginia,Virginia,1,1,0.0,0.0,0.0,0.0,0.0
 535,Other,Other,Other,1,1,0.0,0.0,0.0,0.0,0.0
+726,San Antonio,Texas,Texas-Other,1,1,0.0,0.0,0.0,0.0,100.0
 524,Chicago,Illinois,Illinois,1,1,0.0,0.0,0.0,0.0,0.0
+519,Other,Other,Other,1,1,0.0,0.0,0.0,0.0,0.0
 084,Other,Other,Other,1,1,0.0,0.0,0.0,0.0,0.0

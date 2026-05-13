@@ -61,7 +61,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_booking_window_analysis" FOR DELETE 
 
 
 
--- phiwe_bookings (78 rows)
+-- phiwe_bookings (80 rows)
 
 DROP TABLE IF EXISTS "phiwe_bookings" CASCADE;
 CREATE TABLE "phiwe_bookings" (
@@ -182,7 +182,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_call_timing_optimized" FOR DELETE TO
 
 
 
--- phiwe_calls (8296 rows)
+-- phiwe_calls (8425 rows)
 
 DROP TABLE IF EXISTS "phiwe_calls" CASCADE;
 CREATE TABLE "phiwe_calls" (
@@ -235,7 +235,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_campaign_health" FOR DELETE TO anon 
 
 
 
--- phiwe_cancellation_analysis (53 rows)
+-- phiwe_cancellation_analysis (54 rows)
 
 DROP TABLE IF EXISTS "phiwe_cancellation_analysis" CASCADE;
 CREATE TABLE "phiwe_cancellation_analysis" (
@@ -301,7 +301,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_conversion_trends" FOR DELETE TO ano
 
 
 
--- phiwe_daily_performance (54 rows)
+-- phiwe_daily_performance (55 rows)
 
 DROP TABLE IF EXISTS "phiwe_daily_performance" CASCADE;
 CREATE TABLE "phiwe_daily_performance" (
@@ -347,7 +347,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_day_of_week_performance" FOR DELETE 
 
 
 
--- phiwe_flexologist_performance (33 rows)
+-- phiwe_flexologist_performance (34 rows)
 
 DROP TABLE IF EXISTS "phiwe_flexologist_performance" CASCADE;
 CREATE TABLE "phiwe_flexologist_performance" (
@@ -388,7 +388,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_forecast_30_day" FOR DELETE TO anon 
 
 
 
--- phiwe_lead_funnel (78 rows)
+-- phiwe_lead_funnel (80 rows)
 
 DROP TABLE IF EXISTS "phiwe_lead_funnel" CASCADE;
 CREATE TABLE "phiwe_lead_funnel" (
@@ -453,7 +453,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_loyalsnap_engagement" FOR DELETE TO 
 
 
 
--- phiwe_pipeline (8 rows)
+-- phiwe_pipeline (9 rows)
 
 DROP TABLE IF EXISTS "phiwe_pipeline" CASCADE;
 CREATE TABLE "phiwe_pipeline" (
@@ -532,7 +532,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_unattributed_flags" FOR DELETE TO an
 
 
 
--- phiwe_unified_leads (82 rows)
+-- phiwe_unified_leads (84 rows)
 
 DROP TABLE IF EXISTS "phiwe_unified_leads" CASCADE;
 CREATE TABLE "phiwe_unified_leads" (
