@@ -1,4 +1,4 @@
 scenario,probability,bookings,shows,revenue_conservative,revenue_average,confidence,drivers
-pessimistic,0.25,34,12,19368,38736,medium,"High-risk pipeline cancels, Brighton stays dormant, no improvements"
-likely,0.5,40,24,38736,77472,high,"Current trends continue, confirmation calls improve, Houston stable"
-optimistic,0.25,55,40,64560,129120,medium,"All improvements executed, Brighton activated, Houston test succeeds"
+pessimistic,0.25,15,4,6456,12912,medium,"High-risk pipeline cancels, Brighton stays dormant, no improvements"
+likely,0.5,18,9,14526,29052,high,"Current trends continue, confirmation calls improve, Houston stable"
+optimistic,0.25,25,15,24210,48420,medium,"All improvements executed, Brighton activated, Houston test succeeds"

@@ -102,7 +102,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_bookings" FOR DELETE TO anon USING (
 
 
 
--- phiwe_by_area_code (269 rows)
+-- phiwe_by_area_code (271 rows)
 
 DROP TABLE IF EXISTS "phiwe_by_area_code" CASCADE;
 CREATE TABLE "phiwe_by_area_code" (
@@ -182,7 +182,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_call_timing_optimized" FOR DELETE TO
 
 
 
--- phiwe_calls (8425 rows)
+-- phiwe_calls (8744 rows)
 
 DROP TABLE IF EXISTS "phiwe_calls" CASCADE;
 CREATE TABLE "phiwe_calls" (
@@ -301,7 +301,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_conversion_trends" FOR DELETE TO ano
 
 
 
--- phiwe_daily_performance (55 rows)
+-- phiwe_daily_performance (57 rows)
 
 DROP TABLE IF EXISTS "phiwe_daily_performance" CASCADE;
 CREATE TABLE "phiwe_daily_performance" (
@@ -453,7 +453,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_loyalsnap_engagement" FOR DELETE TO 
 
 
 
--- phiwe_pipeline (9 rows)
+-- phiwe_pipeline (8 rows)
 
 DROP TABLE IF EXISTS "phiwe_pipeline" CASCADE;
 CREATE TABLE "phiwe_pipeline" (

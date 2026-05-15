@@ -159,26 +159,48 @@ class DataValidator:
         }
     
     def _load_manual_calls(self):
-        """Load manual call tracking sheets"""
+        """Load manual call tracking sheets (Months 1–3)."""
+        sheets = []
         try:
-            # Try to load Month 1 and Month 2 sheets
-            calls_m1 = pd.read_excel(
-                self.manual_tracker_path,
-                sheet_name='Phiwe Calls - Month 1 - Daily C'
-            )
-            
-            try:
-                calls_m2 = pd.read_excel(
-                    self.manual_tracker_path,
-                    sheet_name='Phiwe Calls - Month 2 - Daily C'
-                )
-                return pd.concat([calls_m1, calls_m2], ignore_index=True)
-            except:
-                return calls_m1
-                
+            m1 = pd.read_excel(self.manual_tracker_path,
+                               sheet_name='Phiwe Calls - Month 1 - Daily C')
+            m1 = m1.dropna(subset=['Date'])
+            m1['_month'] = 1
+            sheets.append(m1)
         except Exception as e:
-            logger.warning(f"Could not load manual calls: {e}")
+            logger.warning(f"Could not load Month 1 calls: {e}")
+
+        try:
+            m2 = pd.read_excel(self.manual_tracker_path,
+                               sheet_name='Phiwe Calls - Month 2 - Daily C')
+            m2 = m2.dropna(subset=['Date'])
+            m2['_month'] = 2
+            sheets.append(m2)
+        except Exception as e:
+            logger.warning(f"Could not load Month 2 calls: {e}")
+
+        try:
+            # Month 3 has a 3-row preamble; actual headers are at row index 3
+            m3 = pd.read_excel(self.manual_tracker_path,
+                               sheet_name='Phiwe Calls - Month 3 - Daily C',
+                               header=3)
+            m3 = m3.dropna(subset=['Date'])
+            m3 = m3.rename(columns={
+                'Lead Name':   'Lead Name',   # same
+                'Outcome ▼':   'Call Outcome',
+                'Location ▼':  'Location',
+                'Auto: Status': 'Auto_Status',
+            })
+            m3['_month'] = 3
+            sheets.append(m3)
+        except Exception as e:
+            logger.warning(f"Could not load Month 3 calls: {e}")
+
+        if not sheets:
+            logger.warning("Could not load any manual call sheets")
             return None
+
+        return pd.concat(sheets, ignore_index=True)
     
     def _load_manual_appointments(self):
         """Load manual appointment tracking"""

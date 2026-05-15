@@ -68,11 +68,38 @@ class DataExtractor:
         return calls
     
     def _extract_bookings(self, xl):
-        """Extract booking events log"""
+        """Extract booking events log, falling back to the most recent previous workbook if empty."""
         logger.info("Extracting bookings...")
-        
+
         bookings = pd.read_excel(xl, sheet_name='booking_events_log')
-        
+
+        if len(bookings) == 0:
+            logger.warning("  booking_events_log is empty — searching previous workbooks for booking data...")
+            import re
+            raw_dir = self.workbook_path.parent
+            current_name = self.workbook_path.name
+            date_pat = re.compile(r'(\d{4}-\d{2}-\d{2})')
+            cur_match = date_pat.search(current_name)
+            cur_date = cur_match.group(1) if cur_match else ''
+
+            candidates = sorted([
+                f for f in raw_dir.glob('Stretchlab_B2C_DB_Phiwe_*.xlsx')
+                if f.name != current_name
+            ], reverse=True)
+
+            for candidate in candidates:
+                try:
+                    prev = pd.read_excel(candidate, sheet_name='booking_events_log')
+                    if len(prev) > 0:
+                        logger.warning(f"  Falling back to {candidate.name} ({len(prev):,} booking events)")
+                        bookings = prev
+                        break
+                except Exception:
+                    continue
+
+            if len(bookings) == 0:
+                logger.error("  No booking data found in any workbook — pipeline will be incomplete")
+
         logger.info(f"  Extracted {len(bookings):,} booking events")
         return bookings
     
