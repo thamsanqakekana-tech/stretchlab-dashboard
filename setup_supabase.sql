@@ -61,7 +61,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_booking_window_analysis" FOR DELETE 
 
 
 
--- phiwe_bookings (80 rows)
+-- phiwe_bookings (81 rows)
 
 DROP TABLE IF EXISTS "phiwe_bookings" CASCADE;
 CREATE TABLE "phiwe_bookings" (
@@ -347,7 +347,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_day_of_week_performance" FOR DELETE 
 
 
 
--- phiwe_flexologist_performance (34 rows)
+-- phiwe_flexologist_performance (35 rows)
 
 DROP TABLE IF EXISTS "phiwe_flexologist_performance" CASCADE;
 CREATE TABLE "phiwe_flexologist_performance" (
@@ -388,7 +388,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_forecast_30_day" FOR DELETE TO anon 
 
 
 
--- phiwe_lead_funnel (80 rows)
+-- phiwe_lead_funnel (81 rows)
 
 DROP TABLE IF EXISTS "phiwe_lead_funnel" CASCADE;
 CREATE TABLE "phiwe_lead_funnel" (
@@ -453,7 +453,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_loyalsnap_engagement" FOR DELETE TO 
 
 
 
--- phiwe_pipeline (8 rows)
+-- phiwe_pipeline (9 rows)
 
 DROP TABLE IF EXISTS "phiwe_pipeline" CASCADE;
 CREATE TABLE "phiwe_pipeline" (
@@ -511,7 +511,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_revenue_intelligence" FOR DELETE TO 
 
 
 
--- phiwe_unattributed_flags (80 rows)
+-- phiwe_unattributed_flags (81 rows)
 
 DROP TABLE IF EXISTS "phiwe_unattributed_flags" CASCADE;
 CREATE TABLE "phiwe_unattributed_flags" (
@@ -532,7 +532,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_unattributed_flags" FOR DELETE TO an
 
 
 
--- phiwe_unified_leads (84 rows)
+-- phiwe_unified_leads (85 rows)
 
 DROP TABLE IF EXISTS "phiwe_unified_leads" CASCADE;
 CREATE TABLE "phiwe_unified_leads" (
