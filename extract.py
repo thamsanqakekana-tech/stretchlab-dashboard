@@ -106,9 +106,11 @@ class DataExtractor:
     def _extract_first_visits(self, xl):
         """Extract first visits"""
         logger.info("Extracting first visits...")
-        
+
         first_visits = pd.read_excel(xl, sheet_name='first_visits')
-        
+        # Normalize column names: some exports use newlines instead of spaces
+        first_visits.columns = first_visits.columns.str.replace('\n', ' ', regex=False)
+
         logger.info(f"  Extracted {len(first_visits):,} first visit records")
         return first_visits
     

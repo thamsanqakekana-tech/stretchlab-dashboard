@@ -1,10 +1,10 @@
 metric,value
-total_bookings,80.0
-resolved_count,65.0
+total_bookings,81.0
+resolved_count,66.0
 total_shows,26.0
 total_calls,8744.0
 total_cost,3500.0
-cost_per_booking,43.75
+cost_per_booking,43.21
 cost_per_show,134.62
 intro_price,69.0
 revenue_actual,1794.0
@@ -22,5 +22,5 @@ cac_actual,134.62
 cac_target,45.0
 cac_gap,89.62
 shows_needed_for_target,77.8
-conversion_rate,0.0091
-show_rate,0.4
+conversion_rate,0.0093
+show_rate,0.3939
