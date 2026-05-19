@@ -10,11 +10,11 @@ CREATE TABLE "phiwe_benchmarks_comparison" (
   id BIGSERIAL PRIMARY KEY,
   "metric" TEXT,
   "actual_value" NUMERIC,
-  "actual_pct" TEXT,
+  "actual_pct" NUMERIC,
   "benchmark_level" TEXT,
-  "benchmark_pct" TEXT,
+  "benchmark_pct" NUMERIC,
   "rank" TEXT,
-  "gap_pct" TEXT,
+  "gap_pct" NUMERIC,
   "status" TEXT,
   "icon" TEXT
 );
@@ -61,7 +61,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_booking_window_analysis" FOR DELETE 
 
 
 
--- phiwe_bookings (81 rows)
+-- phiwe_bookings (82 rows)
 
 DROP TABLE IF EXISTS "phiwe_bookings" CASCADE;
 CREATE TABLE "phiwe_bookings" (
@@ -92,7 +92,7 @@ CREATE TABLE "phiwe_bookings" (
   "state" TEXT,
   "region" TEXT,
   "booking_day_of_week" TEXT,
-  "booking_hour" INTEGER,
+  "booking_hour" TEXT,
   "days_to_booking" INTEGER
 );
 ALTER TABLE "phiwe_bookings" ENABLE ROW LEVEL SECURITY;
@@ -102,7 +102,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_bookings" FOR DELETE TO anon USING (
 
 
 
--- phiwe_by_area_code (271 rows)
+-- phiwe_by_area_code (272 rows)
 
 DROP TABLE IF EXISTS "phiwe_by_area_code" CASCADE;
 CREATE TABLE "phiwe_by_area_code" (
@@ -147,7 +147,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_by_studio" FOR DELETE TO anon USING 
 
 
 
--- phiwe_call_timing (50 rows)
+-- phiwe_call_timing (53 rows)
 
 DROP TABLE IF EXISTS "phiwe_call_timing" CASCADE;
 CREATE TABLE "phiwe_call_timing" (
@@ -164,7 +164,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_call_timing" FOR DELETE TO anon USIN
 
 
 
--- phiwe_call_timing_optimized (50 rows)
+-- phiwe_call_timing_optimized (53 rows)
 
 DROP TABLE IF EXISTS "phiwe_call_timing_optimized" CASCADE;
 CREATE TABLE "phiwe_call_timing_optimized" (
@@ -182,7 +182,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_call_timing_optimized" FOR DELETE TO
 
 
 
--- phiwe_calls (8744 rows)
+-- phiwe_calls (9082 rows)
 
 DROP TABLE IF EXISTS "phiwe_calls" CASCADE;
 CREATE TABLE "phiwe_calls" (
@@ -235,7 +235,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_campaign_health" FOR DELETE TO anon 
 
 
 
--- phiwe_cancellation_analysis (54 rows)
+-- phiwe_cancellation_analysis (59 rows)
 
 DROP TABLE IF EXISTS "phiwe_cancellation_analysis" CASCADE;
 CREATE TABLE "phiwe_cancellation_analysis" (
@@ -260,7 +260,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_cancellation_analysis" FOR DELETE TO
 
 
 
--- phiwe_cohort_analysis (4 rows)
+-- phiwe_cohort_analysis (3 rows)
 
 DROP TABLE IF EXISTS "phiwe_cohort_analysis" CASCADE;
 CREATE TABLE "phiwe_cohort_analysis" (
@@ -272,7 +272,7 @@ CREATE TABLE "phiwe_cohort_analysis" (
   "no_shows" INTEGER,
   "show_rate" NUMERIC,
   "cancel_rate" NUMERIC,
-  "no_show_rate" INTEGER,
+  "no_show_rate" NUMERIC,
   "insight" TEXT
 );
 ALTER TABLE "phiwe_cohort_analysis" ENABLE ROW LEVEL SECURITY;
@@ -301,7 +301,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_conversion_trends" FOR DELETE TO ano
 
 
 
--- phiwe_daily_performance (57 rows)
+-- phiwe_daily_performance (60 rows)
 
 DROP TABLE IF EXISTS "phiwe_daily_performance" CASCADE;
 CREATE TABLE "phiwe_daily_performance" (
@@ -358,7 +358,7 @@ CREATE TABLE "phiwe_flexologist_performance" (
   "cancellations" INTEGER,
   "no_shows" INTEGER,
   "show_rate_pct" NUMERIC,
-  "cancel_rate_pct" INTEGER
+  "cancel_rate_pct" NUMERIC
 );
 ALTER TABLE "phiwe_flexologist_performance" ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow anon read" ON "phiwe_flexologist_performance" FOR SELECT TO anon USING (true);
@@ -388,7 +388,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_forecast_30_day" FOR DELETE TO anon 
 
 
 
--- phiwe_lead_funnel (81 rows)
+-- phiwe_lead_funnel (82 rows)
 
 DROP TABLE IF EXISTS "phiwe_lead_funnel" CASCADE;
 CREATE TABLE "phiwe_lead_funnel" (
@@ -419,7 +419,7 @@ CREATE TABLE "phiwe_lead_funnel" (
   "state" TEXT,
   "region" TEXT,
   "booking_day_of_week" TEXT,
-  "booking_hour" INTEGER,
+  "booking_hour" TEXT,
   "days_to_booking" INTEGER,
   "total_calls" INTEGER,
   "first_call_date" TEXT,
@@ -434,15 +434,15 @@ CREATE POLICY "Allow anon delete" ON "phiwe_lead_funnel" FOR DELETE TO anon USIN
 
 
 
--- phiwe_loyalsnap_engagement (2566 rows)
+-- phiwe_loyalsnap_engagement (3660 rows)
 
 DROP TABLE IF EXISTS "phiwe_loyalsnap_engagement" CASCADE;
 CREATE TABLE "phiwe_loyalsnap_engagement" (
   id BIGSERIAL PRIMARY KEY,
   "message_type" TEXT,
   "sent_count" INTEGER,
-  "open_rate" INTEGER,
-  "response_rate" INTEGER,
+  "open_rate" NUMERIC,
+  "response_rate" NUMERIC,
   "opt_out_count" INTEGER,
   "date_sent" TEXT
 );
@@ -453,7 +453,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_loyalsnap_engagement" FOR DELETE TO 
 
 
 
--- phiwe_pipeline (9 rows)
+-- phiwe_pipeline (5 rows)
 
 DROP TABLE IF EXISTS "phiwe_pipeline" CASCADE;
 CREATE TABLE "phiwe_pipeline" (
@@ -511,7 +511,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_revenue_intelligence" FOR DELETE TO 
 
 
 
--- phiwe_unattributed_flags (81 rows)
+-- phiwe_unattributed_flags (84 rows)
 
 DROP TABLE IF EXISTS "phiwe_unattributed_flags" CASCADE;
 CREATE TABLE "phiwe_unattributed_flags" (
@@ -532,7 +532,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_unattributed_flags" FOR DELETE TO an
 
 
 
--- phiwe_unified_leads (85 rows)
+-- phiwe_unified_leads (88 rows)
 
 DROP TABLE IF EXISTS "phiwe_unified_leads" CASCADE;
 CREATE TABLE "phiwe_unified_leads" (
@@ -555,7 +555,7 @@ CREATE POLICY "Allow anon delete" ON "phiwe_unified_leads" FOR DELETE TO anon US
 
 
 
--- phiwe_validation_lead_details (57 rows)
+-- phiwe_validation_lead_details (79 rows)
 
 DROP TABLE IF EXISTS "phiwe_validation_lead_details" CASCADE;
 CREATE TABLE "phiwe_validation_lead_details" (

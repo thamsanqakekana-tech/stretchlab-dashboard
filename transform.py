@@ -619,8 +619,10 @@ class DataTransformer:
         bookings['created_date'] = pd.to_datetime(bookings['Booking Last Modified Date'], errors='coerce')
         bookings['log_date'] = pd.to_datetime(bookings['Log Date'], errors='coerce')
         
-        # Determine today
-        today = bookings['log_date'].max() if bookings['log_date'].notna().any() else pd.Timestamp.now()
+        # Determine today — always use actual wall-clock date so is_future is accurate.
+        # log_date.max() was previously used here but a single far-future modification
+        # date (e.g. a Dec 2026 booking) would skew it and mark all bookings as past.
+        today = pd.Timestamp.now().normalize()
         
         # Extract fields
         bookings['booking_id'] = bookings['Booking ID']
@@ -1708,16 +1710,33 @@ class DataTransformer:
         
         m1 = pd.read_excel(manual_path, sheet_name='Phiwe Calls - Appointments Book')
         m2 = pd.read_excel(manual_path, sheet_name='Sheet2')
-        # Strip trailing/leading whitespace from column names (workbook headers have inconsistent spacing)
+        # Strip trailing/leading whitespace from column names
         m1.columns = m1.columns.str.strip()
         m2.columns = m2.columns.str.strip()
 
-        manual_total = len(m1) + len(m2)
+        # Month 3 appointments: Sheet3, header at row 2, emoji status values
+        m3 = pd.DataFrame()
+        try:
+            m3_raw = pd.read_excel(manual_path, sheet_name='Sheet3', header=2)
+            m3_raw.columns = m3_raw.columns.str.strip()
+            m3_raw = m3_raw.dropna(subset=['Lead Name'])
+            m3_raw = m3_raw.rename(columns={
+                'Lead Name':        'Name',
+                'Appt Date & Time': 'Date of appointment',
+                'Held?':            'Held',
+            })
+            # Normalise emoji-prefixed status to plain text
+            m3_raw['Status'] = m3_raw['Status'].astype(str).str.replace(r'^[^\w]+', '', regex=True).str.strip()
+            m3 = m3_raw
+        except Exception as e:
+            logger.warning(f"  Could not load Sheet3 (Month 3 appointments): {e}")
+
+        manual_total = len(m1) + len(m2) + len(m3)
         system_total = len(bookings)
-        
+
         drift_pct = ((system_total - manual_total) / manual_total * 100) if manual_total > 0 else 0
         gap_count = manual_total - system_total
-        
+
         # Validation report
         validation_report = {
             'generated_at': datetime.now().isoformat(),
@@ -1730,7 +1749,8 @@ class DataTransformer:
             'manual_metrics': {
                 'total_bookings': manual_total,
                 'month_1': len(m1),
-                'month_2': len(m2)
+                'month_2': len(m2),
+                'month_3': len(m3),
             },
             'drift': {
                 'booking_drift_pct': round(drift_pct, 1),
@@ -1739,14 +1759,17 @@ class DataTransformer:
             },
             'status': 'expected' if gap_count >= 0 else 'investigate'
         }
-        
+
         # Per-record gap: match manual tracker names to system bookings
         m1['_month'] = 1
         m2['_month'] = 2
+        if len(m3): m3['_month'] = 3
         for col in ['Status', 'Held', 'Notes']:
             if col not in m1.columns: m1[col] = pd.NA
             if col not in m2.columns: m2[col] = pd.NA
-        combined = pd.concat([m1, m2], ignore_index=True)
+            if len(m3) and col not in m3.columns: m3[col] = pd.NA
+        frames = [m1, m2] + ([m3] if len(m3) else [])
+        combined = pd.concat(frames, ignore_index=True)
         system_names = set(bookings['full_name_lower'].dropna())
         combined['_norm'] = combined['Name'].apply(_norm_name)
         def _clean_appt_date(val):

@@ -73,11 +73,18 @@ def infer_pg_type(series: pd.Series) -> str:
         pass
     return "TEXT"
 
+_FORCE_NUMERIC_SUFFIXES = ('_pct', '_rate', '_score', '_ratio', '_avg', '_mean')
+
 def generate_create_table(table_name: str, df: pd.DataFrame) -> str:
     """Generate DROP + CREATE TABLE statement so re-running always uses correct column types."""
     col_defs = []
     for col in df.columns:
-        pg_type = infer_pg_type(df[col])
+        # Force NUMERIC for percentage/rate/score columns regardless of current data values
+        # (all-integer values in one run can flip to decimals the next run)
+        if col.lower().endswith(_FORCE_NUMERIC_SUFFIXES):
+            pg_type = "NUMERIC"
+        else:
+            pg_type = infer_pg_type(df[col])
         safe_col = f'"{col}"'
         col_defs.append(f"  {safe_col} {pg_type}")
     cols_sql = ",\n".join(col_defs)
@@ -188,15 +195,31 @@ def main():
                     raise Exception(str(resp.error))
             except Exception as e:
                 err_str = str(e)
-                print(f" ✗")
-                # Provide targeted guidance
-                if "does not exist" in err_str or "relation" in err_str:
+                # Schema type mismatch: a column was INTEGER but now has decimal values.
+                # Print the exact ALTER statements needed and add to setup_supabase.sql.
+                if "invalid input syntax for type integer" in err_str:
+                    print(f" ✗")
+                    alter_stmts = []
+                    for col in df.columns:
+                        if col.lower().endswith(_FORCE_NUMERIC_SUFFIXES):
+                            alter_stmts.append(
+                                f'ALTER TABLE "{table_name}" '
+                                f'ALTER COLUMN "{col}" TYPE NUMERIC USING "{col}"::NUMERIC;'
+                            )
+                    print(f"    → Column type mismatch (INTEGER → NUMERIC). Run in Supabase SQL editor:")
+                    for stmt in alter_stmts:
+                        print(f"       {stmt}")
+                elif "does not exist" in err_str or "relation" in err_str:
+                    print(f" ✗")
                     print(f"    → Table not found. Run setup_supabase.sql in the Supabase SQL editor first.")
                 elif "policy" in err_str.lower() or "permission" in err_str.lower() or "violates" in err_str.lower():
+                    print(f" ✗")
                     print(f"    → RLS policy error. The SQL file creates the required policies — run it first.")
                 elif "JWT" in err_str or "auth" in err_str.lower():
+                    print(f" ✗")
                     print(f"    → Auth error: {err_str}")
                 else:
+                    print(f" ✗")
                     print(f"    → {err_str[:120]}")
                 failed.append(table_name)
                 success = False

@@ -1,6 +1,6 @@
 day_of_week,total_bookings,shows,cancellations,no_shows,show_rate_pct,cancel_rate_pct
 Monday,15,4,11,0,26.666666666666668,73.33333333333333
-Tuesday,10,5,4,0,50.0,40.0
+Tuesday,10,5,5,0,50.0,50.0
 Wednesday,10,3,4,0,30.0,40.0
 Thursday,5,3,0,1,60.0,0.0
 Friday,16,4,11,0,25.0,68.75
