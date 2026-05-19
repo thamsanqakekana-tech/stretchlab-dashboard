@@ -113,8 +113,9 @@ def sanitise_row(row: dict) -> dict:
             clean[k] = None
         elif str(v).lower() in ("nan", "none", "null", ""):
             clean[k] = None
-        elif isinstance(v, float) and v == int(v):
-            # e.g. 318.0 → 318 — avoids "invalid input syntax for type integer" errors
+        elif isinstance(v, float) and v == int(v) and abs(v) <= 9223372036854775807:
+            # e.g. 318.0 → 318 or 3184263120.0 → 3184263120
+            # Covers both INTEGER (int32) and BIGINT (int64) columns
             clean[k] = int(v)
         else:
             clean[k] = v
