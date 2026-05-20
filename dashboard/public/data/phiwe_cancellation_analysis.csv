@@ -1,60 +1,61 @@
 booking_id,first_name,last_name,booking_location,cancelled_by,cancellation_timing,days_before_appointment,booking_window_category,booking_window_days,booking_day_of_week,booking_date,current_status
-749294280,Melvinia,McClain,StretchLab Heights,Admin,Advance (7+ days),115,30+ days,115.0,Friday,2026-05-01,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
-741595033,Joe,Fanto,StretchLab Brighton,Admin,Advance (7+ days),61,30+ days,61.0,Tuesday,2026-04-07,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
-741179331,David,Kocsis Jr,StretchLab Pearland,Customer,Advance (7+ days),86,30+ days,86.0,Sunday,2026-05-03,Cancelled Within Policy Rules - No session credit lost
-743254076,Samuel,Amos,StretchLab Bellaire,Customer,Advance (7+ days),59,30+ days,59.0,Monday,2026-05-04,Cancelled Within Policy Rules - No session credit lost
-750800026,Abdul,Khan,StretchLab River Oaks,Customer,Advance (7+ days),59,30+ days,59.0,Monday,2026-05-04,Cancelled Within Policy Rules - No session credit lost
-727468046,Becky,Rogers,StretchLab Shreveport,Admin,Advance (7+ days),12,<7 days,-12.0,Monday,2026-03-02,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
-727561401,Lawanda,Wilson,StretchLab Shreveport,Customer,Short Notice (1-7 days),1,<7 days,-1.0,Saturday,2026-03-14,Cancelled Outside Policy Rules - Session Lost
-728387540,Chasity,Allen,StretchLab Shreveport,Customer,Last Minute (<24hr),0,<7 days,0.0,Tuesday,2026-03-17,Cancelled Within Policy Rules - No session credit lost
-735496496,Laura,Adeniseun,StretchLab Bunker Hill,Customer,Last Minute (<24hr),0,<7 days,0.0,Friday,2026-03-20,Cancelled Within Policy Rules - No session credit lost
-735601206,Altaf,Lalani,StretchLab Bunker Hill,Admin,Last Minute (<24hr),0,<7 days,0.0,Saturday,2026-03-21,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
-733854325,Lamont,Johnson,StretchLab Clarkston,Customer,Last Minute (<24hr),0,<7 days,0.0,Saturday,2026-03-21,Cancelled Outside Policy Rules - Session Lost
-733036025,Ali,Waqar,StretchLab Bunker Hill,Customer,Short Notice (1-7 days),1,<7 days,-1.0,Monday,2026-03-23,Cancelled Outside Policy Rules - Session Lost
-735992098,Daniel,Little,StretchLab Clarkston,Customer,Short Notice (1-7 days),1,<7 days,-1.0,Monday,2026-03-23,Cancelled Outside Policy Rules - Session Lost
-733818193,Abijauh,Sanders,StretchLab Shreveport,Customer,Last Minute (<24hr),0,<7 days,0.0,Thursday,2026-03-26,Cancelled Within Policy Rules - No session credit lost
-733489840,Sonya,Thompson,StretchLab Shreveport,Customer,Last Minute (<24hr),0,<7 days,0.0,Friday,2026-03-27,Cancelled Within Policy Rules - No session credit lost
-733516788,Marlene,Washington,StretchLab Shreveport,Customer,Last Minute (<24hr),0,<7 days,0.0,Friday,2026-03-27,Cancelled Within Policy Rules - No session credit lost
-734192604,Elisa,Barahona,StretchLab Cherry Street,Customer,Last Minute (<24hr),0,<7 days,0.0,Saturday,2026-03-28,Cancelled Within Policy Rules - No session credit lost
-735095689,Gini,Fox,StretchLab Cherry Street,Customer,Last Minute (<24hr),0,<7 days,0.0,Monday,2026-03-30,Cancelled Within Policy Rules - No session credit lost
-751169826,Darwin,Jones,StretchLab Shreveport,Customer,Advance (7+ days),29,14-30 days,29.0,Tuesday,2026-05-05,Cancelled Within Policy Rules - No session credit lost
-750718486,Kenacia,Hunter,StretchLab Bellaire,Admin,Advance (7+ days),28,14-30 days,28.0,Monday,2026-05-04,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
-748157239,Christopher,Ejike-Ukah,StretchLab Bellaire,Admin,Advance (7+ days),29,14-30 days,29.0,Tuesday,2026-05-05,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
-744385757,Stephen,Weeks,StretchLab Cherry Street,Admin,Last Minute (<24hr),0,<7 days,0.0,Wednesday,2026-04-15,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
-740823643,Maryam,Taghadosi,StretchLab River Oaks,Customer,Last Minute (<24hr),0,<7 days,0.0,Friday,2026-04-17,Cancelled Within Policy Rules - No session credit lost
-741336745,Candy,Smith,StretchLab Bunker Hill,Customer,Last Minute (<24hr),0,<7 days,0.0,Monday,2026-04-20,Cancelled Within Policy Rules - No session credit lost
-744357883,Richard,Webb,StretchLab Cherry Street,Customer,Last Minute (<24hr),0,<7 days,0.0,Wednesday,2026-04-22,Cancelled Within Policy Rules - No session credit lost
-749325255,Cortez,Cortez,StretchLab Heights,Customer,Short Notice (1-7 days),1,<7 days,-1.0,Friday,2026-04-24,Cancelled Outside Policy Rules - Session Lost
-738898309,Rochelle,Ashe,StretchLab Bunker Hill,Customer,Short Notice (1-7 days),1,<7 days,-1.0,Monday,2026-04-27,Cancelled Outside Policy Rules - Session Lost
-749290964,Jorge,Miranda,StretchLab Heights,Admin,Last Minute (<24hr),0,<7 days,0.0,Wednesday,2026-04-29,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
-750889551,Roan,Luben,StretchLab Bunker Hill,Customer,Short Notice (1-7 days),2,<7 days,2.0,Saturday,2026-05-02,Cancelled Within Policy Rules - No session credit lost
-735191604,Ross,Williams,StretchLab Shreveport,Admin,Last Minute (<24hr),0,<7 days,0.0,Friday,2026-05-01,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
-730056719,Askel,Matre,StretchLab Bellaire,Customer,Advance (7+ days),59,<7 days,-59.0,Friday,2026-03-06,Cancelled Within Policy Rules - No session credit lost
-751124945,Amyanna,Geramy,StretchLab Shreveport,Customer,Last Minute (<24hr),0,<7 days,0.0,Saturday,2026-05-16,Cancelled Within Policy Rules - No session credit lost
-753478595,Ariel,Wallace,StretchLab Bunker Hill,Customer,Last Minute (<24hr),0,<7 days,0.0,Saturday,2026-05-16,Cancelled Within Policy Rules - No session credit lost
-754153111,Cindy,Blass,StretchLab Heights,Customer,Last Minute (<24hr),0,<7 days,0.0,Saturday,2026-05-16,Cancelled Within Policy Rules - No session credit lost
-756551013,Karthika,Devendran,StretchLab Clarkston,Customer,Last Minute (<24hr),0,<7 days,0.0,Saturday,2026-05-16,Cancelled Outside Policy Rules - Session Lost
-755774988,Jim,Sotiroff,StretchLab Brighton,Admin,Last Minute (<24hr),0,<7 days,0.0,Tuesday,2026-05-19,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
-751114217,Reveizzio,Washington,StretchLab Shreveport,Admin,Advance (7+ days),30,<7 days,-30.0,Thursday,2026-05-07,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
-751150490,Kateesha,Martinez,StretchLab Shreveport,Customer,Advance (7+ days),89,<7 days,-89.0,Saturday,2026-05-09,Cancelled Within Policy Rules - No session credit lost
-751206428,Donald,King,StretchLab Shreveport,Customer,Advance (7+ days),89,<7 days,-89.0,Saturday,2026-05-09,Cancelled Within Policy Rules - No session credit lost
-731303867,Euronda,Jefferson,StretchLab Shreveport,Customer,Advance (7+ days),178,<7 days,-178.0,Tuesday,2026-03-10,Cancelled Within Policy Rules - No session credit lost
-727567342,Juan,Bryant,StretchLab Shreveport,Customer,Advance (7+ days),178,<7 days,-178.0,Tuesday,2026-03-10,Cancelled Within Policy Rules - No session credit lost
-727567010,Tamara,Bryant,StretchLab Shreveport,Customer,Advance (7+ days),178,<7 days,-178.0,Tuesday,2026-03-10,Cancelled Within Policy Rules - No session credit lost
-731669864,Caltoniavanta,Tippins,StretchLab Shreveport,Customer,Advance (7+ days),178,<7 days,-178.0,Tuesday,2026-03-10,Cancelled Outside Policy Rules - Session Lost
-743683969,Crystal,Chukwu,StretchLab Shreveport,Admin,Advance (7+ days),149,<7 days,-149.0,Thursday,2026-04-09,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
-743626432,Terry,Davis,StretchLab Pearland,Admin,Advance (7+ days),148,<7 days,-148.0,Friday,2026-04-10,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
-737780834,Chase,Fondren,StretchLab Bellaire,Admin,Advance (7+ days),148,<7 days,-148.0,Friday,2026-04-10,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
-751496397,��scar,Olasava,StretchLab South Tulsa,Admin,Advance (7+ days),120,<7 days,-120.0,Saturday,2026-05-09,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
-745417419,Jacorian,Oes,StretchLab Shreveport,Admin,Advance (7+ days),132,<7 days,-132.0,Monday,2026-04-27,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
-743714716,Lamonica,Martin,StretchLab Shreveport,Admin,Advance (7+ days),178,<7 days,-178.0,Friday,2026-04-10,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
-744399180,Tynisha,Alexander,StretchLab Cherry Street,Customer,Advance (7+ days),136,<7 days,-136.0,Friday,2026-05-22,Cancelled Within Policy Rules - No session credit lost
-748618426,Debbie,Webb,StretchLab Bunker Hill,Customer,Advance (7+ days),148,<7 days,-148.0,Monday,2026-05-11,Cancelled Within Policy Rules - No session credit lost
-747936313,Fame,Gilliam,StretchLab Shreveport,Customer,Advance (7+ days),148,<7 days,-148.0,Monday,2026-05-11,Cancelled Within Policy Rules - No session credit lost
-731251306,Felicia,Jewitt,StretchLab Shreveport,Admin,Advance (7+ days),235,<7 days,-235.0,Saturday,2026-03-14,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
-731651951,Rochelle,Hargrove,StretchLab Shreveport,Customer,Advance (7+ days),235,<7 days,-235.0,Saturday,2026-03-14,Cancelled Within Policy Rules - No session credit lost
-731576591,Angela,Washington,StretchLab Shreveport,Admin,Advance (7+ days),235,<7 days,-235.0,Saturday,2026-03-14,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
-733158704,Edgar,Monroy,StretchLab Bunker Hill,Admin,Advance (7+ days),235,<7 days,-235.0,Saturday,2026-03-14,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
-727996151,Anthony,Hilliard,StretchLab Shreveport,Customer,Advance (7+ days),266,<7 days,-266.0,Friday,2026-03-13,Cancelled Within Policy Rules - No session credit lost
-751211001,Roslyn,Goodall,StretchLab Shreveport,Customer,Advance (7+ days),207,<7 days,-207.0,Wednesday,2026-05-13,Cancelled Within Policy Rules - No session credit lost
-738174359,Rafael,Smith,StretchLab Heights,Admin,Last Minute (<24hr),0,<7 days,0.0,Tuesday,2026-03-31,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
+730056719,Askel,Matre,StretchLab Bellaire,Customer,Advance (7+ days),20518,<7 days,-20518.0,Thursday,1970-01-01 00:00:00.000046087,Cancelled Within Policy Rules - No session credit lost
+731303867,Euronda,Jefferson,StretchLab Shreveport,Customer,Advance (7+ days),20522,<7 days,-20522.0,Thursday,1970-01-01 00:00:00.000046091,Cancelled Within Policy Rules - No session credit lost
+727567010,Tamara,Bryant,StretchLab Shreveport,Customer,Advance (7+ days),20522,<7 days,-20522.0,Thursday,1970-01-01 00:00:00.000046091,Cancelled Within Policy Rules - No session credit lost
+727567342,Juan,Bryant,StretchLab Shreveport,Customer,Advance (7+ days),20522,<7 days,-20522.0,Thursday,1970-01-01 00:00:00.000046091,Cancelled Within Policy Rules - No session credit lost
+731669864,Caltoniavanta,Tippins,StretchLab Shreveport,Customer,Advance (7+ days),20522,<7 days,-20522.0,Thursday,1970-01-01 00:00:00.000046091,Cancelled Outside Policy Rules - Session Lost
+731251306,Felicia,Jewitt,StretchLab Shreveport,Admin,Advance (7+ days),20524,<7 days,-20524.0,Thursday,1970-01-01 00:00:00.000046095,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
+731651951,Rochelle,Hargrove,StretchLab Shreveport,Customer,Advance (7+ days),20524,<7 days,-20524.0,Thursday,1970-01-01 00:00:00.000046095,Cancelled Within Policy Rules - No session credit lost
+731576591,Angela,Washington,StretchLab Shreveport,Admin,Advance (7+ days),20524,<7 days,-20524.0,Thursday,1970-01-01 00:00:00.000046095,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
+733158704,Edgar,Monroy,StretchLab Bunker Hill,Admin,Advance (7+ days),20524,<7 days,-20524.0,Thursday,1970-01-01 00:00:00.000046095,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
+727996151,Anthony,Hilliard,StretchLab Shreveport,Customer,Advance (7+ days),20525,<7 days,-20525.0,Thursday,1970-01-01 00:00:00.000046094,Cancelled Within Policy Rules - No session credit lost
+727468046,Becky,Rogers,StretchLab Shreveport,Admin,Advance (7+ days),20526,<7 days,-20526.0,Thursday,1970-01-01 00:00:00.000046083,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
+727561401,Lawanda,Wilson,StretchLab Shreveport,Customer,Advance (7+ days),20527,<7 days,-20527.0,Thursday,1970-01-01 00:00:00.000046095,Cancelled Outside Policy Rules - Session Lost
+728387540,Chasity,Allen,StretchLab Shreveport,Customer,Advance (7+ days),20529,<7 days,-20529.0,Thursday,1970-01-01 00:00:00.000046098,Cancelled Within Policy Rules - No session credit lost
+735496496,Laura,Adeniseun,StretchLab Bunker Hill,Customer,Advance (7+ days),20532,<7 days,-20532.0,Thursday,1970-01-01 00:00:00.000046101,Cancelled Within Policy Rules - No session credit lost
+735601206,Altaf,Lalani,StretchLab Bunker Hill,Admin,Advance (7+ days),20533,<7 days,-20533.0,Thursday,1970-01-01 00:00:00.000046102,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
+733854325,Lamont,Johnson,StretchLab Clarkston,Customer,Advance (7+ days),20533,<7 days,-20533.0,Thursday,1970-01-01 00:00:00.000046102,Cancelled Outside Policy Rules - Session Lost
+733036025,Ali,Waqar,StretchLab Bunker Hill,Customer,Advance (7+ days),20536,<7 days,-20536.0,Thursday,1970-01-01 00:00:00.000046104,Cancelled Outside Policy Rules - Session Lost
+735992098,Daniel,Little,StretchLab Clarkston,Customer,Advance (7+ days),20536,<7 days,-20536.0,Thursday,1970-01-01 00:00:00.000046104,Cancelled Outside Policy Rules - Session Lost
+733818193,Abijauh,Sanders,StretchLab Shreveport,Customer,Advance (7+ days),20538,<7 days,-20538.0,Thursday,1970-01-01 00:00:00.000046107,Cancelled Within Policy Rules - No session credit lost
+733489840,Sonya,Thompson,StretchLab Shreveport,Customer,Advance (7+ days),20539,<7 days,-20539.0,Thursday,1970-01-01 00:00:00.000046108,Cancelled Within Policy Rules - No session credit lost
+733516788,Marlene,Washington,StretchLab Shreveport,Customer,Advance (7+ days),20539,<7 days,-20539.0,Thursday,1970-01-01 00:00:00.000046108,Cancelled Within Policy Rules - No session credit lost
+734192604,Elisa,Barahona,StretchLab Cherry Street,Customer,Advance (7+ days),20540,<7 days,-20540.0,Thursday,1970-01-01 00:00:00.000046109,Cancelled Within Policy Rules - No session credit lost
+735095689,Gini,Fox,StretchLab Cherry Street,Customer,Advance (7+ days),20542,<7 days,-20542.0,Thursday,1970-01-01 00:00:00.000046111,Cancelled Within Policy Rules - No session credit lost
+741595033,Joe,Fanto,StretchLab Brighton,Admin,Advance (7+ days),20546,<7 days,-20546.0,Thursday,1970-01-01 00:00:00.000046119,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
+743683969,Crystal,Chukwu,StretchLab Shreveport,Admin,Advance (7+ days),20553,<7 days,-20553.0,Thursday,1970-01-01 00:00:00.000046121,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
+743626432,Terry,Davis,StretchLab Pearland,Admin,Advance (7+ days),20553,<7 days,-20553.0,Thursday,1970-01-01 00:00:00.000046122,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
+737780834,Chase,Fondren,StretchLab Bellaire,Admin,Advance (7+ days),20553,<7 days,-20553.0,Thursday,1970-01-01 00:00:00.000046122,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
+743714716,Lamonica,Martin,StretchLab Shreveport,Admin,Advance (7+ days),20554,<7 days,-20554.0,Thursday,1970-01-01 00:00:00.000046122,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
+744399180,Tynisha,Alexander,StretchLab Cherry Street,Customer,Advance (7+ days),20554,<7 days,-20554.0,Thursday,1970-01-01 00:00:00.000046164,Cancelled Within Policy Rules - No session credit lost
+744385757,Stephen,Weeks,StretchLab Cherry Street,Admin,Advance (7+ days),20558,<7 days,-20558.0,Thursday,1970-01-01 00:00:00.000046127,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
+740823643,Maryam,Taghadosi,StretchLab River Oaks,Customer,Advance (7+ days),20560,<7 days,-20560.0,Thursday,1970-01-01 00:00:00.000046129,Cancelled Within Policy Rules - No session credit lost
+741336745,Candy,Smith,StretchLab Bunker Hill,Customer,Advance (7+ days),20563,<7 days,-20563.0,Thursday,1970-01-01 00:00:00.000046132,Cancelled Within Policy Rules - No session credit lost
+744357883,Richard,Webb,StretchLab Cherry Street,Customer,Advance (7+ days),20565,<7 days,-20565.0,Thursday,1970-01-01 00:00:00.000046134,Cancelled Within Policy Rules - No session credit lost
+749325255,Cortez,Cortez,StretchLab Heights,Customer,Advance (7+ days),20568,<7 days,-20568.0,Thursday,1970-01-01 00:00:00.000046136,Cancelled Outside Policy Rules - Session Lost
+738898309,Rochelle,Ashe,StretchLab Bunker Hill,Customer,Advance (7+ days),20571,<7 days,-20571.0,Thursday,1970-01-01 00:00:00.000046139,Cancelled Outside Policy Rules - Session Lost
+749290964,Jorge,Miranda,StretchLab Heights,Admin,Advance (7+ days),20572,<7 days,-20572.0,Thursday,1970-01-01 00:00:00.000046141,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
+750889551,Roan,Luben,StretchLab Bunker Hill,Customer,Advance (7+ days),20573,<7 days,-20573.0,Thursday,1970-01-01 00:00:00.000046144,Cancelled Within Policy Rules - No session credit lost
+735191604,Ross,Williams,StretchLab Shreveport,Admin,Advance (7+ days),20574,<7 days,-20574.0,Thursday,1970-01-01 00:00:00.000046143,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
+749294280,Melvinia,McClain,StretchLab Heights,Admin,Advance (7+ days),20575,<7 days,-20575.0,Thursday,1970-01-01 00:00:00.000046143,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
+741179331,David,Kocsis Jr,StretchLab Pearland,Customer,Advance (7+ days),20576,<7 days,-20576.0,Thursday,1970-01-01 00:00:00.000046145,Cancelled Within Policy Rules - No session credit lost
+743254076,Samuel,Amos,StretchLab Bellaire,Customer,Advance (7+ days),20577,<7 days,-20577.0,Thursday,1970-01-01 00:00:00.000046146,Cancelled Within Policy Rules - No session credit lost
+750800026,Abdul,Khan,StretchLab River Oaks,Customer,Advance (7+ days),20577,<7 days,-20577.0,Thursday,1970-01-01 00:00:00.000046146,Cancelled Within Policy Rules - No session credit lost
+751169826,Darwin,Jones,StretchLab Shreveport,Customer,Advance (7+ days),20578,<7 days,-20578.0,Thursday,1970-01-01 00:00:00.000046147,Cancelled Within Policy Rules - No session credit lost
+750718486,Kenacia,Hunter,StretchLab Bellaire,Admin,Advance (7+ days),20578,<7 days,-20578.0,Thursday,1970-01-01 00:00:00.000046146,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
+748157239,Christopher,Ejike-Ukah,StretchLab Bellaire,Admin,Advance (7+ days),20578,<7 days,-20578.0,Thursday,1970-01-01 00:00:00.000046147,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
+751114217,Reveizzio,Washington,StretchLab Shreveport,Admin,Advance (7+ days),20580,<7 days,-20580.0,Thursday,1970-01-01 00:00:00.000046149,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
+751150490,Kateesha,Martinez,StretchLab Shreveport,Customer,Advance (7+ days),20582,<7 days,-20582.0,Thursday,1970-01-01 00:00:00.000046151,Cancelled Within Policy Rules - No session credit lost
+751206428,Donald,King,StretchLab Shreveport,Customer,Advance (7+ days),20582,<7 days,-20582.0,Thursday,1970-01-01 00:00:00.000046151,Cancelled Within Policy Rules - No session credit lost
+751496397,Óscar,Olasava,StretchLab South Tulsa,Admin,Advance (7+ days),20583,<7 days,-20583.0,Thursday,1970-01-01 00:00:00.000046151,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
+745417419,Jacorian,Oes,StretchLab Shreveport,Admin,Advance (7+ days),20583,<7 days,-20583.0,Thursday,1970-01-01 00:00:00.000046139,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
+748618426,Debbie,Webb,StretchLab Bunker Hill,Customer,Advance (7+ days),20584,<7 days,-20584.0,Thursday,1970-01-01 00:00:00.000046153,Cancelled Within Policy Rules - No session credit lost
+747936313,Fame,Gilliam,StretchLab Shreveport,Customer,Advance (7+ days),20584,<7 days,-20584.0,Thursday,1970-01-01 00:00:00.000046153,Cancelled Within Policy Rules - No session credit lost
+751211001,Roslyn,Goodall,StretchLab Shreveport,Customer,Advance (7+ days),20586,<7 days,-20586.0,Thursday,1970-01-01 00:00:00.000046155,Cancelled Within Policy Rules - No session credit lost
+751124945,Amyanna,Geramy,StretchLab Shreveport,Customer,Advance (7+ days),20589,<7 days,-20589.0,Thursday,1970-01-01 00:00:00.000046158,Cancelled Within Policy Rules - No session credit lost
+753478595,Ariel,Wallace,StretchLab Bunker Hill,Customer,Advance (7+ days),20589,<7 days,-20589.0,Thursday,1970-01-01 00:00:00.000046158,Cancelled Within Policy Rules - No session credit lost
+754153111,Cindy,Blass,StretchLab Heights,Customer,Advance (7+ days),20589,<7 days,-20589.0,Thursday,1970-01-01 00:00:00.000046158,Cancelled Within Policy Rules - No session credit lost
+756551013,Karthika,Devendran,StretchLab Clarkston,Customer,Advance (7+ days),20589,<7 days,-20589.0,Thursday,1970-01-01 00:00:00.000046158,Cancelled Outside Policy Rules - Session Lost
+755774988,Jim,Sotiroff,StretchLab Brighton,Admin,Advance (7+ days),20592,<7 days,-20592.0,Thursday,1970-01-01 00:00:00.000046161,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
+756748537,Laurence,Rhea,StretchLab South Tulsa,Admin,Advance (7+ days),20593,<7 days,-20593.0,Thursday,1970-01-01 00:00:00.000046162,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
+738174359,Rafael,Smith,StretchLab Heights,Admin,Advance (7+ days),20543,<7 days,-20543.0,Thursday,1970-01-01 00:00:00.000046112,Cancelled By Admin - Not Customer Fault - No Session Credit Lost
