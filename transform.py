@@ -611,12 +611,20 @@ class DataTransformer:
 
         return bookings_transformed
 
+    @staticmethod
+    def _parse_date_col(series):
+        """Handle both Excel serial integers (manual workbook) and datetime strings/timestamps (API extract)."""
+        if pd.api.types.is_integer_dtype(series) or pd.api.types.is_float_dtype(series):
+            return pd.to_datetime(series, unit='D', origin='1899-12-30', errors='coerce')
+        return pd.to_datetime(series, errors='coerce')
+
     def _transform_booking_fields(self, bookings, first_visits=None, all_events=None):
         """Transform booking fields WITH PROPER SHOW MATCHING"""
-        # Parse dates
-        bookings['booking_date'] = pd.to_datetime(bookings['Booking Date'], errors='coerce')
+        # Parse dates — handle Excel serial integers from manual workbooks and
+        # proper datetime64 values from the API extract transparently.
+        bookings['booking_date'] = self._parse_date_col(bookings['Booking Date'])
         bookings['booking_datetime'] = pd.to_datetime(bookings['Booking Start'], errors='coerce')
-        bookings['created_date'] = pd.to_datetime(bookings['Booking Last Modified Date'], errors='coerce')
+        bookings['created_date'] = self._parse_date_col(bookings['Booking Last Modified Date'])
         bookings['log_date'] = pd.to_datetime(bookings['Log Date'], errors='coerce')
         
         # Determine today — always use actual wall-clock date so is_future is accurate.
