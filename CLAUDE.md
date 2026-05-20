@@ -12,7 +12,7 @@ This file is the single source of truth for building, extending, and maintaining
 **Campaign type:** B2C cold re-engagement — dormant and old leads
 **SDR:** Phiwe Khasa
 **Campaign period:** Feb–May 2026 (3-month SOW)
-**Active studios:** Shreveport, Bellaire, Bunker Hill, Cherry Street, Pearland, Clarkston, Brighton (activating), River Oaks (inactive), South Tulsa (inactive)
+**Active studios:** Shreveport, Bellaire, Bunker Hill, Cherry Street, Pearland, Clarkston, Brighton, Heights, River Oaks (inactive), South Tulsa (inactive)
 
 ---
 
