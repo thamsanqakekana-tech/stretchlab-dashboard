@@ -1,85 +1,88 @@
 unified_outcome,booking_location,first_name,last_name,booking_date,source,held,paid,current_status,booking_made_by
-attended,StretchLab Shreveport,Samantha,Bennett,2026-03-02 00:00:00,both,,,Completed Booking,Phiwe Khasa
-cancelled,StretchLab Bellaire,Askel,Matre,2026-03-06 00:00:00,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
-cancelled,StretchLab Shreveport,Euronda,Jefferson,2026-03-10 00:00:00,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
-attended,StretchLab Shreveport,Juan,Bryant,2026-03-10 00:00:00,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
-attended,StretchLab Shreveport,Tamara,Bryant,2026-03-10 00:00:00,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
-cancelled,StretchLab Shreveport,Caltoniavanta,Tippins,2026-03-10 00:00:00,both,,,Cancelled Outside Policy Rules - Session Lost,Phiwe Khasa
-cancelled,StretchLab Shreveport,Rochelle,Hargrove,2026-03-14 00:00:00,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
-cancelled,StretchLab Shreveport,Felicia,Jewitt,2026-03-14 00:00:00,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
-cancelled,StretchLab Shreveport,Angela,Washington,2026-03-14 00:00:00,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
-cancelled,StretchLab Bunker Hill,Edgar,Monroy,2026-03-14 00:00:00,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
-cancelled,StretchLab Shreveport,Anthony,Hilliard,2026-03-13 00:00:00,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
-cancelled,StretchLab Shreveport,Becky,Rogers,2026-03-02 00:00:00,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
-attended,StretchLab Shreveport,Lawanda,Wilson,2026-03-14 00:00:00,both,,,Cancelled Outside Policy Rules - Session Lost,Phiwe Khasa
-cancelled,StretchLab Shreveport,Chasity,Allen,2026-03-17 00:00:00,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
-cancelled,StretchLab Bunker Hill,Laura,Adeniseun,2026-03-20 00:00:00,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
-cancelled,StretchLab Bunker Hill,Altaf,Lalani,2026-03-21 00:00:00,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
-cancelled,StretchLab Clarkston,Lamont,Johnson,2026-03-21 00:00:00,both,,,Cancelled Outside Policy Rules - Session Lost,Phiwe Khasa
-cancelled,StretchLab Bunker Hill,Ali,Waqar,2026-03-23 00:00:00,both,,,Cancelled Outside Policy Rules - Session Lost,Phiwe Khasa
-cancelled,StretchLab Clarkston,Daniel,Little,2026-03-23 00:00:00,both,,,Cancelled Outside Policy Rules - Session Lost,Phiwe Khasa
-rescheduled,StretchLab Bunker Hill,Rich,Thayer,2026-03-27 00:00:00,both,,,Rescheduled By Admin,Phiwe Khasa
-attended,StretchLab Shreveport,Donald,Johnson,2026-03-25 00:00:00,both,,,Completed Booking,Phiwe Khasa
-attended,StretchLab Shreveport,Abijauh,Sanders,2026-03-26 00:00:00,clubready,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
-no_show,StretchLab Cherry Street,Ronald,Maxwell,2026-03-26 00:00:00,both,,,No Show Booking,Phiwe Khasa
-cancelled,StretchLab Shreveport,Sonya,Thompson,2026-03-27 00:00:00,clubready,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
-cancelled,StretchLab Shreveport,Marlene,Washington,2026-03-27 00:00:00,clubready,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
-cancelled,StretchLab Cherry Street,Elisa,Barahona,2026-03-28 00:00:00,clubready,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
-cancelled,StretchLab Cherry Street,Gini,Fox,2026-03-30 00:00:00,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
-attended,StretchLab Pearland,JD.,Davis,2026-03-30 00:00:00,both,,,Completed Booking,Phiwe Khasa
-attended,StretchLab Brighton,Joe,Fanto,2026-04-07 00:00:00,clubready,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
-attended,StretchLab Shreveport,Crystal,Chukwu,2026-04-09 00:00:00,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
-cancelled,StretchLab Pearland,Terry,Davis,2026-04-10 00:00:00,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
-cancelled,StretchLab Bellaire,Chase,Fondren,2026-04-10 00:00:00,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
-cancelled,StretchLab Shreveport,Lamonica,Martin,2026-04-10 00:00:00,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
-cancelled,StretchLab Cherry Street,Tynisha,Alexander,2026-05-22 00:00:00,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
-attended,StretchLab Bunker Hill,Gina,Gray,2026-04-15 00:00:00,both,,,Rescheduled By Admin,Phiwe Khasa
-rescheduled,StretchLab Bunker Hill,Rich,Thayer,2026-04-18 00:00:00,both,,,Rescheduled By Admin,Phiwe Khasa
-cancelled,StretchLab Cherry Street,Stephen,Weeks,2026-04-15 00:00:00,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
-attended,StretchLab River Oaks,Maryam,Taghadosi,2026-04-17 00:00:00,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
-attended,StretchLab Cherry Street,Charlene,Johnson,2026-04-17 00:00:00,both,,,Completed Booking,Phiwe Khasa
-cancelled,StretchLab Bunker Hill,Candy,Smith,2026-04-20 00:00:00,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
-cancelled,StretchLab Cherry Street,Richard,Webb,2026-04-22 00:00:00,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
-cancelled,StretchLab Heights,Cortez,Cortez,2026-04-24 00:00:00,clubready,,,Cancelled Outside Policy Rules - Session Lost,Phiwe Khasa
-attended,StretchLab Bellaire,Albert,Cantu,2026-04-24 00:00:00,both,,,Completed Booking,Phiwe Khasa
-cancelled,StretchLab Bunker Hill,Rochelle,Ashe,2026-04-27 00:00:00,both,,,Cancelled Outside Policy Rules - Session Lost,Phiwe Khasa
-cancelled,StretchLab Heights,Jorge,Miranda,2026-04-29 00:00:00,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
-cancelled,StretchLab Bunker Hill,Roan,Luben,2026-05-02 00:00:00,clubready,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
-cancelled,StretchLab Shreveport,Ross,Williams,2026-05-01 00:00:00,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
-attended,StretchLab Bunker Hill,Roan,Luben,2026-05-02 00:00:00,clubready,,,Rescheduled By Admin,Phiwe Khasa
-attended,StretchLab Heights,Melvinia,McClain,2026-05-01 00:00:00,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
-cancelled,StretchLab Pearland,David,Kocsis Jr,2026-05-03 00:00:00,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
-attended,StretchLab Heights,Justin,Cassell,2026-05-03 00:00:00,both,,,Completed Booking,Phiwe Khasa
-cancelled,StretchLab Bellaire,Samuel,Amos,2026-05-04 00:00:00,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
-cancelled,StretchLab River Oaks,Abdul,Khan,2026-05-04 00:00:00,clubready,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
-attended,StretchLab Shreveport,Darwin,Jones,2026-05-05 00:00:00,clubready,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
-attended,StretchLab Bellaire,Kenacia,Hunter,2026-05-04 00:00:00,clubready,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
-attended,StretchLab Bellaire,Christopher,Ejike-Ukah,2026-05-05 00:00:00,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
-attended,StretchLab South Tulsa,David,Priddy,2026-05-06 00:00:00,clubready,,,Completed Booking,Phiwe Khasa
-attended,StretchLab Shreveport,Reveizzio,Washington,2026-05-07 00:00:00,clubready,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
-cancelled,StretchLab Shreveport,Kateesha,Martinez,2026-05-09 00:00:00,clubready,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
-cancelled,StretchLab Shreveport,Donald,King,2026-05-09 00:00:00,clubready,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
-cancelled,StretchLab South Tulsa,Óscar,Olasava,2026-05-09 00:00:00,clubready,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
-attended,StretchLab Brighton,David,Dole,2026-05-09 00:00:00,both,,,Completed Booking,Phiwe Khasa
-attended,StretchLab Brighton,Kelly,Dole,2026-05-09 00:00:00,both,,,Completed Booking,Phiwe Khasa
-cancelled,StretchLab Shreveport,Jacorian,Oes,2026-04-27 00:00:00,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
-cancelled,StretchLab Bunker Hill,Debbie,Webb,2026-05-11 00:00:00,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
-cancelled,StretchLab Shreveport,Fame,Gilliam,2026-05-11 00:00:00,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
-rescheduled,StretchLab Shreveport,Danyai,Murray,2026-06-03 00:00:00,clubready,,,Rescheduled By Admin,Phiwe Khasa
-rescheduled,StretchLab Shreveport,Georgia,Taylor,2026-05-13 00:00:00,clubready,,,Rescheduled By Admin,Phiwe Khasa
-cancelled,StretchLab Shreveport,Roslyn,Goodall,2026-05-13 00:00:00,clubready,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
-upcoming,StretchLab South Tulsa,Rosario,Chico,2026-06-06 00:00:00,clubready,,,Open Booking - not yet logged,Phiwe Khasa
-upcoming,StretchLab South Tulsa,Alma,Byrd owens,2026-05-21 00:00:00,clubready,,,Open Booking - not yet logged,Phiwe Khasa
-upcoming,StretchLab Heights,Cindy,Blass,2026-05-16 00:00:00,clubready,,,Open Booking - not yet logged,Phiwe Khasa
-upcoming,StretchLab Bunker Hill,Ariel,Wallace,2026-05-16 00:00:00,clubready,,,Open Booking - not yet logged,Phiwe Khasa
-upcoming,StretchLab Shreveport,Amyanna,Geramy,2026-05-16 00:00:00,clubready,,,Open Booking - not yet logged,Phiwe Khasa
-upcoming,StretchLab Shreveport,Tadarell,Maiden,2026-05-30 00:00:00,clubready,,,Open Booking - not yet logged,Phiwe Khasa
-upcoming,StretchLab Brighton,Jim,Sotiroff,2026-05-19 00:00:00,clubready,,,Open Booking - not yet logged,Phiwe Khasa
-cancelled,StretchLab Heights,Rafael,Smith,2026-03-31 00:00:00,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
-attended,StretchLab Pearland,Steve,Bynum,2026-04-06 00:00:00,both,,,Completed Booking,Phiwe Khasa
-cancelled,StretchLab Shreveport,Cynthia,Williams,2026-02-27 13:00:00,manual_tracker,No,No,,
-attended,StretchLab Shreveport,Timothy,Cooper,2026-03-21 09:00:00,manual_tracker,Yes,Yes,,
-cancelled,StretchLab Shreveport,Marlene,mira Washington bey,2026-03-27 15:00:00,manual_tracker,No,No,,
-cancelled,StretchLab Shreveport,Abijauh,Parker,2026-03-26 13:00:00,manual_tracker,No,No,,
-attended,StretchLab Bellaire,Cathy,Barazi,2026-04-11 00:00:00,manual_tracker,Yes,Yes,,
-paid_no_show,StretchLab River Oaks,Lyndsey,Brantley,2026-05-07 14:00:00,manual_tracker,,Yes,,
+attended,StretchLab Shreveport,Samantha,Bennett,1970-01-01 00:00:00.000046083,both,,,Completed Booking,Phiwe Khasa
+cancelled,StretchLab Bellaire,Askel,Matre,1970-01-01 00:00:00.000046087,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
+cancelled,StretchLab Shreveport,Euronda,Jefferson,1970-01-01 00:00:00.000046091,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
+attended,StretchLab Shreveport,Tamara,Bryant,1970-01-01 00:00:00.000046091,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
+attended,StretchLab Shreveport,Juan,Bryant,1970-01-01 00:00:00.000046091,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
+cancelled,StretchLab Shreveport,Caltoniavanta,Tippins,1970-01-01 00:00:00.000046091,both,,,Cancelled Outside Policy Rules - Session Lost,Phiwe Khasa
+cancelled,StretchLab Shreveport,Felicia,Jewitt,1970-01-01 00:00:00.000046095,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
+cancelled,StretchLab Shreveport,Rochelle,Hargrove,1970-01-01 00:00:00.000046095,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
+cancelled,StretchLab Shreveport,Angela,Washington,1970-01-01 00:00:00.000046095,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
+cancelled,StretchLab Bunker Hill,Edgar,Monroy,1970-01-01 00:00:00.000046095,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
+cancelled,StretchLab Shreveport,Anthony,Hilliard,1970-01-01 00:00:00.000046094,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
+cancelled,StretchLab Shreveport,Becky,Rogers,1970-01-01 00:00:00.000046083,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
+attended,StretchLab Shreveport,Lawanda,Wilson,1970-01-01 00:00:00.000046095,both,,,Cancelled Outside Policy Rules - Session Lost,Phiwe Khasa
+cancelled,StretchLab Shreveport,Chasity,Allen,1970-01-01 00:00:00.000046098,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
+cancelled,StretchLab Bunker Hill,Laura,Adeniseun,1970-01-01 00:00:00.000046101,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
+cancelled,StretchLab Bunker Hill,Altaf,Lalani,1970-01-01 00:00:00.000046102,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
+cancelled,StretchLab Clarkston,Lamont,Johnson,1970-01-01 00:00:00.000046102,both,,,Cancelled Outside Policy Rules - Session Lost,Phiwe Khasa
+cancelled,StretchLab Bunker Hill,Ali,Waqar,1970-01-01 00:00:00.000046104,both,,,Cancelled Outside Policy Rules - Session Lost,Phiwe Khasa
+cancelled,StretchLab Clarkston,Daniel,Little,1970-01-01 00:00:00.000046104,both,,,Cancelled Outside Policy Rules - Session Lost,Phiwe Khasa
+rescheduled,StretchLab Bunker Hill,Rich,Thayer,1970-01-01 00:00:00.000046108,both,,,Rescheduled By Admin,Phiwe Khasa
+attended,StretchLab Shreveport,Donald,Johnson,1970-01-01 00:00:00.000046106,both,,,Completed Booking,Phiwe Khasa
+attended,StretchLab Shreveport,Abijauh,Sanders,1970-01-01 00:00:00.000046107,clubready,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
+no_show,StretchLab Cherry Street,Ronald,Maxwell,1970-01-01 00:00:00.000046107,both,,,No Show Booking,Phiwe Khasa
+cancelled,StretchLab Shreveport,Sonya,Thompson,1970-01-01 00:00:00.000046108,clubready,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
+cancelled,StretchLab Shreveport,Marlene,Washington,1970-01-01 00:00:00.000046108,clubready,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
+cancelled,StretchLab Cherry Street,Elisa,Barahona,1970-01-01 00:00:00.000046109,clubready,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
+cancelled,StretchLab Cherry Street,Gini,Fox,1970-01-01 00:00:00.000046111,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
+attended,StretchLab Pearland,JD.,Davis,1970-01-01 00:00:00.000046111,both,,,Completed Booking,Phiwe Khasa
+attended,StretchLab Brighton,Joe,Fanto,1970-01-01 00:00:00.000046119,clubready,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
+attended,StretchLab Shreveport,Crystal,Chukwu,1970-01-01 00:00:00.000046121,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
+cancelled,StretchLab Pearland,Terry,Davis,1970-01-01 00:00:00.000046122,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
+cancelled,StretchLab Bellaire,Chase,Fondren,1970-01-01 00:00:00.000046122,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
+cancelled,StretchLab Shreveport,Lamonica,Martin,1970-01-01 00:00:00.000046122,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
+cancelled,StretchLab Cherry Street,Tynisha,Alexander,1970-01-01 00:00:00.000046164,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
+attended,StretchLab Bunker Hill,Gina,Gray,1970-01-01 00:00:00.000046127,both,,,Rescheduled By Admin,Phiwe Khasa
+rescheduled,StretchLab Bunker Hill,Rich,Thayer,1970-01-01 00:00:00.000046130,both,,,Rescheduled By Admin,Phiwe Khasa
+cancelled,StretchLab Cherry Street,Stephen,Weeks,1970-01-01 00:00:00.000046127,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
+attended,StretchLab River Oaks,Maryam,Taghadosi,1970-01-01 00:00:00.000046129,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
+attended,StretchLab Cherry Street,Charlene,Johnson,1970-01-01 00:00:00.000046129,both,,,Completed Booking,Phiwe Khasa
+cancelled,StretchLab Bunker Hill,Candy,Smith,1970-01-01 00:00:00.000046132,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
+cancelled,StretchLab Cherry Street,Richard,Webb,1970-01-01 00:00:00.000046134,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
+cancelled,StretchLab Heights,Cortez,Cortez,1970-01-01 00:00:00.000046136,clubready,,,Cancelled Outside Policy Rules - Session Lost,Phiwe Khasa
+attended,StretchLab Bellaire,Albert,Cantu,1970-01-01 00:00:00.000046136,both,,,Completed Booking,Phiwe Khasa
+cancelled,StretchLab Bunker Hill,Rochelle,Ashe,1970-01-01 00:00:00.000046139,both,,,Cancelled Outside Policy Rules - Session Lost,Phiwe Khasa
+cancelled,StretchLab Heights,Jorge,Miranda,1970-01-01 00:00:00.000046141,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
+attended,StretchLab Bunker Hill,Roan,Luben,1970-01-01 00:00:00.000046144,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
+cancelled,StretchLab Shreveport,Ross,Williams,1970-01-01 00:00:00.000046143,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
+attended,StretchLab Bunker Hill,Roan,Luben,1970-01-01 00:00:00.000046144,both,,,Rescheduled By Admin,Phiwe Khasa
+attended,StretchLab Heights,Melvinia,McClain,1970-01-01 00:00:00.000046143,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
+cancelled,StretchLab Pearland,David,Kocsis Jr,1970-01-01 00:00:00.000046145,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
+attended,StretchLab Heights,Justin,Cassell,1970-01-01 00:00:00.000046145,both,,,Completed Booking,Phiwe Khasa
+cancelled,StretchLab Bellaire,Samuel,Amos,1970-01-01 00:00:00.000046146,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
+cancelled,StretchLab River Oaks,Abdul,Khan,1970-01-01 00:00:00.000046146,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
+attended,StretchLab Shreveport,Darwin,Jones,1970-01-01 00:00:00.000046147,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
+attended,StretchLab Bellaire,Kenacia,Hunter,1970-01-01 00:00:00.000046146,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
+attended,StretchLab Bellaire,Christopher,Ejike-Ukah,1970-01-01 00:00:00.000046147,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
+attended,StretchLab South Tulsa,David,Priddy,1970-01-01 00:00:00.000046148,both,,,Completed Booking,Phiwe Khasa
+attended,StretchLab Shreveport,Reveizzio,Washington,1970-01-01 00:00:00.000046149,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
+cancelled,StretchLab Shreveport,Kateesha,Martinez,1970-01-01 00:00:00.000046151,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
+cancelled,StretchLab Shreveport,Donald,King,1970-01-01 00:00:00.000046151,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
+cancelled,StretchLab South Tulsa,Óscar,Olasava,1970-01-01 00:00:00.000046151,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
+attended,StretchLab Brighton,David,Dole,1970-01-01 00:00:00.000046151,both,,,Completed Booking,Phiwe Khasa
+attended,StretchLab Brighton,Kelly,Dole,1970-01-01 00:00:00.000046151,both,,,Completed Booking,Phiwe Khasa
+cancelled,StretchLab Shreveport,Jacorian,Oes,1970-01-01 00:00:00.000046139,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
+cancelled,StretchLab Bunker Hill,Debbie,Webb,1970-01-01 00:00:00.000046153,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
+cancelled,StretchLab Shreveport,Fame,Gilliam,1970-01-01 00:00:00.000046153,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
+rescheduled,StretchLab Shreveport,Danyai,Murray,1970-01-01 00:00:00.000046176,both,,,Rescheduled By Admin,Phiwe Khasa
+rescheduled,StretchLab Shreveport,Georgia,Taylor,1970-01-01 00:00:00.000046155,both,,,Rescheduled By Admin,Phiwe Khasa
+cancelled,StretchLab Shreveport,Roslyn,Goodall,1970-01-01 00:00:00.000046155,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
+cancelled,StretchLab Shreveport,Amyanna,Geramy,1970-01-01 00:00:00.000046158,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
+cancelled,StretchLab Bunker Hill,Ariel,Wallace,1970-01-01 00:00:00.000046158,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
+cancelled,StretchLab Heights,Cindy,Blass,1970-01-01 00:00:00.000046158,both,,,Cancelled Within Policy Rules - No session credit lost,Phiwe Khasa
+cancelled,StretchLab Clarkston,Karthika,Devendran,1970-01-01 00:00:00.000046158,both,,,Cancelled Outside Policy Rules - Session Lost,Phiwe Khasa
+cancelled,StretchLab Brighton,Jim,Sotiroff,1970-01-01 00:00:00.000046161,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
+cancelled,StretchLab South Tulsa,Laurence,Rhea,1970-01-01 00:00:00.000046162,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
+upcoming,StretchLab South Tulsa,Rosario,Chico,1970-01-01 00:00:00.000046179,both,,,Open Booking - not yet logged,Phiwe Khasa
+upcoming,StretchLab South Tulsa,Alma,Byrd owens,1970-01-01 00:00:00.000046163,both,,,Open Booking - not yet logged,Phiwe Khasa
+upcoming,StretchLab Shreveport,Tadarell,Maiden,1970-01-01 00:00:00.000046172,both,,,Open Booking - not yet logged,Phiwe Khasa
+cancelled,StretchLab Heights,Rafael,Smith,1970-01-01 00:00:00.000046112,both,,,Cancelled By Admin - Not Customer Fault - No Session Credit Lost,Phiwe Khasa
+attended,StretchLab Pearland,Steve,Bynum,1970-01-01 00:00:00.000046118,both,,,Completed Booking,Phiwe Khasa
+cancelled,StretchLab Shreveport,Cynthia,Williams,2026-02-27 13:00:00.000000000,manual_tracker,No,No,,
+attended,StretchLab Shreveport,Timothy,Cooper,2026-03-21 09:00:00.000000000,manual_tracker,Yes,Yes,,
+cancelled,StretchLab Shreveport,Marlene,mira Washington bey,2026-03-27 15:00:00.000000000,manual_tracker,No,No,,
+cancelled,StretchLab Shreveport,Abijauh,Parker,2026-03-26 13:00:00.000000000,manual_tracker,No,No,,
+attended,StretchLab Bellaire,Cathy,Barazi,2026-04-11 00:00:00.000000000,manual_tracker,Yes,Yes,,
+paid_no_show,StretchLab River Oaks,Lyndsey,Brantley,2026-05-07 14:00:00.000000000,manual_tracker,,Yes,,
+paid_no_show,StretchLab Bunker Hill,Kristel,Hunter,2026-05-11 13:00:00.000000000,manual_tracker,No,Yes,,
