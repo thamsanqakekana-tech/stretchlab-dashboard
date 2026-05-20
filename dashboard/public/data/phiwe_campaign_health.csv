@@ -11,9 +11,9 @@ engagement_max,25
 goal_alignment_score,0
 goal_alignment_max,25
 total_calls,9116
-meaningful_convs,0
-connect_rate_pct,0.0
+meaningful_convs,1536
+connect_rate_pct,16.8
 total_bookings,82
 shows,26
 show_rate_pct,29.9
-booking_rate_pct,0
+booking_rate_pct,5.3

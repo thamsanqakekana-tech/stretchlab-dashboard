@@ -488,11 +488,16 @@ class DataTransformer:
         calls['day_of_week'] = calls['call_start_time'].dt.day_name()
         
         # Parse durations
+        # RingCentral exports time as Excel fractional days (e.g. 0.00328 = ~4.7 min).
+        # pd.Timedelta only arrives when Excel parses the column as duration; floats
+        # arrive when it reads them as numbers. Both cases must produce minutes.
         def parse_timedelta(td):
             if pd.isna(td):
                 return 0
             if isinstance(td, pd.Timedelta):
                 return td.total_seconds() / 60
+            if isinstance(td, (int, float)):
+                return float(td) * 1440  # fractional days → minutes
             return 0
         
         calls['live_talk_min'] = calls['live_talk_time'].apply(parse_timedelta)
