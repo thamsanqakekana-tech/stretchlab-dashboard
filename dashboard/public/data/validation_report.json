@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-05-20T14:42:39.452385",
+  "generated_at": "2026-05-21T08:42:18.801819",
   "system_metrics": {
     "total_bookings": 82,
     "shows": 26,
-    "cancellations": 60,
+    "cancellations": 61,
     "no_shows": 0
   },
   "manual_metrics": {

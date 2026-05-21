@@ -1,6 +1,6 @@
 metric,value
 total_bookings,82.0
-resolved_count,72.0
+resolved_count,73.0
 total_shows,26.0
 total_calls,9116.0
 total_cost,3500.0
@@ -23,4 +23,4 @@ cac_target,45.0
 cac_gap,89.62
 shows_needed_for_target,77.8
 conversion_rate,0.009
-show_rate,0.3611
+show_rate,0.3562
