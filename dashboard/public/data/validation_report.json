@@ -1,56 +1,30 @@
 {
-  "generated_at": "2026-05-21T08:42:18.801819",
+  "generated_at": "2026-05-22T10:07:06.481662",
   "system_metrics": {
-    "total_bookings": 82,
+    "total_bookings": 84,
     "shows": 26,
     "cancellations": 61,
     "no_shows": 0
   },
   "manual_metrics": {
-    "total_bookings": 79,
-    "month_1": 30,
-    "month_2": 27,
-    "month_3": 22
+    "total_bookings": 24,
+    "month_1": 0,
+    "month_2": 0,
+    "month_3": 24
   },
   "drift": {
-    "booking_drift_pct": 3.8,
-    "gap_bookings": -3,
+    "booking_drift_pct": 250.0,
+    "gap_bookings": -60,
     "gap_direction": "system_has_more"
   },
   "status": "investigate",
   "show_gaps": {
-    "tracker_held_count": 17,
+    "tracker_held_count": 3,
     "pipeline_shows": 26,
     "gap_count": 0,
     "gap_leads": [],
     "note": "Leads recorded as held in the manual tracker with no confirmed attendance in ClubReady. Studio must update ClubReady records before these sessions can be counted in pipeline metrics."
   },
-  "unlogged_attended": [
-    {
-      "name": "Timothy Cooper",
-      "location": "StretchLab Shreveport",
-      "date": "2026-03-21 09:00:00"
-    },
-    {
-      "name": "Cathy Barazi",
-      "location": "StretchLab Bellaire",
-      "date": "2026-04-11 00:00:00"
-    }
-  ],
-  "possible_duplicates": [
-    {
-      "name": "Marlene mira Washington bey",
-      "location": "StretchLab Shreveport",
-      "outcome": "cancelled",
-      "date": "2026-03-27 15:00:00",
-      "note": "First name matches a ClubReady lead \u2014 verify if same person"
-    },
-    {
-      "name": "Abijauh Parker",
-      "location": "StretchLab Shreveport",
-      "outcome": "cancelled",
-      "date": "2026-03-26 13:00:00",
-      "note": "First name matches a ClubReady lead \u2014 verify if same person"
-    }
-  ]
+  "unlogged_attended": [],
+  "possible_duplicates": []
 }
