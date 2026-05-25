@@ -13,8 +13,8 @@
     },
     {
       "cause": "Insufficient pre-booking contact",
-      "count": 36,
-      "percentage": 59.0,
+      "count": 35,
+      "percentage": 57.4,
       "impact": "High",
       "action": "Strengthen confirmation follow-up before booking is confirmed",
       "active": true

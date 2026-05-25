@@ -1,6 +1,6 @@
 booking_id,first_name,last_name,phone_clean,email,booking_date,days_until,booking_location,session_mins,total_calls_made,risk_level,attribution_method
-755259586,Danyai,Murray,5626056455,danyaimurray@gmail.com,2026-06-03,12,StretchLab Shreveport,50,2,High,Direct
-758801620,Clifton,Alexander,3462835493,alexanderclifton007@icloud.com,2026-05-29,7,StretchLab River Oaks,50,1,High,Direct
-758813709,Kirk,Foy,8323318031,kfoy84.kf@gmail.com,2026-05-29,7,StretchLab River Oaks,50,3,Medium,Direct
-753308276,Tadarell,Maiden,3184408341,tmaiden414@gmail.com,2026-05-30,8,StretchLab Shreveport,50,1,High,Direct
-751517294,Rosario,Chico,3163003172,chico.media.tv@gmail.com,2026-06-06,15,StretchLab South Tulsa,50,1,High,Direct
+755259586,Danyai,Murray,5626056455,danyaimurray@gmail.com,2026-06-03,9,StretchLab Shreveport,50,2,High,Direct
+758801620,Clifton,Alexander,3462835493,alexanderclifton007@icloud.com,2026-05-29,4,StretchLab River Oaks,50,1,High,Direct
+758813709,Kirk,Foy,8323318031,kfoy84.kf@gmail.com,2026-05-29,4,StretchLab River Oaks,50,3,Medium,Direct
+753308276,Tadarell,Maiden,3184408341,tmaiden414@gmail.com,2026-05-30,5,StretchLab Shreveport,50,1,High,Direct
+751517294,Rosario,Chico,3163003172,chico.media.tv@gmail.com,2026-06-06,12,StretchLab South Tulsa,50,1,High,Direct
